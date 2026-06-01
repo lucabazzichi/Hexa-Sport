@@ -16,7 +16,9 @@
 <link rel="apple-touch-icon" sizes="152x152" href="pwa_icons/icon-152.png">
 <!-- iOS: apre a schermo intero come app standalone -->
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!-- iOS: status bar opaca (default) per riservare lo spazio in alto.
+     "black-translucent" mette il contenuto sotto la status bar e causa overlap su iPhone con dynamic island. -->
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Hockey Stats">
 <!-- Microsoft (per chi installa da Edge) -->
 <meta name="msapplication-TileColor" content="#e8a020">
@@ -679,19 +681,17 @@
     text-size-adjust: 100%;
     touch-action: manipulation;
   }
-  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; min-height: 100vh; }
+  body {
+    background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; min-height: 100vh;
+    /* Padding bottom safe area per la tab bar mobile (iPhone con home indicator) */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 
   header {
     background: var(--bg2);
     border-bottom: 1px solid var(--border);
-    /* Padding-top dinamico: usa la safe-area dell'iPhone/iPad (la zona dove c'è
-       ora, batteria, ecc.) + 0px di base. Su PWA standalone questo evita che
-       l'header si sovrapponga alla barra di stato. Su Safari normale (con
-       barra del browser) il valore env() = 0, quindi nessun effetto. */
-    padding: env(safe-area-inset-top, 0px) 24px 0 24px;
-    /* Altezza totale: contenuto fisso 60px + safe area dinamica */
-    height: calc(60px + env(safe-area-inset-top, 0px));
-    box-sizing: border-box;
+    padding: 0 24px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: space-between;
