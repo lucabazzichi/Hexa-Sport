@@ -1939,6 +1939,14 @@
     background: rgba(232,160,32,.12); color: var(--accent); border-color: var(--accent);
   }
   .edit-mode-toggle .emt-icon { font-size: 14px; }
+  /* iOS Safari fix: gli span interni a volte intercettano il tap impedendo
+     al gestore onclick del bottone di partire. Lasciamo passare gli eventi al parent. */
+  .edit-mode-toggle > span,
+  .edit-mode-toggle .emt-icon,
+  .edit-mode-toggle #emt-icon,
+  .edit-mode-toggle #emt-label {
+    pointer-events: none;
+  }
 
   /* Read-only state for cards in view mode */
   .stat-value.readonly { cursor: default; }
