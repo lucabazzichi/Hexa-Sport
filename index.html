@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <!-- ============== PWA setup ============== -->
 <!-- Manifest: descrive l'app al browser quando l'utente la installa sulla home -->
 <link rel="manifest" href="manifest.json">
@@ -671,6 +671,14 @@
   body[data-accent="purple"] { --accent: #a855f7; --accent2: #8a3edb; }
   body[data-accent="pink"]   { --accent: #ec4899; --accent2: #c5337a; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* iOS PWA: previene il flash di zoom all'apertura.
+     -webkit-text-size-adjust impedisce al sistema di rescalare il testo automaticamente.
+     touch-action manipulation blocca il double-tap-to-zoom (mantiene scroll e pan). */
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    touch-action: manipulation;
+  }
   body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; min-height: 100vh; }
 
   header {
