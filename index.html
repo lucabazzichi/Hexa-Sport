@@ -673,7 +673,25 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; min-height: 100vh; }
 
-  header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; gap: 16px; }
+  header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    /* Padding-top dinamico: usa la safe-area dell'iPhone/iPad (la zona dove c'è
+       ora, batteria, ecc.) + 0px di base. Su PWA standalone questo evita che
+       l'header si sovrapponga alla barra di stato. Su Safari normale (con
+       barra del browser) il valore env() = 0, quindi nessun effetto. */
+    padding: env(safe-area-inset-top, 0px) 24px 0 24px;
+    /* Altezza totale: contenuto fisso 60px + safe area dinamica */
+    height: calc(60px + env(safe-area-inset-top, 0px));
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    gap: 16px;
+  }
   .logo { font-size: 22px; font-weight: 700; letter-spacing: .04em; color: var(--accent); text-transform: uppercase; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
   .logo svg { width: 28px; height: 28px; }
   nav { display: flex; gap: 4px; flex-shrink: 0; }
