@@ -2891,11 +2891,22 @@
 <div class="toast-saved" id="toast-saved" data-i18n="toastSaved">✓ Salvato</div>
 
 <script>
-window.onerror = function(msg, url, lineNo) {
-  var errDiv = document.createElement('div');
-  errDiv.style.cssText = "background:#f85149;color:#fff;padding:20px;font-family:sans-serif;margin:15px;border-radius:8px;position:relative;z-index:9999;";
-  errDiv.innerHTML = "<h3>⚠️ Errore</h3><p><b>Dettaglio:</b> " + msg + "</p><p><b>Linea:</b> " + lineNo + "</p>";
-  document.body.prepend(errDiv);
+window.onerror = function(msg, url, lineNo, colNo, error) {
+  // Ignora gli "Script error." cross-origin: sono errori da CDN esterni (Chart.js, jsPDF, ecc.)
+  // che il browser non può analizzare per motivi di sicurezza. Sono spesso falsi positivi
+  // (es. un blocco di rete, un'estensione del browser) e non aiutano a debuggare.
+  if (msg === 'Script error.' || msg === 'Script error' || !lineNo) {
+    return true; // silenzia
+  }
+  // Errori veri: mostra un toast in alto, auto-nascondibile dopo 8 secondi.
+  try {
+    var errDiv = document.createElement('div');
+    errDiv.style.cssText = "background:#f85149;color:#fff;padding:14px 18px;font-family:sans-serif;margin:10px;border-radius:8px;position:fixed;top:8px;left:8px;right:8px;z-index:99999;box-shadow:0 4px 16px rgba(0,0,0,0.4);font-size:14px;";
+    errDiv.innerHTML = "<b>⚠️ Errore:</b> " + msg + " <span style='opacity:.7;font-size:12px;'>(linea " + lineNo + ")</span>";
+    document.body.prepend(errDiv);
+    // Auto-rimuovi dopo 8 secondi così non resta bloccato a schermo
+    setTimeout(function(){ if (errDiv && errDiv.parentNode) errDiv.parentNode.removeChild(errDiv); }, 8000);
+  } catch (e) { /* fail silently */ }
   return false;
 };
 
