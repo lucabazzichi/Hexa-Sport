@@ -11235,10 +11235,21 @@ function toggleEditMode() {
   var wasEditing = editMode;
   editMode = !editMode;
   pendingChoice = null;
-  // STEP M2: on mobile, edit mode auto-enters swipe view; view mode exits it
+  // STEP M2: on mobile, edit mode auto-enters swipe view; view mode exits it.
+  // BUT: skip swipe-mode if the match has no convoked players/goalies yet —
+  // otherwise the user can't access the "Convoca" buttons (which only appear
+  // in edit-mode-but-not-swipe-mode), creating a deadlock loop.
   if (isMobileViewport() && editMode) {
-    enterSwipeMode();
-    return;
+    var p = getPartitaById(currentDetailMatchId);
+    var hasConvocati = p && ((p.convocatiG && p.convocatiG.length > 0) ||
+                              (p.convocatiP && p.convocatiP.length > 0));
+    if (hasConvocati) {
+      enterSwipeMode();
+      return;
+    }
+    // No convoked players yet → fall through to normal edit mode (with
+    // the "Convoca" buttons visible). Once the user convokes someone, the
+    // next edit-toggle on mobile will enter swipe-mode normally.
   }
   if (swipeMode && !editMode) {
     exitSwipeMode();
