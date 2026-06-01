@@ -2,7 +2,7 @@
   "name": "Hockey Stats",
   "short_name": "Hockey Stats",
   "description": "Statistiche complete per la tua squadra di hockey su pista",
-  "start_url": "./hockey_stats.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
