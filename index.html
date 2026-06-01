@@ -675,11 +675,11 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   /* iOS PWA: previene il flash di zoom all'apertura.
      -webkit-text-size-adjust impedisce al sistema di rescalare il testo automaticamente.
-     touch-action manipulation blocca il double-tap-to-zoom (mantiene scroll e pan). */
+     touch-action manipulation è stato RIMOSSO perché su iPhone interferisce con
+     alcuni onclick (es. il pulsante Modifica nella pagina partita). */
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    touch-action: manipulation;
   }
   body {
     background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; min-height: 100vh;
@@ -11541,6 +11541,17 @@ document.addEventListener("DOMContentLoaded", function() {
     overlays[i].addEventListener('click', function(e) {
       if (e.target.classList.contains('overlay')) e.target.classList.remove('open');
     });
+  }
+  // iOS Safari fix: il pulsante Modifica/Visualizza (#edit-mode-toggle-btn) su alcuni iPhone
+  // non lancia l'onclick. Aggiungiamo un listener nativo 'touchend' come backup.
+  // Su Mac/iPad continua a usare l'onclick normale.
+  var editBtn = document.getElementById('edit-mode-toggle-btn');
+  if (editBtn) {
+    editBtn.addEventListener('touchend', function(e) {
+      // preventDefault evita che parta anche il click dopo (evita doppio toggle)
+      e.preventDefault();
+      try { toggleEditMode(); } catch(err) { console.error(err); }
+    }, { passive: false });
   }
   applyTheme();  // STEP H3: apply saved theme + accent before render
   applyTeamIdentity();  // N4: apply saved team name + logo before render
