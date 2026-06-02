@@ -1475,7 +1475,17 @@
   .btn-ghost:hover { color: var(--text); }
   .btn-danger { background: rgba(248,81,73,.15); color: var(--red); }
   .btn-danger:hover { background: rgba(248,81,73,.25); }
-  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+  .modal-footer {
+    display: flex; gap: 10px; justify-content: flex-end;
+    position: sticky; bottom: 0;
+    background: var(--bg2);
+    padding: 14px 24px;
+    border-top: 1px solid var(--border);
+    z-index: 1;
+    margin-top: 0;
+  }
+  /* When the footer sits INSIDE modal-body, cancel the body's padding so the bar spans full width */
+  .modal-body > .modal-footer { margin: 20px -24px -24px; }
 
   .action-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
 
@@ -2845,11 +2855,11 @@
         <div class="sep-label" data-i18n="lbNotes">Note</div>
         <div class="form-group full"><label data-i18n="lbMatchNotes">Note partita</label><textarea id="p-note" rows="4" data-i18n-ph="phNotes" placeholder="Osservazioni..." style="width:100%;font-family:inherit;font-size:15px;padding:10px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--bg);color:var(--text);resize:vertical;min-height:80px;"></textarea></div>
       </div>
-      <div class="modal-footer">
-        <input type="hidden" id="p-edit-id">
-        <button class="btn btn-ghost" onclick="closeModal('modal-partita')" data-i18n="cancel">Annulla</button>
-        <button class="btn btn-primary" onclick="savePartita()" data-i18n="saveAndOpen">Salva e apri</button>
-      </div>
+    </div>
+    <div class="modal-footer">
+      <input type="hidden" id="p-edit-id">
+      <button class="btn btn-ghost" onclick="closeModal('modal-partita')" data-i18n="cancel">Annulla</button>
+      <button class="btn btn-primary" onclick="savePartita()" data-i18n="saveAndOpen">Salva e apri</button>
     </div>
   </div>
 </div>
