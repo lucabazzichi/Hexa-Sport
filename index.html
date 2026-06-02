@@ -3056,6 +3056,22 @@ Ti consigliamo di scaricare prima un backup. Vuoi farlo ora?</p>
   </div>
 </div>
 
+<!-- Generic themed alert/confirm modal (replaces native browser popups) -->
+<div class="overlay" id="modal-app-dialog">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-header">
+      <h2 id="app-dialog-title">—</h2>
+    </div>
+    <div class="modal-body">
+      <p id="app-dialog-message" style="font-size:14px;color:var(--text2);white-space:pre-line;line-height:1.5;"></p>
+      <div class="modal-footer" id="app-dialog-footer">
+        <button class="btn btn-ghost" id="app-dialog-cancel" data-i18n="cancel">Annulla</button>
+        <button class="btn btn-primary" id="app-dialog-ok" data-i18n="ok">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast-saved" id="toast-saved" data-i18n="toastSaved">✓ Salvato</div>
 
 <script>
@@ -3097,7 +3113,7 @@ var I18N = {
     settingsCompact: 'Modalità compatta', settingsCompactHint: 'Riduce gli spazi per vedere più informazioni (solo desktop)',
     settingsTemplate: 'Scarica template partita', settingsTemplateHint: 'Foglio cartaceo da portare al palazzetto in caso non si possa usare l'+String.fromCharCode(8217)+'app live', templateDownloadTitle: 'Scarica template partita', templateDownloadHint: 'Scegli il formato', templateFormatPdf: '📄 PDF (stampabile A4)', templateFormatXlsx: '📊 Excel (.xlsx)', templateInfoHeader: 'INFO PARTITA', templateDate: 'Data', templateOpponent: 'Avversario', templateVenue: 'Sede', templateHome: 'Casa', templateAway: 'Trasferta', templateCompetition: 'Competizione', templateResult: 'Risultato finale', templateShots: 'Tiri totali', templateUs: 'Noi', templateThem: 'Loro', templatePpRow: 'Powerplay (PP gol / PP totali)', templatePkRow: 'Penalty Kill (PK gol subiti / PK totali)', templatePkGolFatti: 'Gol fatti in PK', templatePpGolSubiti: 'Gol subiti in PP', templateNotes: 'Note', templatePlayersHeader: 'GIOCATORI', templateGoaliesHeader: 'PORTIERI', templateColName: 'Nome', settingsExport: 'Esporta dati', settingsExportHint: 'Scarica un backup di tutte le tue partite e giocatori',
     settingsImport: 'Importa dati', settingsImportHint: 'Ripristina da un file di backup',
-    exportFailed: 'Esportazione fallita.', importInvalidJson: 'Il file non è un JSON valido.', importInvalidBackup: 'Il file non è un backup valido di Hockey Tracker.', importConfirmTitle: 'Conferma importazione', importBackupDate: 'Data backup', importMatches: 'partite', importPlayers: 'giocatori', importGoalies: 'portieri', importConfirmBody: 'I dati attuali verranno sostituiti. Vuoi continuare?', importSuccess: 'Importazione completata. La pagina verrà ricaricata.', importFailed: 'Importazione fallita.', importReadError: 'Impossibile leggere il file.', clearStep1Title: 'Cancella tutti i dati', clearStep1Body: 'Stai per cancellare definitivamente partite, giocatori e statistiche.\n\nTi consigliamo di scaricare prima un backup. Vuoi farlo ora?', clearBackupFailedContinue: 'Il backup non è riuscito. Vuoi comunque procedere con la cancellazione?', clearKeyword: 'CANCELLA', clearStep2Body: 'Per confermare, scrivi la parola {KEY} (in maiuscolo):', clearKeywordMismatch: 'La parola digitata non corrisponde a {KEY}. Cancellazione annullata.', clearSuccess: 'Dati cancellati. La pagina verrà ricaricata.', clearFailed: 'Cancellazione fallita.', clearStep2Title: 'Conferma cancellazione', clearSkipBackup: 'Salta backup', clearDoBackup: 'Scarica backup', clearConfirmFinal: 'Cancella definitivamente', clearDoneTitle: 'Fatto', ok: 'OK',
+    exportFailed: 'Esportazione fallita.', importInvalidJson: 'Il file non è un JSON valido.', importInvalidBackup: 'Il file non è un backup valido di Hockey Tracker.', importConfirmTitle: 'Conferma importazione', importBackupDate: 'Data backup', importMatches: 'partite', importPlayers: 'giocatori', importGoalies: 'portieri', importConfirmBody: 'I dati attuali verranno sostituiti. Vuoi continuare?', importSuccess: 'Importazione completata. La pagina verrà ricaricata.', importFailed: 'Importazione fallita.', importReadError: 'Impossibile leggere il file.', clearStep1Title: 'Cancella tutti i dati', clearStep1Body: 'Stai per cancellare definitivamente partite, giocatori e statistiche.\n\nTi consigliamo di scaricare prima un backup. Vuoi farlo ora?', clearBackupFailedContinue: 'Il backup non è riuscito. Vuoi comunque procedere con la cancellazione?', clearKeyword: 'CANCELLA', clearStep2Body: 'Per confermare, scrivi la parola {KEY} (in maiuscolo):', clearKeywordMismatch: 'La parola digitata non corrisponde a {KEY}. Cancellazione annullata.', clearSuccess: 'Dati cancellati. La pagina verrà ricaricata.', clearFailed: 'Cancellazione fallita.', clearStep2Title: 'Conferma cancellazione', clearSkipBackup: 'Salta backup', clearDoBackup: 'Scarica backup', clearConfirmFinal: 'Cancella definitivamente', clearDoneTitle: 'Fatto', ok: 'OK', dialogNotice: 'Avviso', dialogConfirm: 'Conferma',
     settingsReset: 'Cancella tutti i dati', settingsResetHint: 'Rimuove definitivamente partite, giocatori e statistiche',
     settingsTeamName: 'Nome squadra', settingsTeamNameHint: 'Personalizza il nome che appare nello scoreboard',
     settingsTeamLogo: 'Logo squadra', settingsTeamLogoHint: 'Carica il logo della tua squadra',
@@ -3113,7 +3129,7 @@ var I18N = {
     logoUpload: 'Carica', logoEmoji: 'Emoji', logoRemove: 'Rimuovi',
     logoEmojiTitle: 'Scegli un\'emoji', logoEmojiHint: 'Scegli un\'emoji come logo della tua squadra',
     logoUploadInvalidType: 'Formato non supportato. Usa PNG o JPG.',
-    logoUploadTooBig: 'Immagine troppo grande (max ~600 KB). Comprimila e riprova.',
+    logoUploadTooBig: 'File troppo pesante. Usa un\u2019immagine sotto i 3 MB.',
     liveStart: 'Live', livePause: 'Pausa', livePlay: 'Riprendi', liveEnd: 'Termina',
     liveStartTitle: 'Inizia Live', liveStartHint: 'Seleziona i giocatori e il portiere in campo all\'inizio della partita.',
     livePickPlayers: 'Giocatori in campo', livePickGoalie: 'Portiere',
@@ -3293,7 +3309,7 @@ var I18N = {
     settingsCompact: 'Compact mode', settingsCompactHint: 'Reduces spacing to fit more info (desktop only)',
     settingsTemplate: 'Download match template', settingsTemplateHint: 'Paper sheet to take to the rink when live mode is not available', templateDownloadTitle: 'Download match template', templateDownloadHint: 'Choose the format', templateFormatPdf: '📄 PDF (printable A4)', templateFormatXlsx: '📊 Excel (.xlsx)', templateInfoHeader: 'MATCH INFO', templateDate: 'Date', templateOpponent: 'Opponent', templateVenue: 'Venue', templateHome: 'Home', templateAway: 'Away', templateCompetition: 'Competition', templateResult: 'Final result', templateShots: 'Shots total', templateUs: 'Us', templateThem: 'Them', templatePpRow: 'Powerplay (PP goals / PP total)', templatePkRow: 'Penalty Kill (PK goals conceded / PK total)', templatePkGolFatti: 'Goals scored in PK', templatePpGolSubiti: 'Goals conceded in PP', templateNotes: 'Notes', templatePlayersHeader: 'PLAYERS', templateGoaliesHeader: 'GOALIES', templateColName: 'Name', settingsExport: 'Export data', settingsExportHint: 'Download a backup of your matches and players',
     settingsImport: 'Import data', settingsImportHint: 'Restore from a backup file',
-    exportFailed: 'Export failed.', importInvalidJson: 'The file is not valid JSON.', importInvalidBackup: 'The file is not a valid Hockey Tracker backup.', importConfirmTitle: 'Confirm import', importBackupDate: 'Backup date', importMatches: 'matches', importPlayers: 'players', importGoalies: 'goalies', importConfirmBody: 'Your current data will be replaced. Continue?', importSuccess: 'Import completed. The page will reload.', importFailed: 'Import failed.', importReadError: 'Could not read the file.', clearStep1Title: 'Clear all data', clearStep1Body: 'You are about to permanently delete matches, players and statistics.\n\nWe recommend downloading a backup first. Do it now?', clearBackupFailedContinue: 'Backup failed. Do you want to delete anyway?', clearKeyword: 'DELETE', clearStep2Body: 'To confirm, type the word {KEY} (uppercase):', clearKeywordMismatch: 'The word you typed does not match {KEY}. Deletion cancelled.', clearSuccess: 'Data cleared. The page will reload.', clearFailed: 'Deletion failed.', clearStep2Title: 'Confirm deletion', clearSkipBackup: 'Skip backup', clearDoBackup: 'Download backup', clearConfirmFinal: 'Delete permanently', clearDoneTitle: 'Done', ok: 'OK',
+    exportFailed: 'Export failed.', importInvalidJson: 'The file is not valid JSON.', importInvalidBackup: 'The file is not a valid Hockey Tracker backup.', importConfirmTitle: 'Confirm import', importBackupDate: 'Backup date', importMatches: 'matches', importPlayers: 'players', importGoalies: 'goalies', importConfirmBody: 'Your current data will be replaced. Continue?', importSuccess: 'Import completed. The page will reload.', importFailed: 'Import failed.', importReadError: 'Could not read the file.', clearStep1Title: 'Clear all data', clearStep1Body: 'You are about to permanently delete matches, players and statistics.\n\nWe recommend downloading a backup first. Do it now?', clearBackupFailedContinue: 'Backup failed. Do you want to delete anyway?', clearKeyword: 'DELETE', clearStep2Body: 'To confirm, type the word {KEY} (uppercase):', clearKeywordMismatch: 'The word you typed does not match {KEY}. Deletion cancelled.', clearSuccess: 'Data cleared. The page will reload.', clearFailed: 'Deletion failed.', clearStep2Title: 'Confirm deletion', clearSkipBackup: 'Skip backup', clearDoBackup: 'Download backup', clearConfirmFinal: 'Delete permanently', clearDoneTitle: 'Done', ok: 'OK', dialogNotice: 'Notice', dialogConfirm: 'Confirm',
     settingsReset: 'Erase all data', settingsResetHint: 'Permanently removes matches, players and stats',
     settingsTeamName: 'Team name', settingsTeamNameHint: 'Customize the name shown in the scoreboard',
     settingsTeamLogo: 'Team logo', settingsTeamLogoHint: 'Upload your team logo',
@@ -3309,7 +3325,7 @@ var I18N = {
     logoUpload: 'Upload', logoEmoji: 'Emoji', logoRemove: 'Remove',
     logoEmojiTitle: 'Pick an emoji', logoEmojiHint: 'Choose an emoji as your team logo',
     logoUploadInvalidType: 'Unsupported format. Use PNG or JPG.',
-    logoUploadTooBig: 'Image too large (max ~600 KB). Please compress it.',
+    logoUploadTooBig: 'File too heavy. Please use an image under 3 MB.',
     liveStart: 'Live', livePause: 'Pause', livePlay: 'Resume', liveEnd: 'End',
     liveStartTitle: 'Start Live', liveStartHint: 'Select the players and goalie on the field at the start of the match.',
     livePickPlayers: 'Players on field', livePickGoalie: 'Goalie',
@@ -3486,7 +3502,7 @@ var I18N = {
     settingsCompact: 'Modo compacto', settingsCompactHint: 'Reduce los espacios para ver más información (solo escritorio)',
     settingsTemplate: 'Descargar plantilla partido', settingsTemplateHint: 'Hoja en papel para llevar al pabellón cuando no se pueda usar el live', templateDownloadTitle: 'Descargar plantilla partido', templateDownloadHint: 'Elige el formato', templateFormatPdf: '📄 PDF (imprimible A4)', templateFormatXlsx: '📊 Excel (.xlsx)', templateInfoHeader: 'INFO PARTIDO', templateDate: 'Fecha', templateOpponent: 'Rival', templateVenue: 'Sede', templateHome: 'Casa', templateAway: 'Visitante', templateCompetition: 'Competición', templateResult: 'Resultado final', templateShots: 'Tiros totales', templateUs: 'Nosotros', templateThem: 'Ellos', templatePpRow: 'Powerplay (PP goles / PP total)', templatePkRow: 'Penalty Kill (PK goles recibidos / PK total)', templatePkGolFatti: 'Goles en PK', templatePpGolSubiti: 'Goles recibidos en PP', templateNotes: 'Notas', templatePlayersHeader: 'JUGADORES', templateGoaliesHeader: 'PORTEROS', templateColName: 'Nombre', settingsExport: 'Exportar datos', settingsExportHint: 'Descarga una copia de seguridad de partidos y jugadores',
     settingsImport: 'Importar datos', settingsImportHint: 'Restaurar desde un archivo de copia',
-    exportFailed: 'Exportación fallida.', importInvalidJson: 'El archivo no es JSON válido.', importInvalidBackup: 'El archivo no es una copia de seguridad válida de Hockey Tracker.', importConfirmTitle: 'Confirmar importación', importBackupDate: 'Fecha copia', importMatches: 'partidos', importPlayers: 'jugadores', importGoalies: 'porteros', importConfirmBody: 'Los datos actuales serán reemplazados. ¿Continuar?', importSuccess: 'Importación completada. La página se recargará.', importFailed: 'Importación fallida.', importReadError: 'No se pudo leer el archivo.', clearStep1Title: 'Borrar todos los datos', clearStep1Body: 'Vas a borrar definitivamente partidos, jugadores y estadísticas.\n\nRecomendamos descargar primero una copia. ¿Hacerlo ahora?', clearBackupFailedContinue: 'La copia ha fallado. ¿Quieres borrar de todas formas?', clearKeyword: 'BORRAR', clearStep2Body: 'Para confirmar, escribe la palabra {KEY} (mayúsculas):', clearKeywordMismatch: 'La palabra no coincide con {KEY}. Borrado cancelado.', clearSuccess: 'Datos borrados. La página se recargará.', clearFailed: 'Borrado fallido.', clearStep2Title: 'Confirmar borrado', clearSkipBackup: 'Saltar copia', clearDoBackup: 'Descargar copia', clearConfirmFinal: 'Borrar definitivamente', clearDoneTitle: 'Hecho', ok: 'OK',
+    exportFailed: 'Exportación fallida.', importInvalidJson: 'El archivo no es JSON válido.', importInvalidBackup: 'El archivo no es una copia de seguridad válida de Hockey Tracker.', importConfirmTitle: 'Confirmar importación', importBackupDate: 'Fecha copia', importMatches: 'partidos', importPlayers: 'jugadores', importGoalies: 'porteros', importConfirmBody: 'Los datos actuales serán reemplazados. ¿Continuar?', importSuccess: 'Importación completada. La página se recargará.', importFailed: 'Importación fallida.', importReadError: 'No se pudo leer el archivo.', clearStep1Title: 'Borrar todos los datos', clearStep1Body: 'Vas a borrar definitivamente partidos, jugadores y estadísticas.\n\nRecomendamos descargar primero una copia. ¿Hacerlo ahora?', clearBackupFailedContinue: 'La copia ha fallado. ¿Quieres borrar de todas formas?', clearKeyword: 'BORRAR', clearStep2Body: 'Para confirmar, escribe la palabra {KEY} (mayúsculas):', clearKeywordMismatch: 'La palabra no coincide con {KEY}. Borrado cancelado.', clearSuccess: 'Datos borrados. La página se recargará.', clearFailed: 'Borrado fallido.', clearStep2Title: 'Confirmar borrado', clearSkipBackup: 'Saltar copia', clearDoBackup: 'Descargar copia', clearConfirmFinal: 'Borrar definitivamente', clearDoneTitle: 'Hecho', ok: 'OK', dialogNotice: 'Aviso', dialogConfirm: 'Confirmar',
     settingsReset: 'Borrar todos los datos', settingsResetHint: 'Elimina permanentemente partidos, jugadores y estadísticas',
     settingsTeamName: 'Nombre del equipo', settingsTeamNameHint: 'Personaliza el nombre que aparece en el marcador',
     settingsTeamLogo: 'Escudo del equipo', settingsTeamLogoHint: 'Sube el escudo de tu equipo',
@@ -3502,7 +3518,7 @@ var I18N = {
     logoUpload: 'Subir', logoEmoji: 'Emoji', logoRemove: 'Quitar',
     logoEmojiTitle: 'Elige un emoji', logoEmojiHint: 'Elige un emoji como logo de tu equipo',
     logoUploadInvalidType: 'Formato no compatible. Usa PNG o JPG.',
-    logoUploadTooBig: 'Imagen demasiado grande (máx. ~600 KB). Comprímela.',
+    logoUploadTooBig: 'Archivo demasiado pesado. Usa una imagen de menos de 3 MB.',
     liveStart: 'En vivo', livePause: 'Pausa', livePlay: 'Reanudar', liveEnd: 'Terminar',
     liveStartTitle: 'Iniciar En vivo', liveStartHint: 'Selecciona los jugadores y el portero en el campo al inicio del partido.',
     livePickPlayers: 'Jugadores en pista', livePickGoalie: 'Portero',
@@ -3679,7 +3695,7 @@ var I18N = {
     settingsCompact: 'Modo compacto', settingsCompactHint: 'Reduz os espaços para ver mais informação (apenas desktop)',
     settingsTemplate: 'Descarregar modelo partida', settingsTemplateHint: 'Folha em papel para levar ao pavilhão quando não se possa usar o live', templateDownloadTitle: 'Descarregar modelo partida', templateDownloadHint: 'Escolhe o formato', templateFormatPdf: '📄 PDF (imprimível A4)', templateFormatXlsx: '📊 Excel (.xlsx)', templateInfoHeader: 'INFO PARTIDA', templateDate: 'Data', templateOpponent: 'Adversário', templateVenue: 'Local', templateHome: 'Casa', templateAway: 'Fora', templateCompetition: 'Competição', templateResult: 'Resultado final', templateShots: 'Remates totais', templateUs: 'Nós', templateThem: 'Eles', templatePpRow: 'Powerplay (PP golos / PP total)', templatePkRow: 'Penalty Kill (PK golos sofridos / PK total)', templatePkGolFatti: 'Golos em PK', templatePpGolSubiti: 'Golos sofridos em PP', templateNotes: 'Notas', templatePlayersHeader: 'JOGADORES', templateGoaliesHeader: 'GUARDA-REDES', templateColName: 'Nome', settingsExport: 'Exportar dados', settingsExportHint: 'Descarrega uma cópia de segurança dos jogos e jogadores',
     settingsImport: 'Importar dados', settingsImportHint: 'Restaurar de um ficheiro de cópia',
-    exportFailed: 'Exportação falhou.', importInvalidJson: 'O ficheiro não é um JSON válido.', importInvalidBackup: 'O ficheiro não é uma cópia de segurança válida do Hockey Tracker.', importConfirmTitle: 'Confirmar importação', importBackupDate: 'Data cópia', importMatches: 'jogos', importPlayers: 'jogadores', importGoalies: 'guarda-redes', importConfirmBody: 'Os dados atuais serão substituídos. Continuar?', importSuccess: 'Importação concluída. A página será recarregada.', importFailed: 'Importação falhou.', importReadError: 'Não foi possível ler o ficheiro.', clearStep1Title: 'Apagar todos os dados', clearStep1Body: 'Estás prestes a apagar definitivamente jogos, jogadores e estatísticas.\n\nRecomendamos descarregar primeiro uma cópia. Fazer agora?', clearBackupFailedContinue: 'A cópia falhou. Queres apagar mesmo assim?', clearKeyword: 'APAGAR', clearStep2Body: 'Para confirmar, escreve a palavra {KEY} (em maiúsculas):', clearKeywordMismatch: 'A palavra não corresponde a {KEY}. Eliminação cancelada.', clearSuccess: 'Dados apagados. A página será recarregada.', clearFailed: 'Eliminação falhou.', clearStep2Title: 'Confirmar eliminação', clearSkipBackup: 'Saltar cópia', clearDoBackup: 'Descarregar cópia', clearConfirmFinal: 'Apagar definitivamente', clearDoneTitle: 'Feito', ok: 'OK',
+    exportFailed: 'Exportação falhou.', importInvalidJson: 'O ficheiro não é um JSON válido.', importInvalidBackup: 'O ficheiro não é uma cópia de segurança válida do Hockey Tracker.', importConfirmTitle: 'Confirmar importação', importBackupDate: 'Data cópia', importMatches: 'jogos', importPlayers: 'jogadores', importGoalies: 'guarda-redes', importConfirmBody: 'Os dados atuais serão substituídos. Continuar?', importSuccess: 'Importação concluída. A página será recarregada.', importFailed: 'Importação falhou.', importReadError: 'Não foi possível ler o ficheiro.', clearStep1Title: 'Apagar todos os dados', clearStep1Body: 'Estás prestes a apagar definitivamente jogos, jogadores e estatísticas.\n\nRecomendamos descarregar primeiro uma cópia. Fazer agora?', clearBackupFailedContinue: 'A cópia falhou. Queres apagar mesmo assim?', clearKeyword: 'APAGAR', clearStep2Body: 'Para confirmar, escreve a palavra {KEY} (em maiúsculas):', clearKeywordMismatch: 'A palavra não corresponde a {KEY}. Eliminação cancelada.', clearSuccess: 'Dados apagados. A página será recarregada.', clearFailed: 'Eliminação falhou.', clearStep2Title: 'Confirmar eliminação', clearSkipBackup: 'Saltar cópia', clearDoBackup: 'Descarregar cópia', clearConfirmFinal: 'Apagar definitivamente', clearDoneTitle: 'Feito', ok: 'OK', dialogNotice: 'Aviso', dialogConfirm: 'Confirmar',
     settingsReset: 'Apagar todos os dados', settingsResetHint: 'Remove permanentemente jogos, jogadores e estatísticas',
     settingsTeamName: 'Nome da equipa', settingsTeamNameHint: 'Personaliza o nome que aparece no marcador',
     settingsTeamLogo: 'Logótipo da equipa', settingsTeamLogoHint: 'Carrega o logótipo da tua equipa',
@@ -3695,7 +3711,7 @@ var I18N = {
     logoUpload: 'Carregar', logoEmoji: 'Emoji', logoRemove: 'Remover',
     logoEmojiTitle: 'Escolhe um emoji', logoEmojiHint: 'Escolhe um emoji como logótipo da equipa',
     logoUploadInvalidType: 'Formato não suportado. Usa PNG ou JPG.',
-    logoUploadTooBig: 'Imagem demasiado grande (máx. ~600 KB). Comprime-a.',
+    logoUploadTooBig: 'Ficheiro demasiado pesado. Usa uma imagem com menos de 3 MB.',
     liveStart: 'Ao vivo', livePause: 'Pausa', livePlay: 'Retomar', liveEnd: 'Terminar',
     liveStartTitle: 'Iniciar Ao vivo', liveStartHint: 'Seleciona os jogadores e o guarda-redes em campo no início do jogo.',
     livePickPlayers: 'Jogadores em campo', livePickGoalie: 'Guarda-redes',
@@ -3872,7 +3888,7 @@ var I18N = {
     settingsCompact: 'Mode compact', settingsCompactHint: 'Réduit les espacements pour afficher plus d\'infos (bureau uniquement)',
     settingsTemplate: 'Télécharger modèle match', settingsTemplateHint: 'Feuille papier à emporter à la patinoire quand le live n’est pas possible', templateDownloadTitle: 'Télécharger modèle match', templateDownloadHint: 'Choisis le format', templateFormatPdf: '📄 PDF (imprimable A4)', templateFormatXlsx: '📊 Excel (.xlsx)', templateInfoHeader: 'INFO MATCH', templateDate: 'Date', templateOpponent: 'Adversaire', templateVenue: 'Lieu', templateHome: 'Domicile', templateAway: 'Extérieur', templateCompetition: 'Compétition', templateResult: 'Résultat final', templateShots: 'Tirs totaux', templateUs: 'Nous', templateThem: 'Eux', templatePpRow: 'Powerplay (PP buts / PP total)', templatePkRow: 'Penalty Kill (PK buts encaissés / PK total)', templatePkGolFatti: 'Buts en PK', templatePpGolSubiti: 'Buts encaissés en PP', templateNotes: 'Notes', templatePlayersHeader: 'JOUEURS', templateGoaliesHeader: 'GARDIENS', templateColName: 'Nom', settingsExport: 'Exporter les données', settingsExportHint: 'Télécharge une sauvegarde des matchs et joueurs',
     settingsImport: 'Importer les données', settingsImportHint: 'Restaurer depuis une sauvegarde',
-    exportFailed: 'Échec de l'+String.fromCharCode(39)+'export.', importInvalidJson: 'Le fichier n'+String.fromCharCode(39)+'est pas un JSON valide.', importInvalidBackup: 'Le fichier n'+String.fromCharCode(39)+'est pas une sauvegarde Hockey Tracker valide.', importConfirmTitle: 'Confirmer l'+String.fromCharCode(39)+'import', importBackupDate: 'Date sauvegarde', importMatches: 'matchs', importPlayers: 'joueurs', importGoalies: 'gardiens', importConfirmBody: 'Tes données actuelles seront remplacées. Continuer ?', importSuccess: 'Import terminé. La page va se recharger.', importFailed: 'Échec de l'+String.fromCharCode(39)+'import.', importReadError: 'Impossible de lire le fichier.', clearStep1Title: 'Effacer toutes les données', clearStep1Body: 'Tu vas effacer définitivement matchs, joueurs et statistiques.\n\nIl est recommandé de télécharger d'+String.fromCharCode(39)+'abord une sauvegarde. Le faire maintenant ?', clearBackupFailedContinue: 'La sauvegarde a échoué. Veux-tu effacer quand même ?', clearKeyword: 'EFFACER', clearStep2Body: 'Pour confirmer, tape le mot {KEY} (en majuscules) :', clearKeywordMismatch: 'Le mot ne correspond pas à {KEY}. Suppression annulée.', clearSuccess: 'Données effacées. La page va se recharger.', clearFailed: 'Suppression échouée.', clearStep2Title: 'Confirmer la suppression', clearSkipBackup: 'Sauter la sauvegarde', clearDoBackup: 'Télécharger sauvegarde', clearConfirmFinal: 'Supprimer définitivement', clearDoneTitle: 'Terminé', ok: 'OK',
+    exportFailed: 'Échec de l'+String.fromCharCode(39)+'export.', importInvalidJson: 'Le fichier n'+String.fromCharCode(39)+'est pas un JSON valide.', importInvalidBackup: 'Le fichier n'+String.fromCharCode(39)+'est pas une sauvegarde Hockey Tracker valide.', importConfirmTitle: 'Confirmer l'+String.fromCharCode(39)+'import', importBackupDate: 'Date sauvegarde', importMatches: 'matchs', importPlayers: 'joueurs', importGoalies: 'gardiens', importConfirmBody: 'Tes données actuelles seront remplacées. Continuer ?', importSuccess: 'Import terminé. La page va se recharger.', importFailed: 'Échec de l'+String.fromCharCode(39)+'import.', importReadError: 'Impossible de lire le fichier.', clearStep1Title: 'Effacer toutes les données', clearStep1Body: 'Tu vas effacer définitivement matchs, joueurs et statistiques.\n\nIl est recommandé de télécharger d'+String.fromCharCode(39)+'abord une sauvegarde. Le faire maintenant ?', clearBackupFailedContinue: 'La sauvegarde a échoué. Veux-tu effacer quand même ?', clearKeyword: 'EFFACER', clearStep2Body: 'Pour confirmer, tape le mot {KEY} (en majuscules) :', clearKeywordMismatch: 'Le mot ne correspond pas à {KEY}. Suppression annulée.', clearSuccess: 'Données effacées. La page va se recharger.', clearFailed: 'Suppression échouée.', clearStep2Title: 'Confirmer la suppression', clearSkipBackup: 'Sauter la sauvegarde', clearDoBackup: 'Télécharger sauvegarde', clearConfirmFinal: 'Supprimer définitivement', clearDoneTitle: 'Terminé', ok: 'OK', dialogNotice: 'Avis', dialogConfirm: 'Confirmation',
     settingsReset: 'Effacer toutes les données', settingsResetHint: 'Supprime définitivement matchs, joueurs et stats',
     settingsTeamName: 'Nom d\'équipe', settingsTeamNameHint: 'Personnalise le nom affiché au tableau',
     settingsTeamLogo: 'Logo d\'équipe', settingsTeamLogoHint: 'Téléverse le logo de ton équipe',
@@ -3888,7 +3904,7 @@ var I18N = {
     logoUpload: 'Charger', logoEmoji: 'Emoji', logoRemove: 'Retirer',
     logoEmojiTitle: 'Choisis un emoji', logoEmojiHint: 'Choisis un emoji comme logo de ton équipe',
     logoUploadInvalidType: 'Format non pris en charge. Utilise PNG ou JPG.',
-    logoUploadTooBig: 'Image trop grande (max ~600 Ko). Compresse-la.',
+    logoUploadTooBig: 'Fichier trop lourd. Utilise une image de moins de 3 Mo.',
     liveStart: 'Live', livePause: 'Pause', livePlay: 'Reprendre', liveEnd: 'Terminer',
     liveStartTitle: 'Démarrer Live', liveStartHint: 'Sélectionne les joueurs et le gardien sur le terrain au début du match.',
     livePickPlayers: 'Joueurs sur le terrain', livePickGoalie: 'Gardien',
@@ -4065,7 +4081,7 @@ var I18N = {
     settingsCompact: 'Kompaktmodus', settingsCompactHint: 'Reduziert Abstände für mehr Inhalte (nur Desktop)',
     settingsTemplate: 'Spiel-Vorlage herunterladen', settingsTemplateHint: 'Papier-Vorlage für die Halle, falls Live nicht möglich', templateDownloadTitle: 'Spiel-Vorlage herunterladen', templateDownloadHint: 'Format wählen', templateFormatPdf: '📄 PDF (druckbar A4)', templateFormatXlsx: '📊 Excel (.xlsx)', templateInfoHeader: 'SPIELDATEN', templateDate: 'Datum', templateOpponent: 'Gegner', templateVenue: 'Ort', templateHome: 'Heim', templateAway: 'Auswärts', templateCompetition: 'Wettbewerb', templateResult: 'Endergebnis', templateShots: 'Schüsse total', templateUs: 'Wir', templateThem: 'Sie', templatePpRow: 'Powerplay (PP Tore / PP gesamt)', templatePkRow: 'Penalty Kill (PK Gegentore / PK gesamt)', templatePkGolFatti: 'Tore in PK', templatePpGolSubiti: 'Gegentore in PP', templateNotes: 'Notizen', templatePlayersHeader: 'SPIELER', templateGoaliesHeader: 'TORWARTE', templateColName: 'Name', settingsExport: 'Daten exportieren', settingsExportHint: 'Lade ein Backup deiner Spiele und Spieler herunter',
     settingsImport: 'Daten importieren', settingsImportHint: 'Aus einer Sicherungsdatei wiederherstellen',
-    exportFailed: 'Export fehlgeschlagen.', importInvalidJson: 'Die Datei ist kein gültiges JSON.', importInvalidBackup: 'Die Datei ist kein gültiges Hockey-Tracker-Backup.', importConfirmTitle: 'Import bestätigen', importBackupDate: 'Backup-Datum', importMatches: 'Spiele', importPlayers: 'Spieler', importGoalies: 'Torwarte', importConfirmBody: 'Deine aktuellen Daten werden ersetzt. Fortfahren?', importSuccess: 'Import abgeschlossen. Die Seite wird neu geladen.', importFailed: 'Import fehlgeschlagen.', importReadError: 'Datei konnte nicht gelesen werden.', clearStep1Title: 'Alle Daten löschen', clearStep1Body: 'Du bist dabei, Spiele, Spieler und Statistiken endgültig zu löschen.\n\nWir empfehlen, zuerst ein Backup herunterzuladen. Jetzt machen?', clearBackupFailedContinue: 'Backup fehlgeschlagen. Trotzdem löschen?', clearKeyword: 'LOESCHEN', clearStep2Body: 'Zur Bestätigung tippe das Wort {KEY} (in Großbuchstaben):', clearKeywordMismatch: 'Das Wort stimmt nicht mit {KEY} überein. Löschung abgebrochen.', clearSuccess: 'Daten gelöscht. Die Seite wird neu geladen.', clearFailed: 'Löschung fehlgeschlagen.', clearStep2Title: 'Löschung bestätigen', clearSkipBackup: 'Backup überspringen', clearDoBackup: 'Backup herunterladen', clearConfirmFinal: 'Endgültig löschen', clearDoneTitle: 'Fertig', ok: 'OK',
+    exportFailed: 'Export fehlgeschlagen.', importInvalidJson: 'Die Datei ist kein gültiges JSON.', importInvalidBackup: 'Die Datei ist kein gültiges Hockey-Tracker-Backup.', importConfirmTitle: 'Import bestätigen', importBackupDate: 'Backup-Datum', importMatches: 'Spiele', importPlayers: 'Spieler', importGoalies: 'Torwarte', importConfirmBody: 'Deine aktuellen Daten werden ersetzt. Fortfahren?', importSuccess: 'Import abgeschlossen. Die Seite wird neu geladen.', importFailed: 'Import fehlgeschlagen.', importReadError: 'Datei konnte nicht gelesen werden.', clearStep1Title: 'Alle Daten löschen', clearStep1Body: 'Du bist dabei, Spiele, Spieler und Statistiken endgültig zu löschen.\n\nWir empfehlen, zuerst ein Backup herunterzuladen. Jetzt machen?', clearBackupFailedContinue: 'Backup fehlgeschlagen. Trotzdem löschen?', clearKeyword: 'LOESCHEN', clearStep2Body: 'Zur Bestätigung tippe das Wort {KEY} (in Großbuchstaben):', clearKeywordMismatch: 'Das Wort stimmt nicht mit {KEY} überein. Löschung abgebrochen.', clearSuccess: 'Daten gelöscht. Die Seite wird neu geladen.', clearFailed: 'Löschung fehlgeschlagen.', clearStep2Title: 'Löschung bestätigen', clearSkipBackup: 'Backup überspringen', clearDoBackup: 'Backup herunterladen', clearConfirmFinal: 'Endgültig löschen', clearDoneTitle: 'Fertig', ok: 'OK', dialogNotice: 'Hinweis', dialogConfirm: 'Bestätigung',
     settingsReset: 'Alle Daten löschen', settingsResetHint: 'Entfernt dauerhaft Spiele, Spieler und Statistiken',
     settingsTeamName: 'Teamname', settingsTeamNameHint: 'Passe den Namen im Scoreboard an',
     settingsTeamLogo: 'Teamlogo', settingsTeamLogoHint: 'Lade dein Teamlogo hoch',
@@ -4081,7 +4097,7 @@ var I18N = {
     logoUpload: 'Hochladen', logoEmoji: 'Emoji', logoRemove: 'Entfernen',
     logoEmojiTitle: 'Emoji wählen', logoEmojiHint: 'Wähle ein Emoji als Teamlogo',
     logoUploadInvalidType: 'Format nicht unterstützt. Bitte PNG oder JPG verwenden.',
-    logoUploadTooBig: 'Bild zu groß (max ~600 KB). Bitte komprimieren.',
+    logoUploadTooBig: 'Datei zu groß. Bitte ein Bild unter 3 MB verwenden.',
     liveStart: 'Live', livePause: 'Pause', livePlay: 'Fortsetzen', liveEnd: 'Beenden',
     liveStartTitle: 'Live starten', liveStartHint: 'Wähle die Spieler und den Torhüter auf dem Feld zu Beginn des Spiels.',
     livePickPlayers: 'Spieler auf dem Feld', livePickGoalie: 'Torhüter',
@@ -4382,22 +4398,24 @@ function handleLogoUpload(e) {
   var file = e.target.files && e.target.files[0];
   if (!file) return;
   if (!/^image\/(png|jpe?g)$/i.test(file.type)) {
-    alert(t('logoUploadInvalidType'));
+    appAlert(t('logoUploadInvalidType'));
     e.target.value = '';
     return;
   }
-  // Max ~500KB after base64 encoding (to keep localStorage healthy)
-  if (file.size > 600 * 1024) {
-    alert(t('logoUploadTooBig'));
+  // Soft guard against absurd files; the image is resized down right after.
+  if (file.size > 3 * 1024 * 1024) {
+    appAlert(t('logoUploadTooBig'));
     e.target.value = '';
     return;
   }
-  var reader = new FileReader();
-  reader.onload = function(ev) {
-    setTeamLogo(ev.target.result); // data: URL
-  };
-  reader.readAsDataURL(file);
-  e.target.value = '';
+  // Auto-resize + compress to keep localStorage healthy. 512px is plenty for a team logo.
+  loadAndResizeImage(file, 512, function(dataUrl) {
+    setTeamLogo(dataUrl);
+    e.target.value = '';
+  }, function(err) {
+    appAlert(t('avvLogoError') + ' (' + err + ')');
+    e.target.value = '';
+  });
 }
 
 // Apply team name + logo to the header and re-render scoreboards via renderAll.
@@ -4650,6 +4668,67 @@ function showSavedToast() {
   toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 1400);
 }
 
+// ============== Themed dialogs (replace native alert/confirm) ==============
+// appAlert(message, title?)  -> Promise that resolves when the user taps OK
+// appConfirm(message, title?) -> Promise<boolean>: true if OK, false if Annulla/close
+var _appDialogResolve = null;
+var _appDialogMode = 'alert';
+
+function _appDialogClose(result) {
+  var ov = document.getElementById('modal-app-dialog');
+  if (ov) ov.classList.remove('open');
+  var r = _appDialogResolve;
+  _appDialogResolve = null;
+  if (r) r(result);
+}
+
+function appAlert(message, title) {
+  return new Promise(function(resolve){
+    _appDialogResolve = resolve;
+    _appDialogMode = 'alert';
+    var titleEl  = document.getElementById('app-dialog-title');
+    var msgEl    = document.getElementById('app-dialog-message');
+    var okBtn    = document.getElementById('app-dialog-ok');
+    var cancelBtn= document.getElementById('app-dialog-cancel');
+    if (titleEl) titleEl.textContent = title || t('dialogNotice');
+    if (msgEl)   msgEl.textContent = (message == null ? '' : String(message));
+    if (cancelBtn) cancelBtn.style.display = 'none';
+    if (okBtn) { okBtn.textContent = t('ok'); okBtn.onclick = function(){ _appDialogClose(true); }; }
+    var ov = document.getElementById('modal-app-dialog');
+    if (ov) ov.classList.add('open');
+  });
+}
+
+function appConfirm(message, title) {
+  return new Promise(function(resolve){
+    _appDialogResolve = resolve;
+    _appDialogMode = 'confirm';
+    var titleEl  = document.getElementById('app-dialog-title');
+    var msgEl    = document.getElementById('app-dialog-message');
+    var okBtn    = document.getElementById('app-dialog-ok');
+    var cancelBtn= document.getElementById('app-dialog-cancel');
+    if (titleEl) titleEl.textContent = title || t('dialogConfirm');
+    if (msgEl)   msgEl.textContent = (message == null ? '' : String(message));
+    if (cancelBtn) {
+      cancelBtn.style.display = '';
+      cancelBtn.textContent = t('cancel');
+      cancelBtn.onclick = function(){ _appDialogClose(false); };
+    }
+    if (okBtn) { okBtn.textContent = t('ok'); okBtn.onclick = function(){ _appDialogClose(true); }; }
+    var ov = document.getElementById('modal-app-dialog');
+    if (ov) ov.classList.add('open');
+  });
+}
+
+// Tapping the dark overlay outside the box = cancel (false) for confirm, dismiss for alert
+document.addEventListener('click', function(e){
+  var ov = document.getElementById('modal-app-dialog');
+  if (ov && ov.classList.contains('open') && e.target === ov) {
+    _appDialogClose(_appDialogMode === 'confirm' ? false : true);
+  }
+});
+// ============== fine Themed dialogs ==============
+
 // ============== Esporta / Importa / Cancella dati ==============
 // Build a single JSON snapshot of every piece of app state worth backing up.
 function buildBackupSnapshot() {
@@ -4688,7 +4767,7 @@ function exportAllData() {
     downloadBackupFile();
     showSavedToast();
   } catch(e) {
-    alert(t('exportFailed') + '\n\n' + (e && e.message ? e.message : e));
+    appAlert(t('exportFailed') + '\n\n' + (e && e.message ? e.message : e));
   }
 }
 
@@ -4704,18 +4783,18 @@ function handleImportFile(event) {
   var file = event.target.files && event.target.files[0];
   if (!file) return;
   var reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = async function(e) {
     var raw = e.target.result;
     var parsed = null;
     try { parsed = JSON.parse(raw); }
-    catch(err) { alert(t('importInvalidJson')); return; }
+    catch(err) { appAlert(t('importInvalidJson')); return; }
     // Validate it's our backup
     if (!parsed || parsed.app !== 'hockey-tracker' || !parsed.db ||
         typeof parsed.db !== 'object' ||
         !Array.isArray(parsed.db.partite) ||
         !Array.isArray(parsed.db.giocatori) ||
         !Array.isArray(parsed.db.portieri)) {
-      alert(t('importInvalidBackup'));
+      appAlert(t('importInvalidBackup'));
       return;
     }
     var nMatches  = parsed.db.partite.length;
@@ -4728,7 +4807,7 @@ function handleImportFile(event) {
               '• ' + nPlayers + ' ' + t('importPlayers') + '\n' +
               '• ' + nGoalies + ' ' + t('importGoalies') + '\n\n' +
               t('importConfirmBody');
-    if (!confirm(msg)) return;
+    if (!(await appConfirm(msg))) return;
     // Apply the import
     try {
       localStorage.setItem('hockey_db_v3', JSON.stringify(parsed.db));
@@ -4737,13 +4816,13 @@ function handleImportFile(event) {
       if (parsed.lang) localStorage.setItem('hockey_lang', parsed.lang);
       // Drop any stale live-match state so the imported data is the source of truth
       try { localStorage.removeItem('hockey_live_state'); } catch(_){}
-      alert(t('importSuccess'));
+      appAlert(t('importSuccess'));
       window.location.reload();
     } catch(err) {
-      alert(t('importFailed') + '\n\n' + (err && err.message ? err.message : err));
+      appAlert(t('importFailed') + '\n\n' + (err && err.message ? err.message : err));
     }
   };
-  reader.onerror = function() { alert(t('importReadError')); };
+  reader.onerror = function() { appAlert(t('importReadError')); };
   reader.readAsText(file);
 }
 
@@ -4767,13 +4846,13 @@ function confirmClearAllData() {
   openModal('modal-clear-step1');
 }
 
-function clearFlowWithBackup() {
+async function clearFlowWithBackup() {
   // Scarica il backup e poi passa allo step 2
   try {
     downloadBackupFile();
   } catch(e) {
     // Se il backup fallisce, chiedi se proseguire comunque
-    if (!confirm(t('clearBackupFailedContinue'))) {
+    if (!(await appConfirm(t('clearBackupFailedContinue')))) {
       closeModal('modal-clear-step1');
       return;
     }
@@ -4832,7 +4911,7 @@ function clearFlowFinalize() {
     closeModal('modal-clear-step2');
     setTimeout(function(){ openModal('modal-clear-done'); }, 150);
   } catch(e) {
-    alert(t('clearFailed') + '\n\n' + (e && e.message ? e.message : e));
+    appAlert(t('clearFailed') + '\n\n' + (e && e.message ? e.message : e));
   }
 }
 // ============== fine Esporta / Importa / Cancella dati ==============
@@ -6308,7 +6387,7 @@ function exportMatchPDF() {
     .then(function(){ doExportPDF(); })
     .catch(function(err){
       console.error(err);
-      alert('PDF export failed: ' + err.message);
+      appAlert('PDF export failed: ' + err.message);
     })
     .finally(function(){
       setTimeout(function(){ var t = document.getElementById('pdf-toast'); if (t) t.remove(); }, 600);
@@ -6344,7 +6423,7 @@ function doExportPDF() {
   if (!p) return;
   // jspdf UMD exposes window.jspdf.jsPDF
   var jsPDFCtor = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
-  if (!jsPDFCtor) { alert('jsPDF not loaded'); return; }
+  if (!jsPDFCtor) { appAlert('jsPDF not loaded'); return; }
   var doc = new jsPDFCtor({ orientation: 'landscape', unit: 'mm', format: 'a4' });
   var pageW = doc.internal.pageSize.getWidth();
   var pageH = doc.internal.pageSize.getHeight();
@@ -6687,7 +6766,7 @@ function exportPlayersPDF() {
   showPdfToast();
   Promise.all([loadScript(CDN_JSPDF), loadScript(CDN_AUTOTABLE)])
     .then(function(){ doExportPlayersPDF(); })
-    .catch(function(err){ console.error(err); alert('PDF export failed: ' + err.message); })
+    .catch(function(err){ console.error(err); appAlert('PDF export failed: ' + err.message); })
     .finally(function(){
       setTimeout(function(){ var t = document.getElementById('pdf-toast'); if (t) t.remove(); }, 600);
     });
@@ -6696,7 +6775,7 @@ function exportGoaliesPDF() {
   showPdfToast();
   Promise.all([loadScript(CDN_JSPDF), loadScript(CDN_AUTOTABLE)])
     .then(function(){ doExportGoaliesPDF(); })
-    .catch(function(err){ console.error(err); alert('PDF export failed: ' + err.message); })
+    .catch(function(err){ console.error(err); appAlert('PDF export failed: ' + err.message); })
     .finally(function(){
       setTimeout(function(){ var t = document.getElementById('pdf-toast'); if (t) t.remove(); }, 600);
     });
@@ -6756,7 +6835,7 @@ function doExportGoaliesPDF() { doExportSeasonPDF(); }
 // Combined season PDF: players table + goalies table (like the match PDF, but season totals)
 function doExportSeasonPDF() {
   var jsPDFCtor = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
-  if (!jsPDFCtor) { alert('jsPDF not loaded'); return; }
+  if (!jsPDFCtor) { appAlert('jsPDF not loaded'); return; }
   var doc = new jsPDFCtor({ orientation: 'landscape', unit: 'mm', format: 'a4' });
   var accent = [232, 160, 32];
   var marginX = 14;
@@ -7469,7 +7548,7 @@ function liveConsumeOneExpiredCard() {
 
 // ============== N5a — Live mode: start, pause, resume, end ==============
 // Open the "select starting 5" modal (4 players + 1 goalie)
-function openLiveStartModal() {
+async function openLiveStartModal() {
   if (!currentDetailMatchId) return;
   var p = getPartitaById(currentDetailMatchId);
   if (!p) return;
@@ -7480,7 +7559,7 @@ function openLiveStartModal() {
   }
   // If a live exists for ANOTHER match, ask first to avoid losing data
   if (liveState && liveState.matchId !== currentDetailMatchId) {
-    if (!confirm(t('liveOtherMatchOngoing'))) return;
+    if (!(await appConfirm(t('liveOtherMatchOngoing')))) return;
     // User confirms abandoning previous live
     liveState = null;
     saveLiveState();
@@ -7557,8 +7636,8 @@ function confirmLiveStart() {
   var pickedG = [];
   var boxes = listG.querySelectorAll('input.live-pick-g:checked');
   for (var i = 0; i < boxes.length; i++) pickedG.push(boxes[i].value);
-  if (pickedG.length < 1) { alert(t('liveNeedPlayers')); return; }
-  if (pickedG.length > 4) { alert(t('liveTooManyPlayers')); return; }
+  if (pickedG.length < 1) { appAlert(t('liveNeedPlayers')); return; }
+  if (pickedG.length > 4) { appAlert(t('liveTooManyPlayers')); return; }
   var pickedGo = null;
   var radio = listP.querySelector('input[name="live-pick-p"]:checked');
   if (radio) pickedGo = radio.value;
@@ -7621,9 +7700,9 @@ function exitLiveUI() {
 }
 
 // Permanently end the live session (clear state)
-function endLiveSession() {
+async function endLiveSession() {
   if (!liveState) return;
-  if (!confirm(t('liveEndConfirm'))) return;
+  if (!(await appConfirm(t('liveEndConfirm')))) return;
   liveFlushTimesToMatch();
   // N5d.3 (Q5.A.3): restore previous edit state before clearing
   if (typeof liveState.previousEditMode !== 'undefined') {
@@ -7732,12 +7811,12 @@ function liveToggle() {
 // N5g.8 (Q11.A bug fix) + Q10.A.1: switch to a period with optional confirmation reset.
 // Crucially: the GENERAL clock resets to 0 but PLAYER MINUTES are PRESERVED (the previous bug
 // erroneously zeroed playerTimers.totalMs as well).
-function liveSwitchToPeriod(period) {
+async function liveSwitchToPeriod(period) {
   if (!liveState) return;
   var alreadyOnPeriod = (liveState.currentPeriod === period);
   if (alreadyOnPeriod) return;
   // Q10.A.1: ask confirmation when actually switching (general clock will restart from 0)
-  if (!confirm(t('livePeriodSwitchConfirm'))) return;
+  if (!(await appConfirm(t('livePeriodSwitchConfirm')))) return;
   // 1) Flush current minutes into the match (so they're truly persisted)
   liveFlushTimesToMatch();
   // 2) Reset the GENERAL clock to 0:00 — accumulatedMs only
@@ -7999,13 +8078,13 @@ function renderActiveCardsInner() {
 var subModalState = null; // { kind: 'subOut'|'subIn'|'subGoalie', playerOutId?, playerInId? }
 
 // Open modal to pick who comes in to replace pidOut (tap 🔄 on on-field card)
-function openLiveSubMenu(playerOutId) {
+async function openLiveSubMenu(playerOutId) {
   if (!liveState) return;
   var p = getPartitaById(liveState.matchId);
   if (!p) return;
   var bench = (p.convocatiG || []).filter(function(pid){ return liveState.onField.indexOf(pid) === -1 && !isRemovedFromLive(pid); });
   if (bench.length === 0) {
-    if (confirm(t('liveNoBench'))) {
+    if (await appConfirm(t('liveNoBench'))) {
       liveSubstitute(playerOutId, null);
     }
     return;
@@ -8214,7 +8293,7 @@ function showLiveBanner(message) {
   vibrate(60);
 }
 
-function confirmSubModal(chosenId) {
+async function confirmSubModal(chosenId) {
   if (!subModalState) { closeModal('modal-live-sub'); return; }
   var kind = subModalState.kind;
   if (kind === 'subOut') {
@@ -8227,7 +8306,7 @@ function confirmSubModal(chosenId) {
     // Q2.F.3: ask if goalie should come off
     var pullGoalie = false;
     if (liveState.goalieOnField) {
-      pullGoalie = confirm(t('liveFifthPullGoalie'));
+      pullGoalie = await appConfirm(t('liveFifthPullGoalie'));
     }
     // Add the 5th player to field
     liveSubstitute(null, chosenId);
@@ -8245,11 +8324,11 @@ function confirmSubModal(chosenId) {
 // N5d.4 Q2: open the modal to pick a 5th player (only callable when conditions met)
 function openLiveFifthMenu() {
   if (!liveState) return;
-  if (liveState.onField.length >= 5) { alert(t('liveFifthFull')); return; }
+  if (liveState.onField.length >= 5) { appAlert(t('liveFifthFull')); return; }
   var p = getPartitaById(liveState.matchId);
   if (!p) return;
   var bench = (p.convocatiG || []).filter(function(pid){ return liveState.onField.indexOf(pid) === -1 && !isRemovedFromLive(pid); });
-  if (bench.length === 0) { alert(t('liveNoBench')); return; }
+  if (bench.length === 0) { appAlert(t('liveNoBench')); return; }
   subModalState = { kind: 'subFifth' };
   renderSubModalList(bench, 'g');
   var titleEl = document.getElementById('modal-live-sub-title');
@@ -8863,7 +8942,7 @@ function onOpponentLogoFile(inputEl) {
   var file = inputEl.files[0];
   // Soft size guard: 5 MB original max (resized down later)
   if (file.size > 5 * 1024 * 1024) {
-    alert(t('avvLogoTooBig'));
+    appAlert(t('avvLogoTooBig'));
     inputEl.value = '';
     return;
   }
@@ -8875,14 +8954,14 @@ function onOpponentLogoFile(inputEl) {
     }
     inputEl.value = '';
   }, function(err) {
-    alert(t('avvLogoError') + ' (' + err + ')');
+    appAlert(t('avvLogoError') + ' (' + err + ')');
     inputEl.value = '';
   });
 }
 
-function removeOpponentLogo() {
+async function removeOpponentLogo() {
   if (!currentAvversario) return;
-  if (!confirm(t('avvLogoRemoveConfirm'))) return;
+  if (!(await appConfirm(t('avvLogoRemoveConfirm')))) return;
   setOpponentLogo(currentAvversario, null);
   renderAvversarioDetail(currentAvversario);
 }
@@ -8954,10 +9033,10 @@ function renderModalOpponentLogo() {
 function onModalOpponentLogoFile(inputEl) {
   if (!inputEl || !inputEl.files || !inputEl.files[0]) return;
   var avvName = (document.getElementById('p-avversario').value || '').trim();
-  if (!avvName) { alert(t('avvLogoNeedName')); inputEl.value = ''; return; }
+  if (!avvName) { appAlert(t('avvLogoNeedName')); inputEl.value = ''; return; }
   var file = inputEl.files[0];
   if (file.size > 5 * 1024 * 1024) {
-    alert(t('avvLogoTooBig'));
+    appAlert(t('avvLogoTooBig'));
     inputEl.value = '';
     return;
   }
@@ -8966,15 +9045,15 @@ function onModalOpponentLogoFile(inputEl) {
     renderModalOpponentLogo();
     inputEl.value = '';
   }, function(err) {
-    alert(t('avvLogoError') + ' (' + err + ')');
+    appAlert(t('avvLogoError') + ' (' + err + ')');
     inputEl.value = '';
   });
 }
 
-function removeModalOpponentLogo() {
+async function removeModalOpponentLogo() {
   var avvName = (document.getElementById('p-avversario').value || '').trim();
   if (!avvName) return;
-  if (!confirm(t('avvLogoRemoveConfirm'))) return;
+  if (!(await appConfirm(t('avvLogoRemoveConfirm')))) return;
   setOpponentLogo(avvName, null);
   renderModalOpponentLogo();
 }
@@ -9170,7 +9249,7 @@ function setInputReadonly(inputEl, isReadonly) {
 function savePartita() {
   var editId = document.getElementById('p-edit-id').value;
   var avv = document.getElementById('p-avversario').value.trim();
-  if (!avv) { alert(t('alertOpponent')); return; }
+  if (!avv) { appAlert(t('alertOpponent')); return; }
   if (editId) {
     var p = getPartitaById(editId);
     if (p) {
@@ -9254,17 +9333,17 @@ function savePartita() {
   }
 }
 
-function deleteCurrentMatch() {
+async function deleteCurrentMatch() {
   if (!currentDetailMatchId) return;
-  if (!confirm(t('confirmDeleteMatch'))) return;
+  if (!(await appConfirm(t('confirmDeleteMatch')))) return;
   var newArr = [];
   for (var i = 0; i < DB.partite.length; i++) { if (DB.partite[i].id !== currentDetailMatchId) newArr.push(DB.partite[i]); }
   DB.partite = newArr;
   save(); showPage('partite');
 }
 
-function deletePartita(id) {
-  if (!confirm(t('confirmDeleteMatch'))) return;
+async function deletePartita(id) {
+  if (!(await appConfirm(t('confirmDeleteMatch')))) return;
   var newArr = [];
   for (var i = 0; i < DB.partite.length; i++) { if (DB.partite[i].id !== id) newArr.push(DB.partite[i]); }
   DB.partite = newArr;
@@ -9274,7 +9353,7 @@ function deletePartita(id) {
 function saveGiocatore() {
   var editId = document.getElementById('g-edit-id').value;
   var nome = document.getElementById('g-nome').value.trim();
-  if (!nome) { alert(t('alertPlayerName')); return; }
+  if (!nome) { appAlert(t('alertPlayerName')); return; }
   var obj = {
     id: editId || uid(),
     nome: nome,
@@ -9305,8 +9384,8 @@ function editGiocatore(id) {
   openModal('modal-giocatore');
 }
 
-function deleteGiocatore(id) {
-  if (!confirm(t('confirmDeletePlayer'))) return;
+async function deleteGiocatore(id) {
+  if (!(await appConfirm(t('confirmDeletePlayer')))) return;
   for (var i = 0; i < DB.partite.length; i++) {
     var p = DB.partite[i];
     if (p.convocatiG) {
@@ -9325,7 +9404,7 @@ function deleteGiocatore(id) {
 function savePortiere() {
   var editId = document.getElementById('pt-edit-id').value;
   var nome = document.getElementById('pt-nome').value.trim();
-  if (!nome) { alert(t('alertGoalieName')); return; }
+  if (!nome) { appAlert(t('alertGoalieName')); return; }
   var obj = {
     id: editId || uid(),
     nome: nome,
@@ -9354,8 +9433,8 @@ function editPortiere(id) {
   openModal('modal-portiere');
 }
 
-function deletePortiere(id) {
-  if (!confirm(t('confirmDeleteGoalie'))) return;
+async function deletePortiere(id) {
+  if (!(await appConfirm(t('confirmDeleteGoalie')))) return;
   for (var i = 0; i < DB.partite.length; i++) {
     var p = DB.partite[i];
     if (p.convocatiP) {
@@ -9416,7 +9495,7 @@ function convocaPlayer(playerId) {
   var maxConv = convocaType === 'g' ? 8 : 2;
   if (convocaType === 'g') {
     if (!match.convocatiG) match.convocatiG = [];
-    if (match.convocatiG.length >= maxConv) { alert(t('alertLimit') + ' ' + maxConv + ' ' + t('alertReached')); return; }
+    if (match.convocatiG.length >= maxConv) { appAlert(t('alertLimit') + ' ' + maxConv + ' ' + t('alertReached')); return; }
     match.convocatiG.push(playerId);
     if (!match.statsG) match.statsG = {};
     if (!match.statsG[playerId]) {
@@ -9426,7 +9505,7 @@ function convocaPlayer(playerId) {
     }
   } else {
     if (!match.convocatiP) match.convocatiP = [];
-    if (match.convocatiP.length >= maxConv) { alert(t('alertLimit') + ' ' + maxConv + ' ' + t('alertReached')); return; }
+    if (match.convocatiP.length >= maxConv) { appAlert(t('alertLimit') + ' ' + maxConv + ' ' + t('alertReached')); return; }
     match.convocatiP.push(playerId);
     if (!match.statsP) match.statsP = {};
     if (!match.statsP[playerId]) {
@@ -9440,10 +9519,10 @@ function convocaPlayer(playerId) {
   renderMatchDetail(currentDetailMatchId);
 }
 
-function rimuoviConvocato(type, playerId) {
+async function rimuoviConvocato(type, playerId) {
   var match = getPartitaById(currentDetailMatchId);
   if (!match) return;
-  if (!confirm(type === 'g' ? t('confirmRemovePlayer') : t('confirmRemoveGoalie'))) return;
+  if (!(await appConfirm(type === 'g' ? t('confirmRemovePlayer') : t('confirmRemoveGoalie')))) return;
   if (type === 'g') {
     match.convocatiG = (match.convocatiG || []).filter(function(x){ return x !== playerId; });
     if (match.statsG && match.statsG[playerId]) delete match.statsG[playerId];
@@ -11002,10 +11081,10 @@ function updateMatchBulkCount() {
   if (el) el.textContent = selectedMatchIds.length;
 }
 
-function bulkDeleteSelectedMatches() {
+async function bulkDeleteSelectedMatches() {
   if (selectedMatchIds.length === 0) return;
   var n = selectedMatchIds.length;
-  if (!confirm(t('confirmBulkDelete').replace('{N}', n))) return;
+  if (!(await appConfirm(t('confirmBulkDelete').replace('{N}', n)))) return;
   // Remove all selected matches from DB
   for (var i = 0; i < selectedMatchIds.length; i++) {
     var id = selectedMatchIds[i];
@@ -11623,7 +11702,7 @@ function applyEditModeUI() {
   if (toggleBtn && icon && label) {
     if (editMode) {
       toggleBtn.classList.add('editing');
-      icon.textContent = '✏️';
+      icon.textContent = '🔓';
       label.textContent = t('editMode');
     } else {
       toggleBtn.classList.remove('editing');
