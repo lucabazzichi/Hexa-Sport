@@ -2282,6 +2282,67 @@
     body.swipe-mode .conv-bar,
     body.swipe-mode .section-title,
     body.swipe-mode #btn-edit-match-info { display: none !important; }
+
+    /* STEP M2 — Two-section swipe view */
+    .swipe-section {
+      margin-bottom: 28px;
+    }
+    .swipe-section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--accent);
+      padding: 4px 10px;
+      border-left: 3px solid var(--accent);
+      margin-bottom: 12px;
+      margin-top: 8px;
+    }
+    .swipe-section-title > span:first-child {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .swipe-section-pager {
+      background: var(--bg3);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 12px;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+    .swipe-convoke-section-btn {
+      width: 100%;
+      padding: 14px 16px !important;
+      font-size: 15px !important;
+      font-weight: 700;
+      letter-spacing: .03em;
+      border-radius: 10px;
+      min-height: 50px;
+      margin-top: 12px;
+    }
+    .swipe-stage-empty {
+      background: var(--bg2);
+      border: 1px dashed var(--border2);
+      border-radius: 12px;
+      padding: 28px 20px;
+      text-align: center;
+      color: var(--text3);
+      font-size: 13px;
+      font-style: italic;
+      min-height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Hide the old single-carousel convoke row (replaced by per-section buttons) */
+    .swipe-convoke-actions { display: none !important; }
     /* ============== fine STEP M2 ============== */
   }
   /* Very small screens: auto-fit will naturally collapse to 2 columns thanks to the 85px min */
@@ -2509,22 +2570,43 @@
 
     <div class="stat-row" id="detail-match-stats" style="margin-bottom:24px;"></div>
 
-    <!-- STEP M2: Mobile swipe view (single-card per slide) -->
+    <!-- STEP M2: Mobile swipe view (two independent sections: players + goalies) -->
     <div class="swipe-view" id="swipe-view">
       <div class="swipe-header">
         <div class="swipe-header-mini-score" id="swipe-mini-score"></div>
-        <div class="swipe-pager" id="swipe-pager">1 / 1</div>
         <button class="swipe-info-btn" onclick="editCurrentMatchInfo()" title="Info partita">ℹ️</button>
       </div>
-      <div class="swipe-stage" id="swipe-stage"></div>
-      <div class="swipe-nav-row">
-        <button class="swipe-nav-btn" id="swipe-prev" onclick="swipePrev()">◀</button>
-        <button class="swipe-nav-btn" id="swipe-next" onclick="swipeNext()">▶</button>
+
+      <!-- SEZIONE GIOCATORI -->
+      <div class="swipe-section">
+        <div class="swipe-section-title">
+          <span>👤 <span data-i18n="navPlayers">Giocatori</span></span>
+          <span class="swipe-section-pager" id="swipe-pager-g">0 / 0</span>
+        </div>
+        <div class="swipe-stage" id="swipe-stage-g"></div>
+        <div class="swipe-nav-row">
+          <button class="swipe-nav-btn" id="swipe-prev-g" onclick="swipePrev('g')">◀</button>
+          <button class="swipe-nav-btn" id="swipe-next-g" onclick="swipeNext('g')">▶</button>
+        </div>
+        <button class="btn btn-primary swipe-convoke-section-btn" onclick="openConvocaModal('g')">
+          + <span data-i18n="convokePlayer">Convoca giocatore</span>
+        </button>
       </div>
-      <!-- Iter 9: convoke buttons inside swipe view (below the arrows) -->
-      <div class="swipe-convoke-actions">
-        <button class="btn btn-primary mobile-convoke-btn" onclick="openConvocaModal('g')">+ <span data-i18n="convokePlayer">Convoca giocatore</span></button>
-        <button class="btn btn-primary mobile-convoke-btn" onclick="openConvocaModal('p')">+ <span data-i18n="convokeGoalie">Convoca portiere</span></button>
+
+      <!-- SEZIONE PORTIERI -->
+      <div class="swipe-section">
+        <div class="swipe-section-title">
+          <span>🥅 <span data-i18n="navGoalies">Portieri</span></span>
+          <span class="swipe-section-pager" id="swipe-pager-p">0 / 0</span>
+        </div>
+        <div class="swipe-stage" id="swipe-stage-p"></div>
+        <div class="swipe-nav-row">
+          <button class="swipe-nav-btn" id="swipe-prev-p" onclick="swipePrev('p')">◀</button>
+          <button class="swipe-nav-btn" id="swipe-next-p" onclick="swipeNext('p')">▶</button>
+        </div>
+        <button class="btn btn-primary swipe-convoke-section-btn" onclick="openConvocaModal('p')">
+          + <span data-i18n="convokeGoalie">Convoca portiere</span>
+        </button>
       </div>
     </div>
 
@@ -9647,8 +9729,10 @@ function openMatchDetail(matchId) {
   expandedCardIds = {};   // N5d.5 Q6.F.3: don't persist expand state between openings
   // STEP M2: reset swipe view state on entering a match
   swipeMode = false;
-  swipeViewIdx = 0;
-  swipeViewList = [];
+  swipeViewIdxG = 0;
+  swipeViewIdxP = 0;
+  swipeViewListG = [];
+  swipeViewListP = [];
   document.body.classList.remove('swipe-mode');
   var svEl = document.getElementById('swipe-view');
   if (svEl) svEl.classList.remove('active');
@@ -10067,16 +10151,10 @@ function renderMatchDetail(matchId) {
   }
   // STEP H1: cascade flag is one-shot — clear it after this render
   cascadeOnNextRender = false;
-  // STEP M2: if mobile swipe mode is active, also refresh the visible card
+  // STEP M2: if mobile swipe mode is active, refresh both sections.
+  // renderSwipeSlide() rebuilds both player+goalie lists from scratch.
   if (swipeMode) {
-    // Rebuild list in case convocati changed (e.g. removed a player)
-    var pp = getPartitaById(matchId);
-    if (pp) {
-      swipeViewList = buildSwipeList(pp);
-      if (swipeViewIdx >= swipeViewList.length) swipeViewIdx = Math.max(0, swipeViewList.length - 1);
-      // Only re-render the slide content (no transition)
-      renderSwipeSlide();
-    }
+    renderSwipeSlide();
   }
 }
 
@@ -10992,46 +11070,57 @@ function setDetailCardsSort(type) {
   renderMatchDetail(currentDetailMatchId);
 }
 
-// ============== STEP M2 — Swipe view functions ==============
-// Detect mobile: prefer width-based check (matches CSS media query).
+// ============== STEP M2 — Swipe view (TWO independent sections: players + goalies) ==============
+// Detect mobile viewport (matches the CSS media query)
 function isMobileViewport() {
   return window.innerWidth <= 768;
 }
 
-// Build the list of slides: all convoked players, then a divider, then all convoked goalies
-function buildSwipeList(p) {
+// State for the two independent carousels
+var swipeViewListG = [];   // [{id: 'playerId'}]
+var swipeViewListP = [];   // [{id: 'goalieId'}]
+var swipeViewIdxG = 0;
+var swipeViewIdxP = 0;
+
+// Legacy stubs so older render code that still references these doesn't crash
+var swipeViewList = [];
+var swipeViewIdx = 0;
+function buildSwipeList(p) { return []; }
+
+function buildSwipeListG(p) {
   var list = [];
   var convG = (p.convocatiG || []).slice();
-  var convP = (p.convocatiP || []).slice();
-  // Sort by current sort preference (name asc by default)
   convG.sort(function(a, b){
     var ga = getGiocatoreById(a), gb = getGiocatoreById(b);
     return (ga ? ga.nome : '').localeCompare(gb ? gb.nome : '');
   });
+  for (var i = 0; i < convG.length; i++) list.push({ id: convG[i] });
+  return list;
+}
+
+function buildSwipeListP(p) {
+  var list = [];
+  var convP = (p.convocatiP || []).slice();
   convP.sort(function(a, b){
     var pa = getPortiereById(a), pb = getPortiereById(b);
     return (pa ? pa.nome : '').localeCompare(pb ? pb.nome : '');
   });
-  for (var i = 0; i < convG.length; i++) list.push({ kind: 'g', id: convG[i] });
-  // J3: add divider only if both groups have entries
-  if (convG.length > 0 && convP.length > 0) {
-    list.push({ kind: 'divider' });
-  }
-  for (var j = 0; j < convP.length; j++) list.push({ kind: 'p', id: convP[j] });
+  for (var i = 0; i < convP.length; i++) list.push({ id: convP[i] });
   return list;
 }
 
 function enterSwipeMode() {
   var p = getPartitaById(currentDetailMatchId);
   if (!p) return;
-  swipeViewList = buildSwipeList(p);
-  if (swipeViewList.length === 0) return;
-  swipeViewIdx = 0;
+  swipeViewListG = buildSwipeListG(p);
+  swipeViewListP = buildSwipeListP(p);
+  swipeViewIdxG = 0;
+  swipeViewIdxP = 0;
   swipeMode = true;
   document.body.classList.add('swipe-mode');
   var sv = document.getElementById('swipe-view');
   if (sv) sv.classList.add('active');
-  applyEditModeUI();  // STEP M2-fix: update Visualizza/Modifica button label
+  applyEditModeUI();
   renderSwipeSlide();
   attachSwipeGestures();
 }
@@ -11041,121 +11130,144 @@ function exitSwipeMode() {
   document.body.classList.remove('swipe-mode');
   var sv = document.getElementById('swipe-view');
   if (sv) sv.classList.remove('active');
-  applyEditModeUI();  // STEP M2-fix: update Visualizza/Modifica button label
+  applyEditModeUI();
   renderMatchDetail(currentDetailMatchId);
 }
 
+// Master refresh: rebuilds both lists (in case convocati changed) and redraws both sections
 function renderSwipeSlide() {
   if (!swipeMode) return;
   var p = getPartitaById(currentDetailMatchId);
   if (!p) return;
+  swipeViewListG = buildSwipeListG(p);
+  swipeViewListP = buildSwipeListP(p);
   // Bounds safety
-  if (swipeViewIdx < 0) swipeViewIdx = 0;
-  if (swipeViewIdx >= swipeViewList.length) swipeViewIdx = swipeViewList.length - 1;
-  // Update mini scoreboard
+  if (swipeViewIdxG < 0) swipeViewIdxG = 0;
+  if (swipeViewIdxG >= swipeViewListG.length) swipeViewIdxG = Math.max(0, swipeViewListG.length - 1);
+  if (swipeViewIdxP < 0) swipeViewIdxP = 0;
+  if (swipeViewIdxP >= swipeViewListP.length) swipeViewIdxP = Math.max(0, swipeViewListP.length - 1);
+  // Mini scoreboard
   var miniScore = document.getElementById('swipe-mini-score');
   if (miniScore) {
     miniScore.innerHTML =
       '<span class="ms-score">' + p.golF + '-' + p.golS + '</span>' +
-      '<span class="ms-opp">vs ' + p.avversario + '</span>';
+      '<span class="ms-opp">vs ' + escapeHtml(String(p.avversario || '')) + '</span>';
   }
-  // Update pager + current section label
-  var pager = document.getElementById('swipe-pager');
-  if (pager) {
-    var item = swipeViewList[swipeViewIdx];
-    var sectionLabel = '';
-    if (item) {
-      if (item.kind === 'g')        sectionLabel = t('playersConvoked');
-      else if (item.kind === 'p')   sectionLabel = t('goaliesConvoked');
-      else if (item.kind === 'divider') sectionLabel = t('swipeGoalies');
-    }
-    pager.innerHTML = '<span class="sp-section">' + sectionLabel + '</span>' +
-                      '<span class="sp-count">' + (swipeViewIdx + 1) + ' / ' + swipeViewList.length + '</span>';
-  }
-  // Render current slide
-  var stage = document.getElementById('swipe-stage');
-  if (!stage) return;
-  var slideItem = swipeViewList[swipeViewIdx];
-  stage.innerHTML = '<div class="swipe-slide">' + buildSwipeSlideHtml(slideItem, p) + '</div>';
-  // Update prev/next disabled state
-  var prevBtn = document.getElementById('swipe-prev');
-  var nextBtn = document.getElementById('swipe-next');
-  if (prevBtn) prevBtn.disabled = (swipeViewIdx === 0);
-  if (nextBtn) nextBtn.disabled = (swipeViewIdx === swipeViewList.length - 1);
+  renderSwipeSection('g');
+  renderSwipeSection('p');
 }
 
-function buildSwipeSlideHtml(item, p) {
-  if (item.kind === 'divider') {
-    return '<div class="swipe-divider">' +
-             '<div class="sd-icon">🥅</div>' +
-             '<div class="sd-title">' + t('swipeGoalies') + '</div>' +
-             '<div class="sd-hint">' + t('swipeDividerHint') + ' →</div>' +
-           '</div>';
-  }
-  if (item.kind === 'g') {
-    var player = getGiocatoreById(item.id);
-    if (!player) return '';
-    var stats = (p.statsG || {})[item.id] || {};
-    var isSel = selectedDetailPlayers.indexOf(item.id) !== -1;
-    return buildPlayerCard(player, stats, item.id, 'g', isSel);
-  }
-  if (item.kind === 'p') {
-    var portiere = getPortiereById(item.id);
-    if (!portiere) return '';
-    var statsP2 = (p.statsP || {})[item.id] || {};
-    var isSelG = selectedDetailGoalies.indexOf(item.id) !== -1;
-    return buildPlayerCard(portiere, statsP2, item.id, 'p', isSelG);
-  }
-  return '';
-}
-
-function swipePrev() {
-  if (swipeViewIdx > 0) {
-    animateSlideTransition('right');
-  }
-}
-
-function swipeNext() {
-  if (swipeViewIdx < swipeViewList.length - 1) {
-    animateSlideTransition('left');
-  }
-}
-
-// L1: iOS-Photos style sliding animation. direction = 'left' (next) or 'right' (prev)
-function animateSlideTransition(direction) {
-  var stage = document.getElementById('swipe-stage');
-  if (!stage) return;
-  var oldSlide = stage.querySelector('.swipe-slide');
-  if (!oldSlide) return;
-  var w = stage.offsetWidth;
-  var goingNext = (direction === 'left');
-  // Update index BEFORE building the new slide
-  swipeViewIdx += goingNext ? 1 : -1;
-  if (swipeViewIdx < 0) swipeViewIdx = 0;
-  if (swipeViewIdx >= swipeViewList.length) swipeViewIdx = swipeViewList.length - 1;
-  // Build incoming slide HTML
+function renderSwipeSection(type) {
   var p = getPartitaById(currentDetailMatchId);
   if (!p) return;
-  var item = swipeViewList[swipeViewIdx];
-  var incomingHtml = buildSwipeSlideHtml(item, p);
+  var list = (type === 'g') ? swipeViewListG : swipeViewListP;
+  var idx  = (type === 'g') ? swipeViewIdxG  : swipeViewIdxP;
+  if (idx < 0) idx = 0;
+  if (idx >= list.length) idx = Math.max(0, list.length - 1);
+  if (type === 'g') swipeViewIdxG = idx;
+  else              swipeViewIdxP = idx;
+
+  // Pager
+  var pagerEl = document.getElementById('swipe-pager-' + type);
+  if (pagerEl) {
+    pagerEl.textContent = (list.length === 0) ? '0 / 0' : ((idx + 1) + ' / ' + list.length);
+  }
+  // Stage
+  var stage = document.getElementById('swipe-stage-' + type);
+  if (stage) {
+    if (list.length === 0) {
+      var emptyMsg = (type === 'g') ? t('noPlayerInMatch') : t('noGoalieInMatch');
+      stage.innerHTML = '<div class="swipe-stage-empty">' + emptyMsg + '</div>';
+    } else {
+      var item = list[idx];
+      if (!item) {
+        stage.innerHTML = '<div class="swipe-stage-empty">—</div>';
+      } else {
+        stage.innerHTML = '<div class="swipe-slide">' + buildSwipeSlideHtml(item, p, type) + '</div>';
+      }
+    }
+  }
+  // Prev/Next
+  var prevBtn = document.getElementById('swipe-prev-' + type);
+  var nextBtn = document.getElementById('swipe-next-' + type);
+  if (prevBtn) prevBtn.disabled = (list.length === 0 || idx === 0);
+  if (nextBtn) nextBtn.disabled = (list.length === 0 || idx >= list.length - 1);
+}
+
+function buildSwipeSlideHtml(item, p, type) {
+  if (!item) return '';
+  var personId = item.id;
+  if (type === 'g') {
+    var player = getGiocatoreById(personId);
+    if (!player) return '';
+    var stats = (p.statsG || {})[personId] || {};
+    var isSel = selectedDetailPlayers.indexOf(personId) !== -1;
+    return buildPlayerCard(player, stats, personId, 'g', isSel, true);
+  }
+  var portiere = getPortiereById(personId);
+  if (!portiere) return '';
+  var statsP2 = (p.statsP || {})[personId] || {};
+  var isSelG = selectedDetailGoalies.indexOf(personId) !== -1;
+  return buildPlayerCard(portiere, statsP2, personId, 'p', isSelG, true);
+}
+
+function swipePrev(type) {
+  type = type || 'g';
+  var idx = (type === 'g') ? swipeViewIdxG : swipeViewIdxP;
+  if (idx > 0) animateSlideTransition('right', type);
+}
+
+function swipeNext(type) {
+  type = type || 'g';
+  var idx  = (type === 'g') ? swipeViewIdxG  : swipeViewIdxP;
+  var list = (type === 'g') ? swipeViewListG : swipeViewListP;
+  if (idx < list.length - 1) animateSlideTransition('left', type);
+}
+
+function animateSlideTransition(direction, type) {
+  type = type || 'g';
+  var stage = document.getElementById('swipe-stage-' + type);
+  if (!stage) return;
+  var oldSlide = stage.querySelector('.swipe-slide');
+  if (!oldSlide) {
+    if (direction === 'left') {
+      if (type === 'g') swipeViewIdxG++; else swipeViewIdxP++;
+    } else {
+      if (type === 'g') swipeViewIdxG--; else swipeViewIdxP--;
+    }
+    renderSwipeSection(type);
+    return;
+  }
+  var w = stage.offsetWidth;
+  var goingNext = (direction === 'left');
+  if (type === 'g') {
+    swipeViewIdxG += goingNext ? 1 : -1;
+    if (swipeViewIdxG < 0) swipeViewIdxG = 0;
+    if (swipeViewIdxG >= swipeViewListG.length) swipeViewIdxG = swipeViewListG.length - 1;
+  } else {
+    swipeViewIdxP += goingNext ? 1 : -1;
+    if (swipeViewIdxP < 0) swipeViewIdxP = 0;
+    if (swipeViewIdxP >= swipeViewListP.length) swipeViewIdxP = swipeViewListP.length - 1;
+  }
+  var p = getPartitaById(currentDetailMatchId);
+  if (!p) return;
+  var idx  = (type === 'g') ? swipeViewIdxG  : swipeViewIdxP;
+  var list = (type === 'g') ? swipeViewListG : swipeViewListP;
+  var item = list[idx];
   var newSlide = document.createElement('div');
   newSlide.className = 'swipe-slide';
-  newSlide.innerHTML = incomingHtml;
-  // Positioning: place incoming slide off-screen on the side it should come from
+  newSlide.innerHTML = buildSwipeSlideHtml(item, p, type);
   newSlide.style.position = 'absolute';
   newSlide.style.top = '0';
   newSlide.style.left = '0';
   newSlide.style.width = '100%';
   newSlide.style.transform = 'translateX(' + (goingNext ? w : -w) + 'px)';
   stage.appendChild(newSlide);
-  // Force browser reflow
   void newSlide.offsetWidth;
-  // Animate old out, new in
   oldSlide.classList.add('moving');
   newSlide.classList.add('moving');
   oldSlide.style.transform = 'translateX(' + (goingNext ? -w : w) + 'px)';
   newSlide.style.transform = 'translateX(0)';
-  // After animation, clean up
   setTimeout(function(){
     if (oldSlide.parentNode) oldSlide.parentNode.removeChild(oldSlide);
     newSlide.classList.remove('moving');
@@ -11164,54 +11276,61 @@ function animateSlideTransition(direction) {
     newSlide.style.left = '';
     newSlide.style.width = '';
     newSlide.style.transform = '';
-    // Update pager + buttons + mini-score
-    updateSwipeChrome();
+    updateSwipeChrome(type);
   }, 300);
 }
 
-function updateSwipeChrome() {
+function updateSwipeChrome(type) {
+  type = type || 'g';
+  var idx  = (type === 'g') ? swipeViewIdxG  : swipeViewIdxP;
+  var list = (type === 'g') ? swipeViewListG : swipeViewListP;
+  var pagerEl = document.getElementById('swipe-pager-' + type);
+  if (pagerEl) pagerEl.textContent = (idx + 1) + ' / ' + list.length;
+  var prevBtn = document.getElementById('swipe-prev-' + type);
+  var nextBtn = document.getElementById('swipe-next-' + type);
+  if (prevBtn) prevBtn.disabled = (idx === 0);
+  if (nextBtn) nextBtn.disabled = (idx >= list.length - 1);
+  // Refresh mini scoreboard
   var p = getPartitaById(currentDetailMatchId);
-  if (!p) return;
-  var miniScore = document.getElementById('swipe-mini-score');
-  if (miniScore) {
-    miniScore.innerHTML =
-      '<span class="ms-score">' + p.golF + '-' + p.golS + '</span>' +
-      '<span class="ms-opp">vs ' + p.avversario + '</span>';
+  if (p) {
+    var miniScore = document.getElementById('swipe-mini-score');
+    if (miniScore) {
+      miniScore.innerHTML =
+        '<span class="ms-score">' + p.golF + '-' + p.golS + '</span>' +
+        '<span class="ms-opp">vs ' + escapeHtml(String(p.avversario || '')) + '</span>';
+    }
   }
-  var pager = document.getElementById('swipe-pager');
-  if (pager) pager.textContent = (swipeViewIdx + 1) + ' / ' + swipeViewList.length;
-  var prevBtn = document.getElementById('swipe-prev');
-  var nextBtn = document.getElementById('swipe-next');
-  if (prevBtn) prevBtn.disabled = (swipeViewIdx === 0);
-  if (nextBtn) nextBtn.disabled = (swipeViewIdx === swipeViewList.length - 1);
 }
 
-// M2: Touch gesture handlers — attach once, use module-level state
+// Touch gesture handlers — attached once to BOTH stages
 var swipeGestureAttached = false;
 var swipeTouchStartX = 0;
 var swipeTouchStartY = 0;
 var swipeTouchActive = false;
+var swipeTouchType = 'g';
+
 function attachSwipeGestures() {
   if (swipeGestureAttached) return;
   swipeGestureAttached = true;
-  var stage = document.getElementById('swipe-stage');
+  attachSwipeGesturesToStage('swipe-stage-g', 'g');
+  attachSwipeGesturesToStage('swipe-stage-p', 'p');
+}
+
+function attachSwipeGesturesToStage(stageId, type) {
+  var stage = document.getElementById(stageId);
   if (!stage) return;
-  // STEP M2-fix: if the touch starts on an interactive element inside the card,
-  // we must NOT treat it as a swipe gesture (otherwise +/-, pill, choice buttons etc. don't fire).
   function isInteractive(el) {
     if (!el || !el.closest) return false;
     return !!el.closest('.stat-btn, .stat-value, .pcard-min-pill, .stat-choice-btn, .pcard-corner-remove, .pcard-header, input, button');
   }
   stage.addEventListener('touchstart', function(e){
     if (!swipeMode) return;
-    if (isInteractive(e.target)) {
-      swipeTouchActive = false;   // give up swipe for this gesture
-      return;
-    }
+    if (isInteractive(e.target)) { swipeTouchActive = false; return; }
     var t0 = e.touches[0];
     swipeTouchStartX = t0.clientX;
     swipeTouchStartY = t0.clientY;
     swipeTouchActive = true;
+    swipeTouchType = type;
   }, { passive: true });
   stage.addEventListener('touchend', function(e){
     if (!swipeMode || !swipeTouchActive) return;
@@ -11219,10 +11338,9 @@ function attachSwipeGestures() {
     var t1 = e.changedTouches[0];
     var dx = t1.clientX - swipeTouchStartX;
     var dy = t1.clientY - swipeTouchStartY;
-    // Only horizontal swipes (dx must dominate dy); threshold 80px (M2)
     if (Math.abs(dx) >= 80 && Math.abs(dx) > Math.abs(dy)) {
-      if (dx < 0) swipeNext();
-      else swipePrev();
+      if (dx < 0) swipeNext(swipeTouchType);
+      else swipePrev(swipeTouchType);
     }
   }, { passive: true });
   stage.addEventListener('touchcancel', function(){
@@ -11235,21 +11353,10 @@ function toggleEditMode() {
   var wasEditing = editMode;
   editMode = !editMode;
   pendingChoice = null;
-  // STEP M2: on mobile, edit mode auto-enters swipe view; view mode exits it.
-  // BUT: skip swipe-mode if the match has no convoked players/goalies yet —
-  // otherwise the user can't access the "Convoca" buttons (which only appear
-  // in edit-mode-but-not-swipe-mode), creating a deadlock loop.
+  // STEP M2: on mobile, edit mode auto-enters swipe view; view mode exits it
   if (isMobileViewport() && editMode) {
-    var p = getPartitaById(currentDetailMatchId);
-    var hasConvocati = p && ((p.convocatiG && p.convocatiG.length > 0) ||
-                              (p.convocatiP && p.convocatiP.length > 0));
-    if (hasConvocati) {
-      enterSwipeMode();
-      return;
-    }
-    // No convoked players yet → fall through to normal edit mode (with
-    // the "Convoca" buttons visible). Once the user convokes someone, the
-    // next edit-toggle on mobile will enter swipe-mode normally.
+    enterSwipeMode();
+    return;
   }
   if (swipeMode && !editMode) {
     exitSwipeMode();
