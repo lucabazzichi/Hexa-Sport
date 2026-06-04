@@ -19,13 +19,17 @@
 <!-- iOS: status bar opaca (default) per riservare lo spazio in alto.
      "black-translucent" mette il contenuto sotto la status bar e causa overlap su iPhone con dynamic island. -->
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Hockey Stats">
+<meta name="apple-mobile-web-app-title" content="Hexa Sport">
 <!-- Microsoft (per chi installa da Edge) -->
 <meta name="msapplication-TileColor" content="#e8a020">
 <meta name="msapplication-TileImage" content="pwa_icons/icon-192.png">
 <!-- ============== fine PWA setup ============== -->
-<title>Hockey su Pista — Statistiche Squadra</title>
+<title>Hexa Sport</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- ============== Firebase (compat SDK — works with this app's ES5 style) ============== -->
+<script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-auth-compat.js"></script>
+<!-- ============== fine Firebase ============== -->
 <style>
   /* STEP M3: Compact mode (desktop-only) — reduces font size and spacings */
   body.compact-mode {
@@ -2410,9 +2414,106 @@
     }
   }
   /* ============== fine Mobile UX polish ============== */
+  /* ============== Auth / Login screen ============== */
+  #auth-screen {
+    position: fixed; inset: 0; z-index: 4000;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .auth-card {
+    width: 100%; max-width: 380px;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    padding: 32px 26px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.4);
+  }
+  .auth-logo {
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    margin-bottom: 24px;
+  }
+  .auth-logo svg { width: 52px; height: 52px; color: var(--accent); }
+  .auth-logo .auth-brand { font-size: 24px; font-weight: 800; letter-spacing: .02em; color: var(--text); }
+  .auth-subtitle { text-align: center; color: var(--text3); font-size: 13px; margin-bottom: 24px; line-height: 1.5; }
+  .auth-field { margin-bottom: 16px; }
+  .auth-field label { display: block; font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .04em; }
+  .auth-field input {
+    width: 100%; box-sizing: border-box;
+    font-size: 16px; padding: 12px 14px;
+    border-radius: 10px; border: 1px solid var(--border2);
+    background: var(--bg); color: var(--text);
+    font-family: inherit;
+  }
+  .auth-field input:focus { outline: none; border-color: var(--accent); }
+  .auth-submit {
+    width: 100%; padding: 14px; font-size: 16px; font-weight: 700;
+    border-radius: 10px; border: none; cursor: pointer;
+    background: var(--accent); color: #1a1a1a;
+    margin-top: 6px; min-height: 50px;
+    transition: opacity .15s;
+  }
+  .auth-submit:disabled { opacity: .6; cursor: default; }
+  .auth-error {
+    display: none;
+    background: rgba(248,81,73,.12);
+    border: 1px solid rgba(248,81,73,.4);
+    color: var(--red);
+    font-size: 13px; line-height: 1.4;
+    padding: 10px 12px; border-radius: 8px;
+    margin-bottom: 16px;
+  }
+  .auth-error.show { display: block; }
+  .auth-toggle {
+    text-align: center; margin-top: 18px; font-size: 13px; color: var(--text3);
+  }
+  .auth-toggle a { color: var(--accent); cursor: pointer; font-weight: 600; text-decoration: none; }
+  .auth-forgot { text-align: center; margin-top: 12px; font-size: 12px; }
+  .auth-forgot a { color: var(--text3); cursor: pointer; text-decoration: underline; }
+  /* ============== fine Auth / Login screen ============== */
 </style>
 </head>
 <body>
+
+<!-- ============== Auth / Login screen ============== -->
+<div id="auth-screen" style="display:flex;">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="16,2 28.124,9 28.124,23 16,30 3.876,23 3.876,9" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" fill="none"/>
+        <rect x="10.5" y="18" width="3" height="5" rx="0.6" fill="currentColor"/>
+        <rect x="14.5" y="14.5" width="3" height="8.5" rx="0.6" fill="currentColor"/>
+        <rect x="18.5" y="11" width="3" height="12" rx="0.6" fill="currentColor"/>
+      </svg>
+      <span class="auth-brand">Hexa Sport</span>
+    </div>
+    <div class="auth-subtitle" id="auth-subtitle" data-i18n="authSubtitleLogin">Accedi per gestire le statistiche della tua squadra</div>
+
+    <div class="auth-error" id="auth-error"></div>
+
+    <div class="auth-field">
+      <label data-i18n="authEmail">Email</label>
+      <input type="email" id="auth-email" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="nome@email.com">
+    </div>
+    <div class="auth-field">
+      <label data-i18n="authPassword">Password</label>
+      <input type="password" id="auth-password" autocomplete="current-password" placeholder="••••••••">
+    </div>
+
+    <button class="auth-submit" id="auth-submit-btn" onclick="authSubmit()" data-i18n="authLoginBtn">Accedi</button>
+
+    <div class="auth-toggle" id="auth-toggle">
+      <span data-i18n="authNoAccount">Non hai un account?</span>
+      <a onclick="authToggleMode()" id="auth-toggle-link" data-i18n="authGoRegister">Registrati</a>
+    </div>
+    <div class="auth-forgot" id="auth-forgot">
+      <a onclick="authResetPassword()" data-i18n="authForgot">Password dimenticata?</a>
+    </div>
+  </div>
+</div>
+<!-- ============== fine Auth / Login screen ============== -->
 
 <header>
   <div class="logo">
@@ -2461,10 +2562,9 @@
         <span class="pm-label" data-i18n="menuSettings">Impostazioni</span>
       </button>
       <div class="profile-menu-divider"></div>
-      <button class="profile-menu-item disabled">
+      <button class="profile-menu-item" onclick="authLogout()">
         <span class="pm-icon">🚪</span>
         <span class="pm-label" data-i18n="menuLogout">Logout</span>
-        <span class="pm-soon" data-i18n="comingSoon">Presto</span>
       </button>
     </div>
   </div>
@@ -3100,7 +3200,7 @@ window.onerror = function(msg, url, lineNo, colNo, error) {
 var I18N = {
   it: {
     flag: '🇮🇹', name: 'Italiano',
-    appTitle: 'Hockey Stats',
+    appTitle: 'Hexa Sport',
     navDashboard: 'Riepilogo', navMatches: 'Partite', navPlayers: 'Giocatori', navGoalies: 'Portieri',
     season: 'Stagione', seasonLabel: 'Stagione',
     menuHeader: 'Menu Utente', menuAccount: 'Account', menuLanguage: 'Lingua', menuSettings: 'Impostazioni', menuLogout: 'Logout',
@@ -3113,7 +3213,7 @@ var I18N = {
     settingsCompact: 'Modalità compatta', settingsCompactHint: 'Riduce gli spazi per vedere più informazioni (solo desktop)',
     settingsTemplate: 'Scarica template partita', settingsTemplateHint: 'Foglio cartaceo da portare al palazzetto in caso non si possa usare l'+String.fromCharCode(8217)+'app live', templateDownloadTitle: 'Scarica template partita', templateDownloadHint: 'Scegli il formato', templateFormatPdf: '📄 PDF (stampabile A4)', templateFormatXlsx: '📊 Excel (.xlsx)', templateInfoHeader: 'INFO PARTITA', templateDate: 'Data', templateOpponent: 'Avversario', templateVenue: 'Sede', templateHome: 'Casa', templateAway: 'Trasferta', templateCompetition: 'Competizione', templateResult: 'Risultato finale', templateShots: 'Tiri totali', templateUs: 'Noi', templateThem: 'Loro', templatePpRow: 'Powerplay (PP gol / PP totali)', templatePkRow: 'Penalty Kill (PK gol subiti / PK totali)', templatePkGolFatti: 'Gol fatti in PK', templatePpGolSubiti: 'Gol subiti in PP', templateNotes: 'Note', templatePlayersHeader: 'GIOCATORI', templateGoaliesHeader: 'PORTIERI', templateColName: 'Nome', settingsExport: 'Esporta dati', settingsExportHint: 'Scarica un backup di tutte le tue partite e giocatori',
     settingsImport: 'Importa dati', settingsImportHint: 'Ripristina da un file di backup',
-    exportFailed: 'Esportazione fallita.', importInvalidJson: 'Il file non è un JSON valido.', importInvalidBackup: 'Il file non è un backup valido di Hockey Tracker.', importConfirmTitle: 'Conferma importazione', importBackupDate: 'Data backup', importMatches: 'partite', importPlayers: 'giocatori', importGoalies: 'portieri', importConfirmBody: 'I dati attuali verranno sostituiti. Vuoi continuare?', importSuccess: 'Importazione completata. La pagina verrà ricaricata.', importFailed: 'Importazione fallita.', importReadError: 'Impossibile leggere il file.', clearStep1Title: 'Cancella tutti i dati', clearStep1Body: 'Stai per cancellare definitivamente partite, giocatori e statistiche.\n\nTi consigliamo di scaricare prima un backup. Vuoi farlo ora?', clearBackupFailedContinue: 'Il backup non è riuscito. Vuoi comunque procedere con la cancellazione?', clearKeyword: 'CANCELLA', clearStep2Body: 'Per confermare, scrivi la parola {KEY} (in maiuscolo):', clearKeywordMismatch: 'La parola digitata non corrisponde a {KEY}. Cancellazione annullata.', clearSuccess: 'Dati cancellati. La pagina verrà ricaricata.', clearFailed: 'Cancellazione fallita.', clearStep2Title: 'Conferma cancellazione', clearSkipBackup: 'Salta backup', clearDoBackup: 'Scarica backup', clearConfirmFinal: 'Cancella definitivamente', clearDoneTitle: 'Fatto', ok: 'OK', dialogNotice: 'Avviso', dialogConfirm: 'Conferma',
+    exportFailed: 'Esportazione fallita.', importInvalidJson: 'Il file non è un JSON valido.', importInvalidBackup: 'Il file non è un backup valido di Hockey Tracker.', importConfirmTitle: 'Conferma importazione', importBackupDate: 'Data backup', importMatches: 'partite', importPlayers: 'giocatori', importGoalies: 'portieri', importConfirmBody: 'I dati attuali verranno sostituiti. Vuoi continuare?', importSuccess: 'Importazione completata. La pagina verrà ricaricata.', importFailed: 'Importazione fallita.', importReadError: 'Impossibile leggere il file.', clearStep1Title: 'Cancella tutti i dati', clearStep1Body: 'Stai per cancellare definitivamente partite, giocatori e statistiche.\n\nTi consigliamo di scaricare prima un backup. Vuoi farlo ora?', clearBackupFailedContinue: 'Il backup non è riuscito. Vuoi comunque procedere con la cancellazione?', clearKeyword: 'CANCELLA', clearStep2Body: 'Per confermare, scrivi la parola {KEY} (in maiuscolo):', clearKeywordMismatch: 'La parola digitata non corrisponde a {KEY}. Cancellazione annullata.', clearSuccess: 'Dati cancellati. La pagina verrà ricaricata.', clearFailed: 'Cancellazione fallita.', clearStep2Title: 'Conferma cancellazione', clearSkipBackup: 'Salta backup', clearDoBackup: 'Scarica backup', clearConfirmFinal: 'Cancella definitivamente', clearDoneTitle: 'Fatto', ok: 'OK', dialogNotice: 'Avviso', dialogConfirm: 'Conferma', authSubtitleLogin: 'Accedi per gestire le statistiche della tua squadra', authSubtitleRegister: 'Crea un account per iniziare', authEmail: 'Email', authPassword: 'Password', authLoginBtn: 'Accedi', authRegisterBtn: 'Registrati', authNoAccount: 'Non hai un account?', authGoRegister: 'Registrati', authHaveAccount: 'Hai già un account?', authGoLogin: 'Accedi', authForgot: 'Password dimenticata?', authWorking: 'Attendi...', authResetSent: 'Ti abbiamo inviato un’email per reimpostare la password. Controlla la posta (anche lo spam).', authErrInvalidEmail: 'Indirizzo email non valido.', authErrNoUser: 'Nessun account trovato con questa email.', authErrWrongPass: 'Email o password errate.', authErrInUse: 'Esiste già un account con questa email.', authErrWeakPass: 'La password deve avere almeno 6 caratteri.', authErrEmptyEmail: 'Inserisci la tua email.', authErrEmptyPass: 'Inserisci la password.', authErrEmptyEmailReset: 'Scrivi la tua email qui sopra, poi premi di nuovo Password dimenticata.', authErrTooMany: 'Troppi tentativi. Riprova tra poco.', authErrNetwork: 'Problema di connessione. Controlla internet.', authErrGeneric: 'Si è verificato un errore. Riprova.',
     settingsReset: 'Cancella tutti i dati', settingsResetHint: 'Rimuove definitivamente partite, giocatori e statistiche',
     settingsTeamName: 'Nome squadra', settingsTeamNameHint: 'Personalizza il nome che appare nello scoreboard',
     settingsTeamLogo: 'Logo squadra', settingsTeamLogoHint: 'Carica il logo della tua squadra',
@@ -3296,7 +3396,7 @@ var I18N = {
   },
   en: {
     flag: '🇬🇧', name: 'English',
-    appTitle: 'Hockey Stats',
+    appTitle: 'Hexa Sport',
     navDashboard: 'Overview', navMatches: 'Matches', navPlayers: 'Players', navGoalies: 'Goalies',
     season: 'Season', seasonLabel: 'Season',
     menuHeader: 'User Menu', menuAccount: 'Account', menuLanguage: 'Language', menuSettings: 'Settings', menuLogout: 'Logout',
@@ -3309,7 +3409,7 @@ var I18N = {
     settingsCompact: 'Compact mode', settingsCompactHint: 'Reduces spacing to fit more info (desktop only)',
     settingsTemplate: 'Download match template', settingsTemplateHint: 'Paper sheet to take to the rink when live mode is not available', templateDownloadTitle: 'Download match template', templateDownloadHint: 'Choose the format', templateFormatPdf: '📄 PDF (printable A4)', templateFormatXlsx: '📊 Excel (.xlsx)', templateInfoHeader: 'MATCH INFO', templateDate: 'Date', templateOpponent: 'Opponent', templateVenue: 'Venue', templateHome: 'Home', templateAway: 'Away', templateCompetition: 'Competition', templateResult: 'Final result', templateShots: 'Shots total', templateUs: 'Us', templateThem: 'Them', templatePpRow: 'Powerplay (PP goals / PP total)', templatePkRow: 'Penalty Kill (PK goals conceded / PK total)', templatePkGolFatti: 'Goals scored in PK', templatePpGolSubiti: 'Goals conceded in PP', templateNotes: 'Notes', templatePlayersHeader: 'PLAYERS', templateGoaliesHeader: 'GOALIES', templateColName: 'Name', settingsExport: 'Export data', settingsExportHint: 'Download a backup of your matches and players',
     settingsImport: 'Import data', settingsImportHint: 'Restore from a backup file',
-    exportFailed: 'Export failed.', importInvalidJson: 'The file is not valid JSON.', importInvalidBackup: 'The file is not a valid Hockey Tracker backup.', importConfirmTitle: 'Confirm import', importBackupDate: 'Backup date', importMatches: 'matches', importPlayers: 'players', importGoalies: 'goalies', importConfirmBody: 'Your current data will be replaced. Continue?', importSuccess: 'Import completed. The page will reload.', importFailed: 'Import failed.', importReadError: 'Could not read the file.', clearStep1Title: 'Clear all data', clearStep1Body: 'You are about to permanently delete matches, players and statistics.\n\nWe recommend downloading a backup first. Do it now?', clearBackupFailedContinue: 'Backup failed. Do you want to delete anyway?', clearKeyword: 'DELETE', clearStep2Body: 'To confirm, type the word {KEY} (uppercase):', clearKeywordMismatch: 'The word you typed does not match {KEY}. Deletion cancelled.', clearSuccess: 'Data cleared. The page will reload.', clearFailed: 'Deletion failed.', clearStep2Title: 'Confirm deletion', clearSkipBackup: 'Skip backup', clearDoBackup: 'Download backup', clearConfirmFinal: 'Delete permanently', clearDoneTitle: 'Done', ok: 'OK', dialogNotice: 'Notice', dialogConfirm: 'Confirm',
+    exportFailed: 'Export failed.', importInvalidJson: 'The file is not valid JSON.', importInvalidBackup: 'The file is not a valid Hockey Tracker backup.', importConfirmTitle: 'Confirm import', importBackupDate: 'Backup date', importMatches: 'matches', importPlayers: 'players', importGoalies: 'goalies', importConfirmBody: 'Your current data will be replaced. Continue?', importSuccess: 'Import completed. The page will reload.', importFailed: 'Import failed.', importReadError: 'Could not read the file.', clearStep1Title: 'Clear all data', clearStep1Body: 'You are about to permanently delete matches, players and statistics.\n\nWe recommend downloading a backup first. Do it now?', clearBackupFailedContinue: 'Backup failed. Do you want to delete anyway?', clearKeyword: 'DELETE', clearStep2Body: 'To confirm, type the word {KEY} (uppercase):', clearKeywordMismatch: 'The word you typed does not match {KEY}. Deletion cancelled.', clearSuccess: 'Data cleared. The page will reload.', clearFailed: 'Deletion failed.', clearStep2Title: 'Confirm deletion', clearSkipBackup: 'Skip backup', clearDoBackup: 'Download backup', clearConfirmFinal: 'Delete permanently', clearDoneTitle: 'Done', ok: 'OK', dialogNotice: 'Notice', dialogConfirm: 'Confirm', authSubtitleLogin: 'Sign in to manage your team statistics', authSubtitleRegister: 'Create an account to get started', authEmail: 'Email', authPassword: 'Password', authLoginBtn: 'Sign in', authRegisterBtn: 'Sign up', authNoAccount: 'No account yet?', authGoRegister: 'Sign up', authHaveAccount: 'Already have an account?', authGoLogin: 'Sign in', authForgot: 'Forgot password?', authWorking: 'Please wait...', authResetSent: 'We sent you a password reset email. Check your inbox (and spam).', authErrInvalidEmail: 'Invalid email address.', authErrNoUser: 'No account found with this email.', authErrWrongPass: 'Wrong email or password.', authErrInUse: 'An account with this email already exists.', authErrWeakPass: 'Password must be at least 6 characters.', authErrEmptyEmail: 'Enter your email.', authErrEmptyPass: 'Enter your password.', authErrEmptyEmailReset: 'Type your email above, then tap Forgot password again.', authErrTooMany: 'Too many attempts. Try again shortly.', authErrNetwork: 'Connection problem. Check your internet.', authErrGeneric: 'Something went wrong. Please try again.',
     settingsReset: 'Erase all data', settingsResetHint: 'Permanently removes matches, players and stats',
     settingsTeamName: 'Team name', settingsTeamNameHint: 'Customize the name shown in the scoreboard',
     settingsTeamLogo: 'Team logo', settingsTeamLogoHint: 'Upload your team logo',
@@ -3489,7 +3589,7 @@ var I18N = {
   },
   es: {
     flag: '🇪🇸', name: 'Español',
-    appTitle: 'Hockey Stats',
+    appTitle: 'Hexa Sport',
     navDashboard: 'Resumen', navMatches: 'Partidos', navPlayers: 'Jugadores', navGoalies: 'Porteros',
     season: 'Temporada', seasonLabel: 'Temporada',
     menuHeader: 'Menú Usuario', menuAccount: 'Cuenta', menuLanguage: 'Idioma', menuSettings: 'Ajustes', menuLogout: 'Cerrar sesión',
@@ -3502,7 +3602,7 @@ var I18N = {
     settingsCompact: 'Modo compacto', settingsCompactHint: 'Reduce los espacios para ver más información (solo escritorio)',
     settingsTemplate: 'Descargar plantilla partido', settingsTemplateHint: 'Hoja en papel para llevar al pabellón cuando no se pueda usar el live', templateDownloadTitle: 'Descargar plantilla partido', templateDownloadHint: 'Elige el formato', templateFormatPdf: '📄 PDF (imprimible A4)', templateFormatXlsx: '📊 Excel (.xlsx)', templateInfoHeader: 'INFO PARTIDO', templateDate: 'Fecha', templateOpponent: 'Rival', templateVenue: 'Sede', templateHome: 'Casa', templateAway: 'Visitante', templateCompetition: 'Competición', templateResult: 'Resultado final', templateShots: 'Tiros totales', templateUs: 'Nosotros', templateThem: 'Ellos', templatePpRow: 'Powerplay (PP goles / PP total)', templatePkRow: 'Penalty Kill (PK goles recibidos / PK total)', templatePkGolFatti: 'Goles en PK', templatePpGolSubiti: 'Goles recibidos en PP', templateNotes: 'Notas', templatePlayersHeader: 'JUGADORES', templateGoaliesHeader: 'PORTEROS', templateColName: 'Nombre', settingsExport: 'Exportar datos', settingsExportHint: 'Descarga una copia de seguridad de partidos y jugadores',
     settingsImport: 'Importar datos', settingsImportHint: 'Restaurar desde un archivo de copia',
-    exportFailed: 'Exportación fallida.', importInvalidJson: 'El archivo no es JSON válido.', importInvalidBackup: 'El archivo no es una copia de seguridad válida de Hockey Tracker.', importConfirmTitle: 'Confirmar importación', importBackupDate: 'Fecha copia', importMatches: 'partidos', importPlayers: 'jugadores', importGoalies: 'porteros', importConfirmBody: 'Los datos actuales serán reemplazados. ¿Continuar?', importSuccess: 'Importación completada. La página se recargará.', importFailed: 'Importación fallida.', importReadError: 'No se pudo leer el archivo.', clearStep1Title: 'Borrar todos los datos', clearStep1Body: 'Vas a borrar definitivamente partidos, jugadores y estadísticas.\n\nRecomendamos descargar primero una copia. ¿Hacerlo ahora?', clearBackupFailedContinue: 'La copia ha fallado. ¿Quieres borrar de todas formas?', clearKeyword: 'BORRAR', clearStep2Body: 'Para confirmar, escribe la palabra {KEY} (mayúsculas):', clearKeywordMismatch: 'La palabra no coincide con {KEY}. Borrado cancelado.', clearSuccess: 'Datos borrados. La página se recargará.', clearFailed: 'Borrado fallido.', clearStep2Title: 'Confirmar borrado', clearSkipBackup: 'Saltar copia', clearDoBackup: 'Descargar copia', clearConfirmFinal: 'Borrar definitivamente', clearDoneTitle: 'Hecho', ok: 'OK', dialogNotice: 'Aviso', dialogConfirm: 'Confirmar',
+    exportFailed: 'Exportación fallida.', importInvalidJson: 'El archivo no es JSON válido.', importInvalidBackup: 'El archivo no es una copia de seguridad válida de Hockey Tracker.', importConfirmTitle: 'Confirmar importación', importBackupDate: 'Fecha copia', importMatches: 'partidos', importPlayers: 'jugadores', importGoalies: 'porteros', importConfirmBody: 'Los datos actuales serán reemplazados. ¿Continuar?', importSuccess: 'Importación completada. La página se recargará.', importFailed: 'Importación fallida.', importReadError: 'No se pudo leer el archivo.', clearStep1Title: 'Borrar todos los datos', clearStep1Body: 'Vas a borrar definitivamente partidos, jugadores y estadísticas.\n\nRecomendamos descargar primero una copia. ¿Hacerlo ahora?', clearBackupFailedContinue: 'La copia ha fallado. ¿Quieres borrar de todas formas?', clearKeyword: 'BORRAR', clearStep2Body: 'Para confirmar, escribe la palabra {KEY} (mayúsculas):', clearKeywordMismatch: 'La palabra no coincide con {KEY}. Borrado cancelado.', clearSuccess: 'Datos borrados. La página se recargará.', clearFailed: 'Borrado fallido.', clearStep2Title: 'Confirmar borrado', clearSkipBackup: 'Saltar copia', clearDoBackup: 'Descargar copia', clearConfirmFinal: 'Borrar definitivamente', clearDoneTitle: 'Hecho', ok: 'OK', dialogNotice: 'Aviso', dialogConfirm: 'Confirmar', authSubtitleLogin: 'Inicia sesión para gestionar las estadísticas de tu equipo', authSubtitleRegister: 'Crea una cuenta para empezar', authEmail: 'Email', authPassword: 'Contraseña', authLoginBtn: 'Iniciar sesión', authRegisterBtn: 'Registrarse', authNoAccount: '¿No tienes cuenta?', authGoRegister: 'Registrarse', authHaveAccount: '¿Ya tienes cuenta?', authGoLogin: 'Iniciar sesión', authForgot: '¿Olvidaste la contraseña?', authWorking: 'Espera...', authResetSent: 'Te hemos enviado un correo para restablecer la contraseña. Revisa tu bandeja (y el spam).', authErrInvalidEmail: 'Correo no válido.', authErrNoUser: 'No hay cuenta con este correo.', authErrWrongPass: 'Correo o contraseña incorrectos.', authErrInUse: 'Ya existe una cuenta con este correo.', authErrWeakPass: 'La contraseña debe tener al menos 6 caracteres.', authErrEmptyEmail: 'Introduce tu correo.', authErrEmptyPass: 'Introduce tu contraseña.', authErrEmptyEmailReset: 'Escribe tu correo arriba y pulsa de nuevo ¿Olvidaste la contraseña?', authErrTooMany: 'Demasiados intentos. Inténtalo más tarde.', authErrNetwork: 'Problema de conexión. Revisa tu internet.', authErrGeneric: 'Ha ocurrido un error. Inténtalo de nuevo.',
     settingsReset: 'Borrar todos los datos', settingsResetHint: 'Elimina permanentemente partidos, jugadores y estadísticas',
     settingsTeamName: 'Nombre del equipo', settingsTeamNameHint: 'Personaliza el nombre que aparece en el marcador',
     settingsTeamLogo: 'Escudo del equipo', settingsTeamLogoHint: 'Sube el escudo de tu equipo',
@@ -3682,7 +3782,7 @@ var I18N = {
   },
   pt: {
     flag: '🇵🇹', name: 'Português',
-    appTitle: 'Hockey Stats',
+    appTitle: 'Hexa Sport',
     navDashboard: 'Resumo', navMatches: 'Jogos', navPlayers: 'Jogadores', navGoalies: 'Guarda-redes',
     season: 'Época', seasonLabel: 'Época',
     menuHeader: 'Menu Utilizador', menuAccount: 'Conta', menuLanguage: 'Idioma', menuSettings: 'Definições', menuLogout: 'Sair',
@@ -3695,7 +3795,7 @@ var I18N = {
     settingsCompact: 'Modo compacto', settingsCompactHint: 'Reduz os espaços para ver mais informação (apenas desktop)',
     settingsTemplate: 'Descarregar modelo partida', settingsTemplateHint: 'Folha em papel para levar ao pavilhão quando não se possa usar o live', templateDownloadTitle: 'Descarregar modelo partida', templateDownloadHint: 'Escolhe o formato', templateFormatPdf: '📄 PDF (imprimível A4)', templateFormatXlsx: '📊 Excel (.xlsx)', templateInfoHeader: 'INFO PARTIDA', templateDate: 'Data', templateOpponent: 'Adversário', templateVenue: 'Local', templateHome: 'Casa', templateAway: 'Fora', templateCompetition: 'Competição', templateResult: 'Resultado final', templateShots: 'Remates totais', templateUs: 'Nós', templateThem: 'Eles', templatePpRow: 'Powerplay (PP golos / PP total)', templatePkRow: 'Penalty Kill (PK golos sofridos / PK total)', templatePkGolFatti: 'Golos em PK', templatePpGolSubiti: 'Golos sofridos em PP', templateNotes: 'Notas', templatePlayersHeader: 'JOGADORES', templateGoaliesHeader: 'GUARDA-REDES', templateColName: 'Nome', settingsExport: 'Exportar dados', settingsExportHint: 'Descarrega uma cópia de segurança dos jogos e jogadores',
     settingsImport: 'Importar dados', settingsImportHint: 'Restaurar de um ficheiro de cópia',
-    exportFailed: 'Exportação falhou.', importInvalidJson: 'O ficheiro não é um JSON válido.', importInvalidBackup: 'O ficheiro não é uma cópia de segurança válida do Hockey Tracker.', importConfirmTitle: 'Confirmar importação', importBackupDate: 'Data cópia', importMatches: 'jogos', importPlayers: 'jogadores', importGoalies: 'guarda-redes', importConfirmBody: 'Os dados atuais serão substituídos. Continuar?', importSuccess: 'Importação concluída. A página será recarregada.', importFailed: 'Importação falhou.', importReadError: 'Não foi possível ler o ficheiro.', clearStep1Title: 'Apagar todos os dados', clearStep1Body: 'Estás prestes a apagar definitivamente jogos, jogadores e estatísticas.\n\nRecomendamos descarregar primeiro uma cópia. Fazer agora?', clearBackupFailedContinue: 'A cópia falhou. Queres apagar mesmo assim?', clearKeyword: 'APAGAR', clearStep2Body: 'Para confirmar, escreve a palavra {KEY} (em maiúsculas):', clearKeywordMismatch: 'A palavra não corresponde a {KEY}. Eliminação cancelada.', clearSuccess: 'Dados apagados. A página será recarregada.', clearFailed: 'Eliminação falhou.', clearStep2Title: 'Confirmar eliminação', clearSkipBackup: 'Saltar cópia', clearDoBackup: 'Descarregar cópia', clearConfirmFinal: 'Apagar definitivamente', clearDoneTitle: 'Feito', ok: 'OK', dialogNotice: 'Aviso', dialogConfirm: 'Confirmar',
+    exportFailed: 'Exportação falhou.', importInvalidJson: 'O ficheiro não é um JSON válido.', importInvalidBackup: 'O ficheiro não é uma cópia de segurança válida do Hockey Tracker.', importConfirmTitle: 'Confirmar importação', importBackupDate: 'Data cópia', importMatches: 'jogos', importPlayers: 'jogadores', importGoalies: 'guarda-redes', importConfirmBody: 'Os dados atuais serão substituídos. Continuar?', importSuccess: 'Importação concluída. A página será recarregada.', importFailed: 'Importação falhou.', importReadError: 'Não foi possível ler o ficheiro.', clearStep1Title: 'Apagar todos os dados', clearStep1Body: 'Estás prestes a apagar definitivamente jogos, jogadores e estatísticas.\n\nRecomendamos descarregar primeiro uma cópia. Fazer agora?', clearBackupFailedContinue: 'A cópia falhou. Queres apagar mesmo assim?', clearKeyword: 'APAGAR', clearStep2Body: 'Para confirmar, escreve a palavra {KEY} (em maiúsculas):', clearKeywordMismatch: 'A palavra não corresponde a {KEY}. Eliminação cancelada.', clearSuccess: 'Dados apagados. A página será recarregada.', clearFailed: 'Eliminação falhou.', clearStep2Title: 'Confirmar eliminação', clearSkipBackup: 'Saltar cópia', clearDoBackup: 'Descarregar cópia', clearConfirmFinal: 'Apagar definitivamente', clearDoneTitle: 'Feito', ok: 'OK', dialogNotice: 'Aviso', dialogConfirm: 'Confirmar', authSubtitleLogin: 'Inicia sessão para gerir as estatísticas da tua equipa', authSubtitleRegister: 'Cria uma conta para começar', authEmail: 'Email', authPassword: 'Palavra-passe', authLoginBtn: 'Entrar', authRegisterBtn: 'Registar', authNoAccount: 'Ainda não tens conta?', authGoRegister: 'Registar', authHaveAccount: 'Já tens conta?', authGoLogin: 'Entrar', authForgot: 'Esqueceste a palavra-passe?', authWorking: 'Aguarda...', authResetSent: 'Enviamos-te um email para repor a palavra-passe. Verifica a caixa (e o spam).', authErrInvalidEmail: 'Email inválido.', authErrNoUser: 'Nenhuma conta encontrada com este email.', authErrWrongPass: 'Email ou palavra-passe errados.', authErrInUse: 'Já existe uma conta com este email.', authErrWeakPass: 'A palavra-passe deve ter pelo menos 6 caracteres.', authErrEmptyEmail: 'Introduz o teu email.', authErrEmptyPass: 'Introduz a palavra-passe.', authErrEmptyEmailReset: 'Escreve o teu email acima e toca novamente em Esqueceste a palavra-passe.', authErrTooMany: 'Demasiadas tentativas. Tenta mais tarde.', authErrNetwork: 'Problema de ligação. Verifica a internet.', authErrGeneric: 'Ocorreu um erro. Tenta novamente.',
     settingsReset: 'Apagar todos os dados', settingsResetHint: 'Remove permanentemente jogos, jogadores e estatísticas',
     settingsTeamName: 'Nome da equipa', settingsTeamNameHint: 'Personaliza o nome que aparece no marcador',
     settingsTeamLogo: 'Logótipo da equipa', settingsTeamLogoHint: 'Carrega o logótipo da tua equipa',
@@ -3875,7 +3975,7 @@ var I18N = {
   },
   fr: {
     flag: '🇫🇷', name: 'Français',
-    appTitle: 'Hockey Stats',
+    appTitle: 'Hexa Sport',
     navDashboard: 'Résumé', navMatches: 'Matchs', navPlayers: 'Joueurs', navGoalies: 'Gardiens',
     season: 'Saison', seasonLabel: 'Saison',
     menuHeader: 'Menu Utilisateur', menuAccount: 'Compte', menuLanguage: 'Langue', menuSettings: 'Paramètres', menuLogout: 'Déconnexion',
@@ -3888,7 +3988,7 @@ var I18N = {
     settingsCompact: 'Mode compact', settingsCompactHint: 'Réduit les espacements pour afficher plus d\'infos (bureau uniquement)',
     settingsTemplate: 'Télécharger modèle match', settingsTemplateHint: 'Feuille papier à emporter à la patinoire quand le live n’est pas possible', templateDownloadTitle: 'Télécharger modèle match', templateDownloadHint: 'Choisis le format', templateFormatPdf: '📄 PDF (imprimable A4)', templateFormatXlsx: '📊 Excel (.xlsx)', templateInfoHeader: 'INFO MATCH', templateDate: 'Date', templateOpponent: 'Adversaire', templateVenue: 'Lieu', templateHome: 'Domicile', templateAway: 'Extérieur', templateCompetition: 'Compétition', templateResult: 'Résultat final', templateShots: 'Tirs totaux', templateUs: 'Nous', templateThem: 'Eux', templatePpRow: 'Powerplay (PP buts / PP total)', templatePkRow: 'Penalty Kill (PK buts encaissés / PK total)', templatePkGolFatti: 'Buts en PK', templatePpGolSubiti: 'Buts encaissés en PP', templateNotes: 'Notes', templatePlayersHeader: 'JOUEURS', templateGoaliesHeader: 'GARDIENS', templateColName: 'Nom', settingsExport: 'Exporter les données', settingsExportHint: 'Télécharge une sauvegarde des matchs et joueurs',
     settingsImport: 'Importer les données', settingsImportHint: 'Restaurer depuis une sauvegarde',
-    exportFailed: 'Échec de l'+String.fromCharCode(39)+'export.', importInvalidJson: 'Le fichier n'+String.fromCharCode(39)+'est pas un JSON valide.', importInvalidBackup: 'Le fichier n'+String.fromCharCode(39)+'est pas une sauvegarde Hockey Tracker valide.', importConfirmTitle: 'Confirmer l'+String.fromCharCode(39)+'import', importBackupDate: 'Date sauvegarde', importMatches: 'matchs', importPlayers: 'joueurs', importGoalies: 'gardiens', importConfirmBody: 'Tes données actuelles seront remplacées. Continuer ?', importSuccess: 'Import terminé. La page va se recharger.', importFailed: 'Échec de l'+String.fromCharCode(39)+'import.', importReadError: 'Impossible de lire le fichier.', clearStep1Title: 'Effacer toutes les données', clearStep1Body: 'Tu vas effacer définitivement matchs, joueurs et statistiques.\n\nIl est recommandé de télécharger d'+String.fromCharCode(39)+'abord une sauvegarde. Le faire maintenant ?', clearBackupFailedContinue: 'La sauvegarde a échoué. Veux-tu effacer quand même ?', clearKeyword: 'EFFACER', clearStep2Body: 'Pour confirmer, tape le mot {KEY} (en majuscules) :', clearKeywordMismatch: 'Le mot ne correspond pas à {KEY}. Suppression annulée.', clearSuccess: 'Données effacées. La page va se recharger.', clearFailed: 'Suppression échouée.', clearStep2Title: 'Confirmer la suppression', clearSkipBackup: 'Sauter la sauvegarde', clearDoBackup: 'Télécharger sauvegarde', clearConfirmFinal: 'Supprimer définitivement', clearDoneTitle: 'Terminé', ok: 'OK', dialogNotice: 'Avis', dialogConfirm: 'Confirmation',
+    exportFailed: 'Échec de l'+String.fromCharCode(39)+'export.', importInvalidJson: 'Le fichier n'+String.fromCharCode(39)+'est pas un JSON valide.', importInvalidBackup: 'Le fichier n'+String.fromCharCode(39)+'est pas une sauvegarde Hockey Tracker valide.', importConfirmTitle: 'Confirmer l'+String.fromCharCode(39)+'import', importBackupDate: 'Date sauvegarde', importMatches: 'matchs', importPlayers: 'joueurs', importGoalies: 'gardiens', importConfirmBody: 'Tes données actuelles seront remplacées. Continuer ?', importSuccess: 'Import terminé. La page va se recharger.', importFailed: 'Échec de l'+String.fromCharCode(39)+'import.', importReadError: 'Impossible de lire le fichier.', clearStep1Title: 'Effacer toutes les données', clearStep1Body: 'Tu vas effacer définitivement matchs, joueurs et statistiques.\n\nIl est recommandé de télécharger d'+String.fromCharCode(39)+'abord une sauvegarde. Le faire maintenant ?', clearBackupFailedContinue: 'La sauvegarde a échoué. Veux-tu effacer quand même ?', clearKeyword: 'EFFACER', clearStep2Body: 'Pour confirmer, tape le mot {KEY} (en majuscules) :', clearKeywordMismatch: 'Le mot ne correspond pas à {KEY}. Suppression annulée.', clearSuccess: 'Données effacées. La page va se recharger.', clearFailed: 'Suppression échouée.', clearStep2Title: 'Confirmer la suppression', clearSkipBackup: 'Sauter la sauvegarde', clearDoBackup: 'Télécharger sauvegarde', clearConfirmFinal: 'Supprimer définitivement', clearDoneTitle: 'Terminé', ok: 'OK', dialogNotice: 'Avis', dialogConfirm: 'Confirmation', authSubtitleLogin: 'Connecte-toi pour gérer les statistiques de ton équipe', authSubtitleRegister: 'Crée un compte pour commencer', authEmail: 'Email', authPassword: 'Mot de passe', authLoginBtn: 'Se connecter', authRegisterBtn: 'S’inscrire', authNoAccount: 'Pas encore de compte?', authGoRegister: 'S’inscrire', authHaveAccount: 'Déjà un compte?', authGoLogin: 'Se connecter', authForgot: 'Mot de passe oublié?', authWorking: 'Patiente...', authResetSent: 'Nous t’avons envoyé un email pour réinitialiser le mot de passe. Vérifie ta boîte (et les spams).', authErrInvalidEmail: 'Adresse email invalide.', authErrNoUser: 'Aucun compte avec cet email.', authErrWrongPass: 'Email ou mot de passe incorrect.', authErrInUse: 'Un compte existe déjà avec cet email.', authErrWeakPass: 'Le mot de passe doit avoir au moins 6 caractères.', authErrEmptyEmail: 'Saisis ton email.', authErrEmptyPass: 'Saisis ton mot de passe.', authErrEmptyEmailReset: 'Ecris ton email ci-dessus, puis appuie de nouveau sur Mot de passe oublié.', authErrTooMany: 'Trop de tentatives. Réessaie bientôt.', authErrNetwork: 'Problème de connexion. Vérifie internet.', authErrGeneric: 'Une erreur est survenue. Réessaie.',
     settingsReset: 'Effacer toutes les données', settingsResetHint: 'Supprime définitivement matchs, joueurs et stats',
     settingsTeamName: 'Nom d\'équipe', settingsTeamNameHint: 'Personnalise le nom affiché au tableau',
     settingsTeamLogo: 'Logo d\'équipe', settingsTeamLogoHint: 'Téléverse le logo de ton équipe',
@@ -4068,7 +4168,7 @@ var I18N = {
   },
   de: {
     flag: '🇩🇪', name: 'Deutsch',
-    appTitle: 'Hockey Stats',
+    appTitle: 'Hexa Sport',
     navDashboard: 'Übersicht', navMatches: 'Spiele', navPlayers: 'Spieler', navGoalies: 'Torhüter',
     season: 'Saison', seasonLabel: 'Saison',
     menuHeader: 'Benutzermenü', menuAccount: 'Konto', menuLanguage: 'Sprache', menuSettings: 'Einstellungen', menuLogout: 'Abmelden',
@@ -4081,7 +4181,7 @@ var I18N = {
     settingsCompact: 'Kompaktmodus', settingsCompactHint: 'Reduziert Abstände für mehr Inhalte (nur Desktop)',
     settingsTemplate: 'Spiel-Vorlage herunterladen', settingsTemplateHint: 'Papier-Vorlage für die Halle, falls Live nicht möglich', templateDownloadTitle: 'Spiel-Vorlage herunterladen', templateDownloadHint: 'Format wählen', templateFormatPdf: '📄 PDF (druckbar A4)', templateFormatXlsx: '📊 Excel (.xlsx)', templateInfoHeader: 'SPIELDATEN', templateDate: 'Datum', templateOpponent: 'Gegner', templateVenue: 'Ort', templateHome: 'Heim', templateAway: 'Auswärts', templateCompetition: 'Wettbewerb', templateResult: 'Endergebnis', templateShots: 'Schüsse total', templateUs: 'Wir', templateThem: 'Sie', templatePpRow: 'Powerplay (PP Tore / PP gesamt)', templatePkRow: 'Penalty Kill (PK Gegentore / PK gesamt)', templatePkGolFatti: 'Tore in PK', templatePpGolSubiti: 'Gegentore in PP', templateNotes: 'Notizen', templatePlayersHeader: 'SPIELER', templateGoaliesHeader: 'TORWARTE', templateColName: 'Name', settingsExport: 'Daten exportieren', settingsExportHint: 'Lade ein Backup deiner Spiele und Spieler herunter',
     settingsImport: 'Daten importieren', settingsImportHint: 'Aus einer Sicherungsdatei wiederherstellen',
-    exportFailed: 'Export fehlgeschlagen.', importInvalidJson: 'Die Datei ist kein gültiges JSON.', importInvalidBackup: 'Die Datei ist kein gültiges Hockey-Tracker-Backup.', importConfirmTitle: 'Import bestätigen', importBackupDate: 'Backup-Datum', importMatches: 'Spiele', importPlayers: 'Spieler', importGoalies: 'Torwarte', importConfirmBody: 'Deine aktuellen Daten werden ersetzt. Fortfahren?', importSuccess: 'Import abgeschlossen. Die Seite wird neu geladen.', importFailed: 'Import fehlgeschlagen.', importReadError: 'Datei konnte nicht gelesen werden.', clearStep1Title: 'Alle Daten löschen', clearStep1Body: 'Du bist dabei, Spiele, Spieler und Statistiken endgültig zu löschen.\n\nWir empfehlen, zuerst ein Backup herunterzuladen. Jetzt machen?', clearBackupFailedContinue: 'Backup fehlgeschlagen. Trotzdem löschen?', clearKeyword: 'LOESCHEN', clearStep2Body: 'Zur Bestätigung tippe das Wort {KEY} (in Großbuchstaben):', clearKeywordMismatch: 'Das Wort stimmt nicht mit {KEY} überein. Löschung abgebrochen.', clearSuccess: 'Daten gelöscht. Die Seite wird neu geladen.', clearFailed: 'Löschung fehlgeschlagen.', clearStep2Title: 'Löschung bestätigen', clearSkipBackup: 'Backup überspringen', clearDoBackup: 'Backup herunterladen', clearConfirmFinal: 'Endgültig löschen', clearDoneTitle: 'Fertig', ok: 'OK', dialogNotice: 'Hinweis', dialogConfirm: 'Bestätigung',
+    exportFailed: 'Export fehlgeschlagen.', importInvalidJson: 'Die Datei ist kein gültiges JSON.', importInvalidBackup: 'Die Datei ist kein gültiges Hockey-Tracker-Backup.', importConfirmTitle: 'Import bestätigen', importBackupDate: 'Backup-Datum', importMatches: 'Spiele', importPlayers: 'Spieler', importGoalies: 'Torwarte', importConfirmBody: 'Deine aktuellen Daten werden ersetzt. Fortfahren?', importSuccess: 'Import abgeschlossen. Die Seite wird neu geladen.', importFailed: 'Import fehlgeschlagen.', importReadError: 'Datei konnte nicht gelesen werden.', clearStep1Title: 'Alle Daten löschen', clearStep1Body: 'Du bist dabei, Spiele, Spieler und Statistiken endgültig zu löschen.\n\nWir empfehlen, zuerst ein Backup herunterzuladen. Jetzt machen?', clearBackupFailedContinue: 'Backup fehlgeschlagen. Trotzdem löschen?', clearKeyword: 'LOESCHEN', clearStep2Body: 'Zur Bestätigung tippe das Wort {KEY} (in Großbuchstaben):', clearKeywordMismatch: 'Das Wort stimmt nicht mit {KEY} überein. Löschung abgebrochen.', clearSuccess: 'Daten gelöscht. Die Seite wird neu geladen.', clearFailed: 'Löschung fehlgeschlagen.', clearStep2Title: 'Löschung bestätigen', clearSkipBackup: 'Backup überspringen', clearDoBackup: 'Backup herunterladen', clearConfirmFinal: 'Endgültig löschen', clearDoneTitle: 'Fertig', ok: 'OK', dialogNotice: 'Hinweis', dialogConfirm: 'Bestätigung', authSubtitleLogin: 'Melde dich an, um deine Teamstatistiken zu verwalten', authSubtitleRegister: 'Erstelle ein Konto, um zu starten', authEmail: 'E-Mail', authPassword: 'Passwort', authLoginBtn: 'Anmelden', authRegisterBtn: 'Registrieren', authNoAccount: 'Noch kein Konto?', authGoRegister: 'Registrieren', authHaveAccount: 'Schon ein Konto?', authGoLogin: 'Anmelden', authForgot: 'Passwort vergessen?', authWorking: 'Bitte warten...', authResetSent: 'Wir haben dir eine E-Mail zum Zurücksetzen des Passworts gesendet. Prüfe dein Postfach (auch Spam).', authErrInvalidEmail: 'Ungültige E-Mail-Adresse.', authErrNoUser: 'Kein Konto mit dieser E-Mail gefunden.', authErrWrongPass: 'E-Mail oder Passwort falsch.', authErrInUse: 'Es existiert bereits ein Konto mit dieser E-Mail.', authErrWeakPass: 'Das Passwort muss mindestens 6 Zeichen haben.', authErrEmptyEmail: 'Gib deine E-Mail ein.', authErrEmptyPass: 'Gib dein Passwort ein.', authErrEmptyEmailReset: 'Schreibe oben deine E-Mail und tippe erneut auf Passwort vergessen.', authErrTooMany: 'Zu viele Versuche. Versuche es später.', authErrNetwork: 'Verbindungsproblem. Prüfe dein Internet.', authErrGeneric: 'Ein Fehler ist aufgetreten. Versuche es erneut.',
     settingsReset: 'Alle Daten löschen', settingsResetHint: 'Entfernt dauerhaft Spiele, Spieler und Statistiken',
     settingsTeamName: 'Teamname', settingsTeamNameHint: 'Passe den Namen im Scoreboard an',
     settingsTeamLogo: 'Teamlogo', settingsTeamLogoHint: 'Lade dein Teamlogo hoch',
@@ -12074,5 +12174,173 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 });
 </script>
+
+<!-- ============== Firebase Auth — Fase 1 (login / registrazione / logout) ============== -->
+<script>
+(function(){
+  var firebaseConfig = {
+    apiKey: "AIzaSyCqB49U82gzsXl-9zCDXIboPUBNxc5JIUg",
+    authDomain: "hexa-sport.firebaseapp.com",
+    projectId: "hexa-sport",
+    storageBucket: "hexa-sport.firebasestorage.app",
+    messagingSenderId: "902431364743",
+    appId: "1:902431364743:web:658e41ca16ed7541d30a22"
+  };
+
+  // Helper to hide the (default-visible) login screen — used both on success and on failure.
+  function hideAuthScreenNow() {
+    var s = document.getElementById('auth-screen');
+    if (s) s.style.display = 'none';
+  }
+
+  // Guard: if the Firebase library didn't load (e.g. no internet / CDN blocked),
+  // DON'T lock the user out — hide the login screen and let them use the local app.
+  if (typeof firebase === 'undefined' || !firebase.initializeApp) {
+    console.warn('Firebase non caricato: la schermata di login viene nascosta.');
+    hideAuthScreenNow();
+    return;
+  }
+
+  var fbAuth;
+  try {
+    firebase.initializeApp(firebaseConfig);
+    fbAuth = firebase.auth();
+  } catch (e) {
+    console.warn('Errore inizializzazione Firebase:', e);
+    hideAuthScreenNow(); // fail open: never trap the user behind a broken login
+    return;
+  }
+  window.fbAuth = fbAuth;
+
+  var authMode = 'login'; // 'login' | 'register'
+
+  function tt(key, fallback) {
+    try { var v = (typeof t === 'function') ? t(key) : null; return (v && v !== key) ? v : fallback; }
+    catch(e) { return fallback; }
+  }
+
+  function el(id){ return document.getElementById(id); }
+
+  function showAuthScreen(show) {
+    var s = el('auth-screen');
+    if (s) s.style.display = show ? 'flex' : 'none';
+  }
+
+  function setAuthError(msg) {
+    var box = el('auth-error');
+    if (!box) return;
+    if (msg) { box.textContent = msg; box.classList.add('show'); }
+    else { box.textContent = ''; box.classList.remove('show'); }
+  }
+
+  // Map Firebase error codes to friendly, translated messages.
+  function friendlyAuthError(err) {
+    var code = (err && err.code) ? err.code : '';
+    switch (code) {
+      case 'auth/invalid-email':        return tt('authErrInvalidEmail', 'Indirizzo email non valido.');
+      case 'auth/user-not-found':       return tt('authErrNoUser', 'Nessun account trovato con questa email.');
+      case 'auth/wrong-password':       return tt('authErrWrongPass', 'Password errata.');
+      case 'auth/invalid-credential':   return tt('authErrWrongPass', 'Email o password errate.');
+      case 'auth/email-already-in-use': return tt('authErrInUse', 'Esiste già un account con questa email.');
+      case 'auth/weak-password':        return tt('authErrWeakPass', 'La password deve avere almeno 6 caratteri.');
+      case 'auth/missing-password':     return tt('authErrEmptyPass', 'Inserisci la password.');
+      case 'auth/too-many-requests':    return tt('authErrTooMany', 'Troppi tentativi. Riprova tra poco.');
+      case 'auth/network-request-failed':return tt('authErrNetwork', 'Problema di connessione. Controlla internet.');
+      default: return tt('authErrGeneric', 'Si è verificato un errore. Riprova.') + (code ? ' (' + code + ')' : '');
+    }
+  }
+
+  window.authToggleMode = function() {
+    authMode = (authMode === 'login') ? 'register' : 'login';
+    setAuthError('');
+    var submitBtn = el('auth-submit-btn');
+    var subtitle  = el('auth-subtitle');
+    var toggleTxt = el('auth-toggle');
+    var pass = el('auth-password');
+    if (authMode === 'register') {
+      if (submitBtn) submitBtn.textContent = tt('authRegisterBtn', 'Registrati');
+      if (subtitle)  subtitle.textContent  = tt('authSubtitleRegister', 'Crea un account per iniziare');
+      if (pass) pass.setAttribute('autocomplete', 'new-password');
+      if (toggleTxt) toggleTxt.innerHTML =
+        '<span>' + tt('authHaveAccount', 'Hai già un account?') + '</span> ' +
+        '<a onclick="authToggleMode()">' + tt('authGoLogin', 'Accedi') + '</a>';
+    } else {
+      if (submitBtn) submitBtn.textContent = tt('authLoginBtn', 'Accedi');
+      if (subtitle)  subtitle.textContent  = tt('authSubtitleLogin', 'Accedi per gestire le statistiche della tua squadra');
+      if (pass) pass.setAttribute('autocomplete', 'current-password');
+      if (toggleTxt) toggleTxt.innerHTML =
+        '<span>' + tt('authNoAccount', 'Non hai un account?') + '</span> ' +
+        '<a onclick="authToggleMode()">' + tt('authGoRegister', 'Registrati') + '</a>';
+    }
+  };
+
+  window.authSubmit = function() {
+    var email = (el('auth-email').value || '').trim();
+    var pass  = el('auth-password').value || '';
+    setAuthError('');
+    if (!email) { setAuthError(tt('authErrEmptyEmail', 'Inserisci la tua email.')); return; }
+    if (!pass)  { setAuthError(tt('authErrEmptyPass', 'Inserisci la password.')); return; }
+
+    var btn = el('auth-submit-btn');
+    if (btn) { btn.disabled = true; btn.textContent = tt('authWorking', 'Attendi...'); }
+
+    var done = function(){ if (btn) { btn.disabled = false; window.authToggleMode(); window.authToggleMode(); } };
+    var fail = function(err){ setAuthError(friendlyAuthError(err)); done(); };
+
+    if (authMode === 'register') {
+      fbAuth.createUserWithEmailAndPassword(email, pass)
+        .then(function(){ /* onAuthStateChanged hides the screen */ })
+        .catch(fail);
+    } else {
+      fbAuth.signInWithEmailAndPassword(email, pass)
+        .then(function(){ /* onAuthStateChanged hides the screen */ })
+        .catch(fail);
+    }
+  };
+
+  window.authResetPassword = function() {
+    var email = (el('auth-email').value || '').trim();
+    setAuthError('');
+    if (!email) { setAuthError(tt('authErrEmptyEmailReset', 'Scrivi la tua email qui sopra, poi premi di nuovo "Password dimenticata?".')); return; }
+    fbAuth.sendPasswordResetEmail(email)
+      .then(function(){ setAuthError(''); appAlert(tt('authResetSent', 'Ti abbiamo inviato un\u2019email per reimpostare la password. Controlla la posta (anche lo spam).')); })
+      .catch(function(err){ setAuthError(friendlyAuthError(err)); });
+  };
+
+  window.authLogout = function() {
+    // Close the user menu if open
+    var menu = document.getElementById('profile-menu');
+    if (menu) menu.classList.remove('open');
+    fbAuth.signOut().catch(function(e){ console.warn('signOut:', e); });
+  };
+
+  // Submit on Enter from the password field
+  document.addEventListener('DOMContentLoaded', function(){
+    var passInput = el('auth-password');
+    if (passInput) {
+      passInput.addEventListener('keydown', function(e){
+        if (e.key === 'Enter') { e.preventDefault(); window.authSubmit(); }
+      });
+    }
+  });
+
+  // The gate: show app when logged in, show login screen when not.
+  fbAuth.onAuthStateChanged(function(user){
+    var btn = el('auth-submit-btn');
+    if (btn) btn.disabled = false;
+    if (user) {
+      showAuthScreen(false);
+      // Show the user's email in the account menu (if the element exists)
+      var accLabel = document.getElementById('account-email-label');
+      if (accLabel) accLabel.textContent = user.email || '';
+      window.__hexaUser = user;
+    } else {
+      showAuthScreen(true);
+      window.__hexaUser = null;
+    }
+  });
+})();
+</script>
+<!-- ============== fine Firebase Auth ============== -->
 </body>
 </html>
