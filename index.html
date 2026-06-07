@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Hexa Sport — Le statistiche del giocatore, al centro</title>
+<title>Hexa Sport — Le statistiche della tua squadra, finalmente chiare</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&family=Sora:wght@400;600;700&family=Archivo:wght@400;600;700&display=swap" rel="stylesheet" />
@@ -11,6 +11,16 @@
 <script>(function(){document.documentElement.classList.add('js');try{var s=JSON.parse(localStorage.getItem('hs_tweaks')||'{}');var m=s.themeMode||'auto';var light=(m==='light')||(m==='auto'&&window.matchMedia('(prefers-color-scheme:light)').matches);document.documentElement.setAttribute('data-theme',light?'light':'dark');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
 </head>
 <body>
+<template id="__bundler_thumbnail" data-bg-color="#07090d">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#07090d"/>
+    <polygon points="600,210 705,272 705,396 600,458 495,396 495,272" fill="none" stroke="#eda21f" stroke-width="14" stroke-linejoin="round"/>
+    <rect x="556" y="372" width="26" height="54" rx="4" fill="#eda21f"/>
+    <rect x="588" y="340" width="26" height="86" rx="4" fill="#eda21f"/>
+    <rect x="620" y="312" width="26" height="114" rx="4" fill="#eda21f"/>
+    <text x="600" y="560" font-family="'Space Grotesk',sans-serif" font-size="68" font-weight="700" fill="#f3f5f8" text-anchor="middle" letter-spacing="2">HEXA SPORT</text>
+  </svg>
+</template>
 <div class="bg-fx"></div>
 
 <!-- ============ NAV ============ -->
@@ -68,16 +78,16 @@
   <div class="wrap">
     <div class="hero-grid">
       <div class="hero-copy">
-        <span class="eyebrow" data-enter style="--d:.05s">Statistiche sportive · per chi gioca davvero</span>
-        <h1 class="h-xl" id="hl-headline" data-enter style="--d:.14s">Le statistiche del <span class="hl">giocatore</span>. Non la burocrazia del club.</h1>
-        <p class="lead" id="hl-sub" data-enter style="--d:.24s">Dimentica calendari, convocazioni e presenze. Hexa Sport misura ciò che conta in pista: gol, assist, tiri, conversione, parate e trend di forma — giocatore per giocatore, partita dopo partita.</p>
+        <span class="eyebrow" data-enter style="--d:.05s">Per allenatori di sport di squadra</span>
+        <h1 class="h-xl" id="hl-headline" data-enter style="--d:.14s">Allena sui <span class="hl">dati</span>,<br />non a sensazione.</h1>
+        <p class="lead" id="hl-sub" data-enter style="--d:.24s">Hexa Sport è l'app per allenatori che vogliono capire davvero come gioca la squadra. Registri la partita e ottieni gol, assist, tiri, parate e forma di ogni giocatore, in numeri chiari. Senza più segnare tutto a memoria o su un foglietto.</p>
         <div class="hero-cta" data-enter style="--d:.34s">
-          <a class="btn btn-primary btn-lg" href="registrazione.html">Crea il tuo account gratis</a>
-          <a class="btn btn-ghost btn-lg" href="#statistiche">Guarda le statistiche</a>
+          <a class="btn btn-primary btn-lg" href="registrazione.html">Provala adesso — è gratis</a>
+          <a class="btn btn-ghost btn-lg" href="#statistiche">Scopri come funziona</a>
         </div>
         <div class="hero-meta" data-enter style="--d:.44s">
-          <span><b>0 €</b> per iniziare</span>
-          <span><b>Cloud</b> sincronizzato</span>
+          <span><b>Gratis</b> per iniziare</span>
+          <span><b>Sempre</b> sul telefono</span>
           <span><b>Nessuna</b> carta richiesta</span>
         </div>
       </div>
@@ -104,15 +114,15 @@
 <section class="section" id="posizionamento">
   <div class="wrap">
     <div class="section-head reveal">
-      <span class="eyebrow">Il nostro posizionamento</span>
-      <h2 class="h-lg">Meno gestione del club.<br />Molto più dati sul giocatore.</h2>
-      <p class="lead">I gestionali per società dilettantistiche ti annegano in funzioni amministrative che, sul campo, non spostano nulla. Noi abbiamo tagliato il superfluo e raddoppiato sull'analisi.</p>
+      <span class="eyebrow">Perché Hexa è diversa</span>
+      <h2 class="h-lg">Meno scartoffie da gestionale.<br />Più dati per allenare meglio.</h2>
+      <p class="lead">I gestionali per società ti riempiono di calendari, convocazioni e presenze: roba da segreteria che, sul campo, non ti fa vincere una partita. Hexa parte da dove conta davvero — come gioca la tua squadra.</p>
     </div>
 
     <div class="contrast card reveal" style="margin-top:36px; overflow:hidden;">
       <div class="col col-them">
         <h3>I gestionali tradizionali</h3>
-        <p class="sub">Pensati per la segreteria, non per la pista</p>
+        <p class="sub">Fatti per la segreteria, non per chi allena</p>
         <ul class="cl-list">
           <li><span class="ic ic-mut">—</span> Calendari, convocazioni e RSVP</li>
           <li><span class="ic ic-mut">—</span> Gestione presenze e quote</li>
@@ -124,7 +134,7 @@
       <div class="vs">VS</div>
       <div class="col col-us">
         <h3>Hexa Sport</h3>
-        <p class="sub">Pensato per allenatori e analisti</p>
+        <p class="sub">Nato dall'esperienza di un allenatore vero</p>
         <ul class="cl-list">
           <li><span class="ic ic-acc">✓</span> Radar di attacco, difesa e disciplina</li>
           <li><span class="ic ic-acc">✓</span> Conversione tiri, dominio tiri, PP &amp; PK</li>
@@ -143,20 +153,20 @@
     <div class="feature">
       <div class="feature-copy reveal">
         <span class="eyebrow">Statistiche del giocatore</span>
-        <h2 class="h-md">Ogni giocatore, letto come un professionista.</h2>
-        <p class="lead">Confronta i tuoi atleti su attacco, difesa e disciplina con radar sovrapponibili. Capisci in un colpo d'occhio chi tira, chi recupera, chi perde palloni — e chi sta crescendo.</p>
+        <h2 class="h-md">Leggi ogni giocatore come un professionista.</h2>
+        <p class="lead">Confronta i tuoi giocatori su attacco, difesa e disciplina con radar sovrapponibili. In un colpo d'occhio vedi chi trascina la squadra, chi cala e chi sta crescendo — e convochi e schieri con cognizione di causa.</p>
         <ul class="feat-points">
           <li>
             <span class="fp-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><polygon points="12 3 21 9 18 20 6 20 3 9"></polygon></svg></span>
-            <div><b>Radar comparativi</b><span>Sovrapponi fino a più giocatori su attacco, difesa e disciplina.</span></div>
+            <div><b>Radar comparativi</b><span>Sovrapponi più giocatori e vedi subito ruoli e differenze.</span></div>
           </li>
           <li>
             <span class="fp-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"></path><path d="M7 14l4-4 3 3 5-6"></path></svg></span>
-            <div><b>Conversione &amp; precisione</b><span>Gol su tiri, tiri in porta, dominio tiri — calcolati per te.</span></div>
+            <div><b>Conversione &amp; precisione</b><span>Quanto è concreto un giocatore: gol su tiri e precisione, calcolati per te.</span></div>
           </li>
           <li>
             <span class="fp-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg></span>
-            <div><b>Schede per giocatore</b><span>Gol, assist, tiri, recuperi, perse e minuti, sempre a portata.</span></div>
+            <div><b>Schede per giocatore</b><span>Gol, assist, tiri, recuperi e minuti di ognuno, sempre a portata.</span></div>
           </li>
         </ul>
       </div>
@@ -172,9 +182,9 @@
   <div class="wrap">
     <div class="feature flip">
       <div class="feature-copy reveal">
-        <span class="eyebrow">Profondità dei dati</span>
+        <span class="eyebrow">Tutti i numeri in un posto</span>
         <h2 class="h-md">Ogni numero che conta, in una sola tabella.</h2>
-        <p class="lead">Dalle reti ai rigori, dai tiri diretti alle palle perse: tutta la rosa ordinabile colonna per colonna. Esporta quando vuoi e porta i dati dove ti servono.</p>
+        <p class="lead">Dalle reti ai rigori, dai tiri alle palle perse: tutta la rosa ordinabile colonna per colonna. Trovi in un attimo chi guida ogni classifica ed esporti i dati quando ti servono.</p>
         <div class="tiles">
           <div class="tile"><div class="t-lbl">Gol stagione</div><div class="t-val" style="color:var(--accent)">50</div></div>
           <div class="tile"><div class="t-lbl">Conv. top</div><div class="t-val" style="color:var(--pos)">21.7%</div></div>
@@ -195,7 +205,7 @@
       <div class="feature-copy reveal">
         <span class="eyebrow">Due modi di lavorare</span>
         <h2 class="h-md">Live a bordo pista, o con calma dopo la partita.</h2>
-        <p class="lead">Nel piano gratuito registri tutto a fine gara. Con Pro sblocchi la modalità live: segna gol, tiri e parate in tempo reale mentre la partita scorre, senza perdere un'azione.</p>
+        <p class="lead">Hai poco tempo durante la gara? Registri tutto con calma a fine partita. Vuoi il massimo del dettaglio? Con Pro segni gol, tiri e parate in tempo reale, senza perderti un'azione.</p>
         <ul class="feat-points">
           <li>
             <span class="fp-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg></span>
@@ -251,7 +261,7 @@
     <div class="pricing-head reveal">
       <span class="eyebrow">Prezzi</span>
       <h2 class="h-lg center">Scegli quanto vuoi spingerti.</h2>
-      <p class="lead center">Inizia gratis, passa a Pro quando vuoi i dati completi, scala a Enterprise per gestire un'intera società.</p>
+      <p class="lead center">Parti gratis, passa a Pro quando vuoi tutti i dati di una squadra, scegli Enterprise per seguire l'intera società da un solo posto.</p>
       <div class="toggle" id="billing-toggle" role="tablist">
         <span class="knob" id="toggle-knob"></span>
         <button data-period="monthly" role="tab">Mensile</button>
@@ -263,7 +273,7 @@
       <!-- FREE -->
       <div class="plan card">
         <div class="p-name">Free</div>
-        <div class="p-desc">Per chi inizia a tracciare la propria squadra.</div>
+        <div class="p-desc">Per iniziare a vedere i tuoi primi numeri, gratis.</div>
         <div class="price-row">
           <span class="price">0&nbsp;€</span>
           <span class="per">per sempre</span>
@@ -284,7 +294,7 @@
       <!-- PRO -->
       <div class="plan card" data-plan="pro">
         <div class="p-name">Pro</div>
-        <div class="p-desc">Per l'allenatore che vuole tutti i numeri.</div>
+        <div class="p-desc">Per l'allenatore che vuole capire tutto della squadra.</div>
         <div class="price-row">
           <span class="price" data-monthly="9,99" data-annual="7,99">7,99&nbsp;€</span>
           <span class="per">/ mese</span>
@@ -305,7 +315,7 @@
       <!-- ENTERPRISE -->
       <div class="plan card" data-plan="enterprise">
         <div class="p-name">Enterprise</div>
-        <div class="p-desc">Per società con più squadre e allenatori.</div>
+        <div class="p-desc">Per la società che vuole tutte le squadre sotto controllo.</div>
         <div class="price-row">
           <span class="price" data-monthly="24,99" data-annual="22,99">22,99&nbsp;€</span>
           <span class="per">/ mese</span>
@@ -317,7 +327,7 @@
           <li class="feat-h">Tutto di Pro, più</li>
           <li><span class="ck pos-ck"></span> <b>Squadre illimitate</b></li>
           <li><span class="ck pos-ck"></span> Chiavi d'accesso per allenatore</li>
-          <li><span class="ck pos-ck"></span> Vista responsabile su tutto il database</li>
+          <li><span class="ck pos-ck"></span> Il direttore sportivo vede tutte le squadre</li>
           <li><span class="ck pos-ck"></span> Ruoli e permessi avanzati</li>
           <li><span class="ck pos-ck"></span> Supporto prioritario</li>
         </ul>
@@ -333,38 +343,43 @@
     <div class="org-grid">
       <div class="reveal">
         <span class="eyebrow">Per le società</span>
-        <h2 class="h-lg">Una sola piattaforma per tutte le tue squadre.</h2>
-        <p class="lead">Il responsabile vede l'intero database; ogni allenatore riceve una chiave d'accesso che lo porta solo alle squadre che allena. Niente confusione, niente fogli condivisi.</p>
+        <h2 class="h-lg">Tutte le squadre del club, sotto un solo sguardo.</h2>
+        <p class="lead">Il direttore sportivo ha il quadro completo di ogni squadra del club; ogni allenatore entra con la propria chiave e trova solo le squadre che allena. Niente fogli condivisi, niente confusione.</p>
         <div class="org-feats">
           <div class="org-feat">
             <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="6" rx="1"></rect><rect x="3" y="14" width="18" height="6" rx="1"></rect></svg></span>
-            <b>Squadre illimitate</b><span>Aggiungi tutte le formazioni della società.</span>
+            <b>Squadre illimitate</b><span>Tutte le formazioni del club, dalle giovanili alla prima squadra.</span>
           </div>
           <div class="org-feat">
             <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M7 11V7a5 5 0 0110 0v4"></path><rect x="5" y="11" width="14" height="9" rx="2"></rect></svg></span>
-            <b>Chiavi allenatore</b><span>Ogni coach accede solo alle sue squadre.</span>
+            <b>Chiavi allenatore</b><span>Ogni coach entra con la sua chiave e vede solo le sue squadre.</span>
           </div>
           <div class="org-feat">
             <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg></span>
-            <b>Vista responsabile</b><span>Accesso completo a tutto il database.</span>
+            <b>Vista direttore sportivo</b><span>Il quadro completo di tutto il club, in tempo reale.</span>
           </div>
           <div class="org-feat">
             <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M4 15a4 4 0 014-4 5 5 0 019.6-1.5A3.5 3.5 0 0119 18H7a3 3 0 01-3-3z"></path></svg></span>
-            <b>Cloud sincronizzato</b><span>Aggiornato in tempo reale per tutti.</span>
+            <b>Cloud sincronizzato</b><span>Tutti vedono gli stessi dati, sempre aggiornati.</span>
           </div>
         </div>
       </div>
       <div class="reveal">
         <div class="org-diagram card">
           <div class="od-top">
-            <span class="badge">R</span>
-            <div><b>Responsabile società</b><span>Accesso a tutte le squadre del database</span></div>
+            <span class="badge">DS</span>
+            <div><b>Direttore sportivo</b><span>Vede tutte le squadre del club</span></div>
           </div>
           <div class="od-lines"></div>
           <div class="od-row">
             <div class="od-node"><div class="k">Coach A</div><div class="key">🔑 KEY-7X2</div><div class="team">Under 19</div></div>
             <div class="od-node"><div class="k">Coach B</div><div class="key">🔑 KEY-4M9</div><div class="team">Prima sq.</div></div>
             <div class="od-node"><div class="k">Coach C</div><div class="key">🔑 KEY-1Q8</div><div class="team">Under 15</div></div>
+          </div>
+          <div class="od-row od-row-2">
+            <div class="od-node"><div class="k">Coach D</div><div class="key">🔑 KEY-9T5</div><div class="team">Under 17</div></div>
+            <div class="od-node"><div class="k">Coach E</div><div class="key">🔑 KEY-3B6</div><div class="team">Femminile</div></div>
+            <div class="od-node"><div class="k">Coach F</div><div class="key">🔑 KEY-2K4</div><div class="team">Under 13</div></div>
           </div>
         </div>
       </div>
@@ -382,7 +397,7 @@
     <div class="faq" style="margin-top:40px;">
       <div class="faq-item">
         <button class="faq-q">Cosa include esattamente il piano gratuito? <span class="pm">+</span></button>
-        <div class="faq-a"><p>Il piano Free ti dà una squadra, le statistiche base — Gol, Assist e Tiri — e la sola modalità di inserimento post-partita. Perfetto per provare l'app e iniziare a tracciare i tuoi giocatori.</p></div>
+        <div class="faq-a"><p>Il piano Free ti dà una squadra, le statistiche base — Gol, Assist e Tiri — e la sola modalità di inserimento post-partita. È il modo migliore per provare l'app e iniziare subito a tracciare i tuoi giocatori, senza spendere nulla.</p></div>
       </div>
       <div class="faq-item">
         <button class="faq-q">Qual è la differenza tra modalità live e post-partita? <span class="pm">+</span></button>
@@ -394,7 +409,7 @@
       </div>
       <div class="faq-item">
         <button class="faq-q">Come funzionano le chiavi per gli allenatori? <span class="pm">+</span></button>
-        <div class="faq-a"><p>Nel piano Enterprise il responsabile crea una chiave d'accesso per ogni allenatore. Con quella chiave il coach vede e modifica solo le squadre che gli sono state assegnate, mentre il responsabile mantiene la visione completa del database.</p></div>
+        <div class="faq-a"><p>Nel piano Enterprise il direttore sportivo crea una chiave d'accesso per ogni allenatore. Con quella chiave il coach vede e modifica solo le squadre che gli sono state assegnate, mentre il direttore sportivo mantiene la visione completa di tutto il club.</p></div>
       </div>
       <div class="faq-item">
         <button class="faq-q">I miei dati sono al sicuro e sincronizzati? <span class="pm">+</span></button>
@@ -402,7 +417,7 @@
       </div>
       <div class="faq-item">
         <button class="faq-q">Per quali sport è pensata l'app? <span class="pm">+</span></button>
-        <div class="faq-a"><p>Oggi Hexa Sport è ottimizzata per l'hockey su pista. Stiamo lavorando per estendere il modello statistico ad altri sport di squadra: chi inizia ora avrà accesso prioritario alle novità.</p></div>
+        <div class="faq-a"><p>Hexa Sport nasce sull'hockey su pista, lo sport da cui veniamo e che conosciamo a fondo. Stiamo già lavorando per estendere il modello statistico ad altri sport di squadra: chi inizia ora cresce con l'app e avrà accesso prioritario alle novità.</p></div>
       </div>
     </div>
   </div>
@@ -413,9 +428,9 @@
   <div class="wrap">
     <div class="cta-final reveal">
       <span class="eyebrow center" style="justify-content:center;">Pronto a partire?</span>
-      <h2 class="h-lg">Smetti di gestire fogli. Inizia a leggere i tuoi giocatori.</h2>
-      <p class="lead">Crea il tuo account gratuito in meno di un minuto. Nessuna carta richiesta.</p>
-      <a class="btn btn-primary btn-lg" href="registrazione.html">Crea il tuo account gratis</a>
+      <h2 class="h-lg">Smetti di segnare a memoria. Inizia a vedere i numeri.</h2>
+      <p class="lead">Crei il tuo account gratuito in meno di un minuto. Nessuna carta, nessun impegno.</p>
+      <a class="btn btn-primary btn-lg" href="registrazione.html">Inizia gratis — senza carta</a>
     </div>
   </div>
 </section>
@@ -429,7 +444,7 @@
           <img src="assets/logo.png" alt="Hexa Sport" />
           <span>HEXA <span class="accent">SPORT</span></span>
         </a>
-        <p class="tag">Le statistiche del giocatore al centro. Costruito per chi vive la pista, non la segreteria.</p>
+        <p class="tag">Le statistiche della squadra, finalmente chiare. Nato dall'esperienza di chi allena davvero.</p>
       </div>
       <div>
         <h4>Prodotto</h4>
@@ -474,12 +489,12 @@
 <script>
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "accent": "#eda21f",
-  "themeMode": "dark",
+  "themeMode": "auto",
   "heroLayout": "split",
   "displayFont": "Sora",
   "featuredPlan": "pro",
   "billingDefault": "annual",
-  "headline": "Le statistiche del giocatore. Non la burocrazia del club."
+  "headlineVariant": "memoria"
 }/*EDITMODE-END*/;
 </script>
 <script src="tweaks-core.js"></script>

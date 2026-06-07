@@ -118,12 +118,23 @@
     });
     applyBilling(T.billingDefault);
     var hl = document.getElementById("hl-headline");
-    if (hl && T.headline) hl.innerHTML = T.headline.replace(/giocatore/i, '<span class="hl">$&</span>');
+    if (hl) {
+      var HEADLINES = {
+        punch:   "Allena sui dati,\nnon a sensazione.",
+        memoria: "Smetti di allenare\na memoria.",
+        numeri:  "La tua squadra,\nfinalmente in numeri."
+      };
+      var txt = HEADLINES[T.headlineVariant] || HEADLINES.memoria;
+      hl.innerHTML = txt
+        .replace(/</g, "&lt;")
+        .replace(/\n/g, "<br>")
+        .replace(/dati|memoria|numeri/i, '<span class="hl">$&</span>');
+    }
   }
 
   HSTweaks.init({
     defaults: (typeof TWEAK_DEFAULTS !== "undefined") ? TWEAK_DEFAULTS : {},
-    controls: ["accent", "themeMode", "displayFont", "heroLayout", "featuredPlan", "billingDefault", "headline"],
+    controls: ["accent", "themeMode", "displayFont", "heroLayout", "featuredPlan", "billingDefault", "headlineVariant"],
     onApply: onApply
   });
 
