@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Apertura di Hexa Sport…</title>
+<meta http-equiv="refresh" content="0; url=app/" />
+<script>window.location.replace("app/");</script>
+<style>
+  html,body{height:100%;margin:0}
+  body{background:#07090d;color:#f3f5f8;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+       display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;text-align:center;padding:24px}
+  .logo{width:56px;height:56px;color:#eda21f}
+  .spin{width:26px;height:26px;border:3px solid rgba(237,162,31,.25);border-top-color:#eda21f;border-radius:50%;animation:s .8s linear infinite}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .msg{font-size:15px;color:#9aa3b2;line-height:1.5}
+  a{color:#eda21f;font-weight:600;text-decoration:none}
+</style>
+</head>
+<body>
+  <svg class="logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="16,2 28.124,9 28.124,23 16,30 3.876,23 3.876,9" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+    <rect x="10.5" y="18" width="3" height="5" rx="0.6" fill="currentColor"/>
+    <rect x="14.5" y="14.5" width="3" height="8.5" rx="0.6" fill="currentColor"/>
+    <rect x="18.5" y="11" width="3" height="12" rx="0.6" fill="currentColor"/>
+  </svg>
+  <div class="spin"></div>
+  <div class="msg">Apertura di Hexa Sport in corso…<br>Se non si apre da solo, <a href="app/">tocca qui</a>.</div>
+</body>
+</html>
