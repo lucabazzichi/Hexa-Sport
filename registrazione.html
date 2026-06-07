@@ -3,28 +3,170 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Apertura di Hexa Sport…</title>
-<meta http-equiv="refresh" content="0; url=app/" />
-<script>window.location.replace("app/");</script>
-<style>
-  html,body{height:100%;margin:0}
-  body{background:#07090d;color:#f3f5f8;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
-       display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;text-align:center;padding:24px}
-  .logo{width:56px;height:56px;color:#eda21f}
-  .spin{width:26px;height:26px;border:3px solid rgba(237,162,31,.25);border-top-color:#eda21f;border-radius:50%;animation:s .8s linear infinite}
-  @keyframes s{to{transform:rotate(360deg)}}
-  .msg{font-size:15px;color:#9aa3b2;line-height:1.5}
-  a{color:#eda21f;font-weight:600;text-decoration:none}
-</style>
+<title>Crea il tuo account — Hexa Sport</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&family=Sora:wght@400;600;700&family=Archivo:wght@400;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<script>(function(){document.documentElement.classList.add('js');try{var s=JSON.parse(localStorage.getItem('hs_tweaks')||'{}');var m=s.themeMode||'auto';var light=(m==='light')||(m==='auto'&&window.matchMedia('(prefers-color-scheme:light)').matches);document.documentElement.setAttribute('data-theme',light?'light':'dark');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
 </head>
 <body>
-  <svg class="logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <polygon points="16,2 28.124,9 28.124,23 16,30 3.876,23 3.876,9" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
-    <rect x="10.5" y="18" width="3" height="5" rx="0.6" fill="currentColor"/>
-    <rect x="14.5" y="14.5" width="3" height="8.5" rx="0.6" fill="currentColor"/>
-    <rect x="18.5" y="11" width="3" height="12" rx="0.6" fill="currentColor"/>
-  </svg>
-  <div class="spin"></div>
-  <div class="msg">Apertura di Hexa Sport in corso…<br>Se non si apre da solo, <a href="app/">tocca qui</a>.</div>
+<div class="bg-fx"></div>
+
+<header class="nav nav-simple">
+  <div class="wrap nav-inner">
+    <a class="brand" href="index.html">
+      <img src="assets/logo.png" alt="Hexa Sport" />
+      <span>HEXA <span class="accent">SPORT</span></span>
+    </a>
+    <div class="nav-cta">
+      <a class="ghost-link" href="index.html">← Torna al sito</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ SCEGLI IL PIANO ============ -->
+<section class="step step-plan" id="planSection">
+  <div class="wrap">
+    <div class="reg-head center">
+      <span class="eyebrow center" style="justify-content:center;">Scegli il piano</span>
+      <h1 class="h-lg" style="margin:14px 0 12px;">Quanto vuoi spingerti con i dati?</h1>
+      <p class="lead center">Parti gratis e cambia quando vuoi. Seleziona un piano: qui sotto comparirà la creazione dell'account.</p>
+      <div class="toggle" id="reg-billing" role="tablist" style="margin-top:22px;">
+        <span class="knob" id="reg-knob"></span>
+        <button data-period="monthly" role="tab">Mensile</button>
+        <button data-period="annual" class="on" role="tab">Annuale<span class="save-tag">-20%</span></button>
+      </div>
+    </div>
+
+    <div class="plans" id="reg-plans">
+      <!-- FREE -->
+      <div class="plan card" data-plan="free">
+        <div class="p-name">Free</div>
+        <div class="p-desc">Per chi inizia a tracciare la propria squadra.</div>
+        <div class="price-row"><span class="price">0&nbsp;€</span><span class="per">per sempre</span></div>
+        <div class="price-old">&nbsp;</div>
+        <div class="price-save" style="visibility:hidden">.</div>
+        <button class="btn btn-ghost btn-block" data-select="free"><span class="sel-label">Seleziona piano</span></button>
+        <ul class="p-feats">
+          <li class="feat-h">Cosa include</li>
+          <li><span class="ck pos-ck"></span> <span><b>1 squadra</b></span></li>
+          <li><span class="ck pos-ck"></span> Statistiche base: <b>Gol, Assist, Tiri</b></li>
+          <li><span class="ck pos-ck"></span> Solo modalità post-partita</li>
+          <li class="off"><span class="ck off-ck"></span> Statistiche avanzate e radar</li>
+          <li class="off"><span class="ck off-ck"></span> Modalità live</li>
+        </ul>
+      </div>
+
+      <!-- PRO -->
+      <div class="plan card featured" data-plan="pro">
+        <div class="p-name">Pro</div>
+        <div class="p-desc">Per l'allenatore che vuole tutti i numeri.</div>
+        <div class="price-row">
+          <span class="price" data-monthly="9,99" data-annual="7,99">7,99&nbsp;€</span>
+          <span class="per">/ mese</span>
+        </div>
+        <div class="price-old" data-old="9,99&nbsp;€/mese">9,99&nbsp;€/mese</div>
+        <div class="price-save" data-save-monthly="" data-save-annual="Risparmi 24&nbsp;€/anno · -20%">Risparmi 24&nbsp;€/anno · -20%</div>
+        <button class="btn btn-primary btn-block" data-select="pro"><span class="sel-label">Seleziona piano</span></button>
+        <ul class="p-feats">
+          <li class="feat-h">Tutto di Free, più</li>
+          <li><span class="ck pos-ck"></span> <span>Fino a <b>2 squadre</b></span></li>
+          <li><span class="ck pos-ck"></span> <b>Tutte</b> le statistiche avanzate</li>
+          <li><span class="ck pos-ck"></span> Radar attacco / difesa / disciplina</li>
+          <li><span class="ck pos-ck"></span> Modalità <b>live</b> + post-partita</li>
+          <li><span class="ck pos-ck"></span> Sincronizzazione cloud</li>
+        </ul>
+      </div>
+
+      <!-- ENTERPRISE -->
+      <div class="plan card" data-plan="enterprise">
+        <div class="p-name">Enterprise</div>
+        <div class="p-desc">Per società con più squadre e allenatori.</div>
+        <div class="price-row">
+          <span class="price" data-monthly="24,99" data-annual="22,99">22,99&nbsp;€</span>
+          <span class="per">/ mese</span>
+        </div>
+        <div class="price-old" data-old="24,99&nbsp;€/mese">24,99&nbsp;€/mese</div>
+        <div class="price-save" data-save-monthly="" data-save-annual="Risparmi 24&nbsp;€/anno · -8%">Risparmi 24&nbsp;€/anno · -8%</div>
+        <button class="btn btn-ghost btn-block" data-select="enterprise"><span class="sel-label">Seleziona piano</span></button>
+        <ul class="p-feats">
+          <li class="feat-h">Tutto di Pro, più</li>
+          <li><span class="ck pos-ck"></span> <b>Squadre illimitate</b></li>
+          <li><span class="ck pos-ck"></span> Chiavi d'accesso per allenatore</li>
+          <li><span class="ck pos-ck"></span> Vista responsabile su tutto il database</li>
+          <li><span class="ck pos-ck"></span> Ruoli e permessi avanzati</li>
+          <li><span class="ck pos-ck"></span> Supporto prioritario</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CREA ACCOUNT (compare dopo la scelta) ============ -->
+<section class="account-section" id="accountSection" aria-hidden="true">
+  <div class="wrap account-wrap">
+    <form class="auth-form" id="signup" novalidate>
+      <div class="sel-plan-note">Piano selezionato: <b id="selPlanName">Pro</b><button type="button" id="change-plan">cambia</button></div>
+      <span class="eyebrow">Crea il tuo account</span>
+      <h1>Inizia la tua esperienza con Hexa Sport.</h1>
+      <p class="sub">Pochi dati e sei dentro. Potrai aggiungere squadre e giocatori subito dopo.</p>
+
+      <div class="field">
+        <label for="name">Nome e cognome</label>
+        <input type="text" id="name" name="name" placeholder="Mario Rossi" autocomplete="name" required />
+      </div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="mario@squadra.it" autocomplete="email" required />
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Almeno 8 caratteri" autocomplete="new-password" required minlength="8" />
+      </div>
+
+      <div class="field">
+        <label>Ruolo</label>
+        <div class="seg-field" id="role-seg">
+          <button type="button" data-val="allenatore" class="on">Allenatore</button>
+          <button type="button" data-val="giocatore">Giocatore</button>
+          <button type="button" data-val="dirigente">Dirigente</button>
+        </div>
+        <input type="hidden" id="role" name="role" value="allenatore" />
+      </div>
+
+      <div class="field">
+        <label for="sport">Sport</label>
+        <select id="sport" name="sport">
+          <option value="hockey-pista">Hockey su pista</option>
+          <option value="altro">Altro sport di squadra (in arrivo)</option>
+        </select>
+      </div>
+
+      <label class="check-field">
+        <input type="checkbox" id="terms" name="terms" required />
+        <span>Accetto i <a href="termini.html">Termini di servizio</a> e la <a href="privacy.html">Privacy Policy</a> di Hexa Sport.</span>
+      </label>
+
+      <button type="submit" class="btn btn-primary btn-lg btn-block">Crea account <span id="btn-plan-label"></span></button>
+
+      <div class="form-msg" id="form-msg">Account creato! 🎉 Ti diamo il benvenuto in Hexa Sport.</div>
+
+      <p class="auth-alt">Hai già un account? <a href="accedi.html">Accedi</a></p>
+    </form>
+  </div>
+</section>
+
+<script>
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accent": "#eda21f",
+  "themeMode": "auto",
+  "displayFont": "Space Grotesk"
+}/*EDITMODE-END*/;
+</script>
+<script src="tweaks-core.js"></script>
+<script src="signup.js"></script>
 </body>
 </html>
