@@ -3,86 +3,28 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Accedi — Hexa Sport</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&family=Sora:wght@400;600;700&family=Archivo:wght@400;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="styles.css" />
-<script>(function(){document.documentElement.classList.add('js');try{var s=JSON.parse(localStorage.getItem('hs_tweaks')||'{}');var m=s.themeMode||'auto';var light=(m==='light')||(m==='auto'&&window.matchMedia('(prefers-color-scheme:light)').matches);document.documentElement.setAttribute('data-theme',light?'light':'dark');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
+<title>Apertura di Hexa Sport…</title>
+<meta http-equiv="refresh" content="0; url=app/" />
+<script>window.location.replace("app/");</script>
+<style>
+  html,body{height:100%;margin:0}
+  body{background:#07090d;color:#f3f5f8;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+       display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;text-align:center;padding:24px}
+  .logo{width:56px;height:56px;color:#eda21f}
+  .spin{width:26px;height:26px;border:3px solid rgba(237,162,31,.25);border-top-color:#eda21f;border-radius:50%;animation:s .8s linear infinite}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .msg{font-size:15px;color:#9aa3b2;line-height:1.5}
+  a{color:#eda21f;font-weight:600;text-decoration:none}
+</style>
 </head>
-<template id="__bundler_thumbnail" data-bg-color="#07090d">
-  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
-    <rect width="1200" height="800" fill="#07090d"/>
-    <polygon points="600,250 660,285 660,355 600,390 540,355 540,285" fill="none" stroke="#eda21f" stroke-width="10"/>
-    <rect x="572" y="300" width="16" height="44" fill="#eda21f"/>
-    <rect x="596" y="288" width="16" height="56" fill="#eda21f"/>
-    <rect x="620" y="312" width="16" height="32" fill="#eda21f"/>
-    <text x="600" y="470" font-family="Arial, sans-serif" font-size="46" font-weight="700" fill="#f3f5f8" text-anchor="middle" letter-spacing="2">HEXA <tspan fill="#eda21f">SPORT</tspan></text>
-    <text x="600" y="520" font-family="Arial, sans-serif" font-size="24" fill="#6b7585" text-anchor="middle">Accedi al tuo account</text>
-  </svg>
-</template>
 <body>
-<div class="bg-fx"></div>
-
-<header class="nav nav-simple">
-  <div class="wrap nav-inner">
-    <a class="brand" href="index.html">
-      <img src="assets/logo.png" alt="Hexa Sport" />
-      <span>HEXA <span class="accent">SPORT</span></span>
-    </a>
-    <div class="nav-cta">
-      <a class="ghost-link" href="index.html">← Torna al sito</a>
-    </div>
-  </div>
-</header>
-
-<main class="login-section">
-  <div class="wrap login-wrap">
-    <form class="auth-form login-form" id="login" novalidate>
-      <span class="eyebrow">Bentornato</span>
-      <h1>Accedi al tuo account.</h1>
-      <p class="sub">Inserisci le tue credenziali per ritrovare le tue squadre e le tue statistiche.</p>
-
-      <div class="field">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" placeholder="mario@squadra.it" autocomplete="email" required />
-      </div>
-
-      <div class="field">
-        <div class="label-row">
-          <label for="password">Password</label>
-          <a class="forgot" href="recupero-password.html">Password dimenticata?</a>
-        </div>
-        <div class="pw-wrap">
-          <input type="password" id="password" name="password" placeholder="La tua password" autocomplete="current-password" required />
-          <button type="button" class="pw-toggle" id="pwToggle" aria-label="Mostra password">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-          </button>
-        </div>
-      </div>
-
-      <label class="check-field remember">
-        <input type="checkbox" id="remember" name="remember" checked />
-        <span>Ricordami su questo dispositivo</span>
-      </label>
-
-      <button type="submit" class="btn btn-primary btn-lg btn-block">Accedi</button>
-
-      <div class="form-msg" id="form-msg">Accesso effettuato! 🎉 Bentornato in Hexa Sport.</div>
-
-      <p class="auth-alt">Non hai ancora un account? <a href="registrazione.html">Registrati gratis</a></p>
-    </form>
-  </div>
-</main>
-
-<script>
-const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
-  "accent": "#eda21f",
-  "themeMode": "auto",
-  "displayFont": "Space Grotesk"
-}/*EDITMODE-END*/;
-</script>
-<script src="tweaks-core.js"></script>
-<script src="login.js"></script>
+  <svg class="logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="16,2 28.124,9 28.124,23 16,30 3.876,23 3.876,9" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+    <rect x="10.5" y="18" width="3" height="5" rx="0.6" fill="currentColor"/>
+    <rect x="14.5" y="14.5" width="3" height="8.5" rx="0.6" fill="currentColor"/>
+    <rect x="18.5" y="11" width="3" height="12" rx="0.6" fill="currentColor"/>
+  </svg>
+  <div class="spin"></div>
+  <div class="msg">Apertura di Hexa Sport in corso…<br>Se non si apre da solo, <a href="app/">tocca qui</a>.</div>
 </body>
 </html>
