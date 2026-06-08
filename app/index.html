@@ -2429,6 +2429,21 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
+  #auth-splash {
+    position: fixed; inset: 0; z-index: 4100;
+    background:
+      radial-gradient(900px 500px at 78% -5%, rgba(232,160,32,.10), transparent 60%),
+      radial-gradient(700px 500px at 10% 8%, rgba(74,163,240,.07), transparent 60%),
+      var(--bg);
+    display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px;
+  }
+  #auth-splash svg { width: 60px; height: 60px; color: var(--accent); }
+  #auth-splash .as-spin {
+    width: 26px; height: 26px;
+    border: 3px solid rgba(232,160,32,.25); border-top-color: var(--accent);
+    border-radius: 50%; animation: asspin .8s linear infinite;
+  }
+  @keyframes asspin { to { transform: rotate(360deg); } }
   .auth-card {
     width: 100%; max-width: 440px;
     background: linear-gradient(180deg, var(--bg2), var(--bg));
@@ -2555,7 +2570,17 @@
 <body>
 
 <!-- ============== Auth / Login screen ============== -->
-<div id="auth-screen" style="display:flex;">
+<div id="auth-splash">
+  <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="16,2 28.124,9 28.124,23 16,30 3.876,23 3.876,9" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" fill="none"/>
+    <rect x="10.5" y="18" width="3" height="5" rx="0.6" fill="currentColor"/>
+    <rect x="14.5" y="14.5" width="3" height="8.5" rx="0.6" fill="currentColor"/>
+    <rect x="18.5" y="11" width="3" height="12" rx="0.6" fill="currentColor"/>
+  </svg>
+  <div class="as-spin"></div>
+</div>
+
+<div id="auth-screen" style="display:none;">
   <div class="auth-card" id="auth-main-card">
     <div class="auth-logo">
       <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -12336,6 +12361,8 @@ document.addEventListener("DOMContentLoaded", function() {
   function hideAuthScreenNow() {
     var s = document.getElementById('auth-screen');
     if (s) s.style.display = 'none';
+    var sp = document.getElementById('auth-splash');
+    if (sp) sp.style.display = 'none';
   }
 
   // Guard: if the Firebase library didn't load (e.g. no internet / CDN blocked),
@@ -12614,6 +12641,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // The gate: show app when logged in, show login screen when not.
   fbAuth.onAuthStateChanged(function(user){
+    var sp = el('auth-splash');
+    if (sp) sp.style.display = 'none';
     var btn = el('auth-submit-btn');
     if (btn) btn.disabled = false;
     if (user) {
@@ -12629,6 +12658,12 @@ document.addEventListener("DOMContentLoaded", function() {
       var vb = el('verify-banner'); if (vb) vb.style.display = 'none';
     }
   });
+
+  // Rete di sicurezza: non lasciare mai la schermata di caricamento bloccata.
+  setTimeout(function(){
+    var sp = el('auth-splash');
+    if (sp && sp.style.display !== 'none') sp.style.display = 'none';
+  }, 8000);
 })();
 </script>
 <!-- ============== fine Firebase Auth ============== -->
