@@ -827,6 +827,8 @@
   }
   .lang-item:hover { background: var(--bg3); }
   .lang-item .lang-flag { font-size: 18px; width: 22px; flex-shrink: 0; }
+  .flag-svg { width: 22px; height: 15px; border-radius: 3px; display: inline-block; vertical-align: middle; box-shadow: 0 0 0 1px rgba(0,0,0,.18) inset; flex-shrink: 0; }
+  .settings-chip .flag-svg { margin-right: 7px; }
   .lang-item.active { background: rgba(232,160,32,.08); color: var(--accent); font-weight: 600; }
   .lang-item.active::after { content: "✓"; margin-left: auto; color: var(--accent); }
 
@@ -4816,7 +4818,7 @@ function buildSettingsLangChips() {
   for (var i = 0; i < langs.length; i++) {
     var l = langs[i];
     var act = (l.code === currentLang) ? ' active' : '';
-    html += '<button class="settings-chip' + act + '" onclick="setLanguageFromSettings(\'' + l.code + '\')">' + l.flag + ' ' + l.name + '</button>';
+    html += '<button class="settings-chip' + act + '" onclick="setLanguageFromSettings(\'' + l.code + '\')">' + flagSVG(l.code) + l.name + '</button>';
   }
   c.innerHTML = html;
 }
@@ -7287,6 +7289,18 @@ function setupMatchLongPress() {
 }
 // ============== fine STEP M2-extra ==============
 
+function flagSVG(code){
+  var inner = {
+    it: '<rect width="10" height="20" fill="#009246"/><rect x="10" width="10" height="20" fill="#fff"/><rect x="20" width="10" height="20" fill="#ce2b37"/>',
+    en: '<rect width="30" height="20" fill="#012169"/><path d="M0,0 L30,20 M30,0 L0,20" stroke="#fff" stroke-width="4"/><path d="M0,0 L30,20 M30,0 L0,20" stroke="#C8102E" stroke-width="2.2"/><path d="M15,0 V20 M0,10 H30" stroke="#fff" stroke-width="6"/><path d="M15,0 V20 M0,10 H30" stroke="#C8102E" stroke-width="3.6"/>',
+    es: '<rect width="30" height="20" fill="#AA151B"/><rect y="5" width="30" height="10" fill="#F1BF00"/>',
+    pt: '<rect width="30" height="20" fill="#FF0000"/><rect width="12" height="20" fill="#006600"/><circle cx="12" cy="10" r="3" fill="#FFCC00" stroke="#fff" stroke-width="0.7"/>',
+    fr: '<rect width="10" height="20" fill="#0055A4"/><rect x="10" width="10" height="20" fill="#fff"/><rect x="20" width="10" height="20" fill="#EF4135"/>',
+    de: '<rect width="30" height="6.67" fill="#000"/><rect y="6.67" width="30" height="6.66" fill="#DD0000"/><rect y="13.33" width="30" height="6.67" fill="#FFCE00"/>'
+  };
+  return '<svg class="flag-svg" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' + (inner[code] || '') + '</svg>';
+}
+
 function buildLangSubmenu() {
   // Lang submenu has been moved to the Settings page. This function is kept as a no-op
   // for backward compatibility with the DOMContentLoaded boot code.
@@ -7299,7 +7313,7 @@ function buildLangSubmenu() {
     var info = I18N[code];
     var isActive = code === currentLang;
     html += '<div class="lang-item' + (isActive ? ' active' : '') + '" onclick="event.stopPropagation();changeLang(\'' + code + '\')">' +
-            '<span class="lang-flag">' + info.flag + '</span><span>' + info.name + '</span>' +
+            flagSVG(code) + '<span>' + info.name + '</span>' +
             '</div>';
   }
   menu.innerHTML = html;
