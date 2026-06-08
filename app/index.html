@@ -2462,6 +2462,8 @@
   }
   .auth-subtitle { color: var(--text2); font-size: 15px; margin: 0; line-height: 1.5; }
   .auth-field { margin-bottom: 18px; }
+  .auth-name-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .auth-name-row .auth-field { margin-bottom: 18px; }
   .auth-field label {
     display: block; font-family: "Space Grotesk", var(--font-body);
     font-size: 12.5px; font-weight: 600; color: var(--text2); margin-bottom: 8px; letter-spacing: .04em; text-transform: uppercase;
@@ -2529,6 +2531,19 @@
     </div>
 
     <div class="auth-error" id="auth-error"></div>
+
+    <div id="auth-name-fields" style="display:none;">
+      <div class="auth-name-row">
+        <div class="auth-field">
+          <label data-i18n="authNome">Nome</label>
+          <input type="text" id="auth-nome" autocomplete="given-name" autocapitalize="words" placeholder="Mario">
+        </div>
+        <div class="auth-field">
+          <label data-i18n="authCognome">Cognome</label>
+          <input type="text" id="auth-cognome" autocomplete="family-name" autocapitalize="words" placeholder="Rossi">
+        </div>
+      </div>
+    </div>
 
     <div class="auth-field">
       <label data-i18n="authEmail">Email</label>
@@ -12296,7 +12311,9 @@ document.addEventListener("DOMContentLoaded", function() {
     var pass = el('auth-password');
     var eyebrow = el('auth-eyebrow');
     var title = el('auth-title');
+    var nameFields = el('auth-name-fields');
     if (authMode === 'register') {
+      if (nameFields) nameFields.style.display = '';
       if (submitBtn) submitBtn.textContent = tt('authRegisterBtn', 'Registrati');
       if (subtitle)  subtitle.textContent  = tt('authSubtitleRegister', 'Crea un account per iniziare');
       if (eyebrow) eyebrow.textContent = tt('authEyebrowRegister', 'Crea il tuo account');
@@ -12306,6 +12323,7 @@ document.addEventListener("DOMContentLoaded", function() {
         '<span>' + tt('authHaveAccount', 'Hai già un account?') + '</span> ' +
         '<a onclick="authToggleMode()">' + tt('authGoLogin', 'Accedi') + '</a>';
     } else {
+      if (nameFields) nameFields.style.display = 'none';
       if (submitBtn) submitBtn.textContent = tt('authLoginBtn', 'Accedi');
       if (subtitle)  subtitle.textContent  = tt('authSubtitleLogin', 'Accedi per gestire le statistiche della tua squadra');
       if (eyebrow) eyebrow.textContent = tt('authEyebrowLogin', 'Bentornato');
@@ -12321,6 +12339,15 @@ document.addEventListener("DOMContentLoaded", function() {
     var email = (el('auth-email').value || '').trim();
     var pass  = el('auth-password').value || '';
     setAuthError('');
+
+    var nome = '', cognome = '';
+    if (authMode === 'register') {
+      nome    = (el('auth-nome').value || '').trim();
+      cognome = (el('auth-cognome').value || '').trim();
+      if (!nome)    { setAuthError(tt('authErrEmptyNome', 'Inserisci il tuo nome.')); return; }
+      if (!cognome) { setAuthError(tt('authErrEmptyCognome', 'Inserisci il tuo cognome.')); return; }
+    }
+
     if (!email) { setAuthError(tt('authErrEmptyEmail', 'Inserisci la tua email.')); return; }
     if (!pass)  { setAuthError(tt('authErrEmptyPass', 'Inserisci la password.')); return; }
 
@@ -12332,7 +12359,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
     if (authMode === 'register') {
       fbAuth.createUserWithEmailAndPassword(email, pass)
-        .then(function(){ /* onAuthStateChanged hides the screen */ })
+        .then(function(cred){
+          var full = (nome + ' ' + cognome).trim();
+          try {
+            localStorage.setItem('hexa_user_nome', nome);
+            localStorage.setItem('hexa_user_cognome', cognome);
+          } catch(e){}
+          var u = cred && cred.user;
+          if (u && u.updateProfile) { return u.updateProfile({ displayName: full }); }
+        })
         .catch(fail);
     } else {
       fbAuth.signInWithEmailAndPassword(email, pass)
