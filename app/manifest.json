@@ -1,0 +1,19 @@
+{
+  "name": "Hexa Sport",
+  "short_name": "Hexa Sport",
+  "description": "Statistiche sportive per allenatori e società.",
+  "lang": "it",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#e8a020",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "pwa_icons/icon-152.png", "sizes": "152x152", "type": "image/png" },
+    { "src": "pwa_icons/icon-167.png", "sizes": "167x167", "type": "image/png" },
+    { "src": "pwa_icons/icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "pwa_icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "pwa_icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
