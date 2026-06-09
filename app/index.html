@@ -1471,10 +1471,13 @@
   .acc-note { color: var(--text3); font-size: 12.5px; line-height: 1.45; background: var(--bg); border: 1px dashed var(--border2); border-radius: 9px; padding: 9px 12px; margin-bottom: 14px; }
   .acc-section { border-top: 1px solid var(--border); padding-top: 16px; margin-top: 16px; }
   .acc-sec-title { font-weight: 700; font-size: 15px; margin-bottom: 12px; color: var(--text); }
-  #modal-account .form-group { margin-bottom: 12px; }
-  #modal-account .form-group label { display:block; font-size:12px; font-weight:600; color:var(--text2); margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em; }
-  #modal-account .form-group input { width:100%; box-sizing:border-box; font-size:16px; padding:11px 13px; border-radius:10px; border:1px solid var(--border2); background:var(--bg); color:var(--text); font-family:inherit; }
-  #modal-account .form-group input:focus { outline:none; border-color:var(--accent); }
+  #page-account .form-group { margin-bottom: 12px; }
+  #page-account .form-group label { display:block; font-size:12px; font-weight:600; color:var(--text2); margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em; }
+  #page-account .form-group input { width:100%; box-sizing:border-box; font-size:16px; padding:11px 13px; border-radius:10px; border:1px solid var(--border2); background:var(--bg); color:var(--text); font-family:inherit; }
+  #page-account .form-group input:focus { outline:none; border-color:var(--accent); }
+  #page-account .acc-info { max-width:560px; }
+  #page-account .acc-note { max-width:560px; }
+  #page-account .form-group, #page-account button.btn { max-width:560px; }
   .modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: 14px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--bg2); z-index: 1; }
   .modal-header h2 { font-size: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
@@ -3090,6 +3093,47 @@
     </div>
   </div>
   <!-- Iter 6: Elenco Avversari -->
+  <div class="page" id="page-account">
+    <div class="settings-top-bar">
+      <button class="btn btn-ghost" onclick="showPage('dashboard')">← <span data-i18n="backToDashboard">Torna alla Dashboard</span></button>
+      <span class="settings-top-cog" aria-hidden="true">👤</span>
+    </div>
+
+    <div class="settings-page-section">
+      <div class="settings-page-section-title">👤 <span data-i18n="accountTitle">Account</span></div>
+      <div class="acc-info">
+        <div class="acc-row"><span class="acc-k" data-i18n="accountName">Nome</span><span class="acc-v" id="acc-name">—</span></div>
+        <div class="acc-row"><span class="acc-k" data-i18n="accountEmailLabel">Email</span><span class="acc-v" id="acc-email">—</span></div>
+        <div class="acc-row"><span class="acc-k" data-i18n="accountTeam">Squadra</span><span class="acc-v" id="acc-team">—</span></div>
+      </div>
+      <div class="acc-note" data-i18n="accountTeamSoon">Selezione tra più squadre: in arrivo (per i piani Pro ed Enterprise).</div>
+    </div>
+
+    <div class="settings-page-section" id="acc-section-email">
+      <div class="settings-page-section-title">✉️ <span data-i18n="accountChangeEmail">Cambia email</span></div>
+      <div id="acc-msg-email" class="auth-error"></div>
+      <div id="acc-ok-email" class="auth-ok" style="display:none;"></div>
+      <div class="form-group"><label data-i18n="accountCurrentPass">Password attuale</label><input type="password" id="acc-email-pass" autocomplete="current-password"></div>
+      <div class="form-group"><label data-i18n="accountNewEmail">Nuova email</label><input type="email" id="acc-new-email1" autocomplete="off" autocapitalize="none"></div>
+      <div class="form-group"><label data-i18n="accountNewEmailConfirm">Ripeti nuova email</label><input type="email" id="acc-new-email2" autocomplete="off" autocapitalize="none"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:4px;" onclick="accountUpdateEmail()" data-i18n="accountUpdateEmailBtn">Aggiorna email</button>
+    </div>
+
+    <div class="settings-page-section" id="acc-section-pass">
+      <div class="settings-page-section-title">🔒 <span data-i18n="accountChangePass">Cambia password</span></div>
+      <div id="acc-msg-pass" class="auth-error"></div>
+      <div id="acc-ok-pass" class="auth-ok" style="display:none;"></div>
+      <div class="form-group"><label data-i18n="accountCurrentPass">Password attuale</label><input type="password" id="acc-pass-current" autocomplete="current-password"></div>
+      <div class="form-group"><label data-i18n="accountNewPass">Nuova password</label><input type="password" id="acc-new-pass1" autocomplete="new-password"></div>
+      <div class="form-group"><label data-i18n="accountNewPassConfirm">Ripeti nuova password</label><input type="password" id="acc-new-pass2" autocomplete="new-password"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:4px;" onclick="accountUpdatePassword()" data-i18n="accountUpdatePassBtn">Aggiorna password</button>
+    </div>
+
+    <div class="settings-page-section" id="acc-google-note-wrap" style="display:none;">
+      <div class="acc-note" data-i18n="accountGoogleNote">Accedi con Google: gestisci email e password dal tuo account Google.</div>
+    </div>
+  </div>
+
   <div class="page" id="page-avversari-list">
     <div class="back-bar">
       <button class="back-btn" onclick="showPage('partite')">← <span data-i18n="backToMatches">Torna alle partite</span></button>
@@ -3108,47 +3152,6 @@
   </div>
 
 </main>
-
-<div class="overlay" id="modal-account">
-  <div class="modal" style="max-width:460px;">
-    <div class="modal-header">
-      <h2 data-i18n="accountTitle">Account</h2>
-      <button class="modal-close" onclick="closeModal('modal-account')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="acc-info">
-        <div class="acc-row"><span class="acc-k" data-i18n="accountName">Nome</span><span class="acc-v" id="acc-name">—</span></div>
-        <div class="acc-row"><span class="acc-k" data-i18n="accountEmailLabel">Email</span><span class="acc-v" id="acc-email">—</span></div>
-        <div class="acc-row"><span class="acc-k" data-i18n="accountTeam">Squadra</span><span class="acc-v" id="acc-team">—</span></div>
-      </div>
-      <div class="acc-note" data-i18n="accountTeamSoon">Selezione tra più squadre: in arrivo (per i piani Pro ed Enterprise).</div>
-
-      <div id="acc-msg" class="auth-error" style="margin-top:4px;"></div>
-      <div id="acc-ok" class="auth-ok" style="display:none;margin-top:4px;"></div>
-
-      <div class="acc-section" id="acc-section-email">
-        <div class="acc-sec-title" data-i18n="accountChangeEmail">Cambia email</div>
-        <div class="form-group"><label data-i18n="accountCurrentPass">Password attuale</label><input type="password" id="acc-email-pass" autocomplete="current-password"></div>
-        <div class="form-group"><label data-i18n="accountNewEmail">Nuova email</label><input type="email" id="acc-new-email1" autocomplete="off" autocapitalize="none"></div>
-        <div class="form-group"><label data-i18n="accountNewEmailConfirm">Ripeti nuova email</label><input type="email" id="acc-new-email2" autocomplete="off" autocapitalize="none"></div>
-        <button class="btn btn-primary" style="width:100%;" onclick="accountUpdateEmail()" data-i18n="accountUpdateEmailBtn">Aggiorna email</button>
-      </div>
-
-      <div class="acc-section" id="acc-section-pass">
-        <div class="acc-sec-title" data-i18n="accountChangePass">Cambia password</div>
-        <div class="form-group"><label data-i18n="accountCurrentPass">Password attuale</label><input type="password" id="acc-pass-current" autocomplete="current-password"></div>
-        <div class="form-group"><label data-i18n="accountNewPass">Nuova password</label><input type="password" id="acc-new-pass1" autocomplete="new-password"></div>
-        <div class="form-group"><label data-i18n="accountNewPassConfirm">Ripeti nuova password</label><input type="password" id="acc-new-pass2" autocomplete="new-password"></div>
-        <button class="btn btn-primary" style="width:100%;" onclick="accountUpdatePassword()" data-i18n="accountUpdatePassBtn">Aggiorna password</button>
-      </div>
-
-      <div class="acc-note" id="acc-google-note" style="display:none;" data-i18n="accountGoogleNote">Accedi con Google: gestisci email e password dal tuo account Google.</div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-account')" data-i18n="close">Chiudi</button>
-    </div>
-  </div>
-</div>
 
 <div class="overlay" id="modal-partita">
   <div class="modal">
@@ -3438,7 +3441,7 @@ var I18N = {
     settingsCompact: 'Modalità compatta', settingsCompactHint: 'Riduce gli spazi per vedere più informazioni (solo desktop)',
     settingsTemplate: 'Scarica template partita', settingsTemplateHint: 'Foglio cartaceo da portare al palazzetto in caso non si possa usare l'+String.fromCharCode(8217)+'app live', templateDownloadTitle: 'Scarica template partita', templateDownloadHint: 'Scegli il formato', templateFormatPdf: '📄 PDF (stampabile A4)', templateFormatXlsx: '📊 Excel (.xlsx)', templateInfoHeader: 'INFO PARTITA', templateDate: 'Data', templateOpponent: 'Avversario', templateVenue: 'Sede', templateHome: 'Casa', templateAway: 'Trasferta', templateCompetition: 'Competizione', templateResult: 'Risultato finale', templateShots: 'Tiri totali', templateUs: 'Noi', templateThem: 'Loro', templatePpRow: 'Powerplay (PP gol / PP totali)', templatePkRow: 'Penalty Kill (PK gol subiti / PK totali)', templatePkGolFatti: 'Gol fatti in PK', templatePpGolSubiti: 'Gol subiti in PP', templateNotes: 'Note', templatePlayersHeader: 'GIOCATORI', templateGoaliesHeader: 'PORTIERI', templateColName: 'Nome', settingsExport: 'Esporta dati', settingsExportHint: 'Scarica un backup di tutte le tue partite e giocatori',
     settingsImport: 'Importa dati', settingsImportHint: 'Ripristina da un file di backup',
-    exportFailed: 'Esportazione fallita.', importInvalidJson: 'Il file non è un JSON valido.', importInvalidBackup: 'Il file non è un backup valido di Hockey Tracker.', importConfirmTitle: 'Conferma importazione', importBackupDate: 'Data backup', importMatches: 'partite', importPlayers: 'giocatori', importGoalies: 'portieri', importConfirmBody: 'I dati attuali verranno sostituiti. Vuoi continuare?', importSuccess: 'Importazione completata. La pagina verrà ricaricata.', importFailed: 'Importazione fallita.', importReadError: 'Impossibile leggere il file.', clearStep1Title: 'Cancella tutti i dati', clearStep1Body: 'Stai per cancellare definitivamente partite, giocatori e statistiche.\n\nTi consigliamo di scaricare prima un backup. Vuoi farlo ora?', clearBackupFailedContinue: 'Il backup non è riuscito. Vuoi comunque procedere con la cancellazione?', clearKeyword: 'CANCELLA', clearStep2Body: 'Per confermare, scrivi la parola {KEY} (in maiuscolo):', clearKeywordMismatch: 'La parola digitata non corrisponde a {KEY}. Cancellazione annullata.', clearSuccess: 'Dati cancellati. La pagina verrà ricaricata.', clearFailed: 'Cancellazione fallita.', clearStep2Title: 'Conferma cancellazione', clearSkipBackup: 'Salta backup', clearDoBackup: 'Scarica backup', clearConfirmFinal: 'Cancella definitivamente', clearDoneTitle: 'Fatto', ok: 'OK', dialogNotice: 'Avviso', dialogConfirm: 'Conferma', authSubtitleLogin: 'Accedi per gestire le statistiche della tua squadra', authSubtitleRegister: 'Crea un account per iniziare', authEmail: 'Email', authPassword: 'Password', authNome: 'Nome', authCognome: 'Cognome', authErrEmptyNome: 'Inserisci il tuo nome.', authErrEmptyCognome: 'Inserisci il tuo cognome.', authLoginBtn: 'Accedi', authRegisterBtn: 'Registrati', authOr: 'oppure', authGoogleBtn: 'Continua con Google', authNoAccount: 'Non hai un account?', authGoRegister: 'Registrati', authHaveAccount: 'Hai già un account?', authGoLogin: 'Accedi', authForgot: 'Password dimenticata?', authResetEyebrow: 'Recupero password', authResetTitle: 'Hai dimenticato la password?', authResetSub: 'Inserisci la tua email: ti inviamo un link per reimpostarla.', authResetBtn: 'Invia link di reset', authResetSentBtn: 'Email inviata ✓', authBackToLogin: '← Torna all’accesso', verifyBannerText: 'Ti abbiamo inviato un’email di verifica. Controlla la casella (anche lo spam).', verifyResend: 'Reinvia email', cloudMigrateAsk: 'Vuoi caricare nel tuo account i dati presenti su questo dispositivo? Premi "Annulla" se questo non è l’account giusto.', accountTitle: 'Account', accountName: 'Nome', accountEmailLabel: 'Email', accountTeam: 'Squadra', accountTeamSoon: 'Selezione tra più squadre: in arrivo (per i piani Pro ed Enterprise).', accountChangeEmail: 'Cambia email', accountChangePass: 'Cambia password', accountCurrentPass: 'Password attuale', accountNewEmail: 'Nuova email', accountNewEmailConfirm: 'Ripeti nuova email', accountNewPass: 'Nuova password', accountNewPassConfirm: 'Ripeti nuova password', accountUpdateEmailBtn: 'Aggiorna email', accountUpdatePassBtn: 'Aggiorna password', accountGoogleNote: 'Accedi con Google: gestisci email e password dal tuo account Google.', accEmailUpdated: 'Email aggiornata ✓', accPassUpdated: 'Password aggiornata ✓', accErrNeedPass: 'Inserisci la password attuale.', accErrNeedEmail: 'Inserisci la nuova email.', accErrEmailMismatch: 'Le due email non coincidono.', accErrPassShort: 'La nuova password deve avere almeno 6 caratteri.', accErrPassMismatch: 'Le due password non coincidono.', accErrWrongPass: 'Password attuale errata.', accErrEmailInUse: 'Questa email è già in uso.', accErrInvalidEmail: 'Email non valida.', accErrRecentLogin: 'Per sicurezza, esci e rientra, poi riprova.', accErrTooMany: 'Troppi tentativi. Riprova più tardi.', accErrGeneric: 'Si è verificato un errore. Riprova.', verifyResent: 'Email inviata ✓', verifyRecheck: 'Ho verificato', verifyDone: 'Email verificata. Grazie!', verifyNotYet: 'Non risulta ancora verificata. Clicca il link nell’email (controlla anche lo spam).', authWorking: 'Attendi...', authResetSent: 'Ti abbiamo inviato un’email per reimpostare la password. Controlla la posta (anche lo spam).', authErrInvalidEmail: 'Indirizzo email non valido.', authErrNoUser: 'Nessun account trovato con questa email.', authErrWrongPass: 'Email o password errate.', authErrInUse: 'Esiste già un account con questa email.', authErrWeakPass: 'La password deve avere almeno 6 caratteri.', authErrEmptyEmail: 'Inserisci la tua email.', authErrEmptyPass: 'Inserisci la password.', authErrEmptyEmailReset: 'Scrivi la tua email qui sopra, poi premi di nuovo Password dimenticata.', authErrTooMany: 'Troppi tentativi. Riprova tra poco.', authErrNetwork: 'Problema di connessione. Controlla internet.', authErrGeneric: 'Si è verificato un errore. Riprova.',
+    exportFailed: 'Esportazione fallita.', importInvalidJson: 'Il file non è un JSON valido.', importInvalidBackup: 'Il file non è un backup valido di Hockey Tracker.', importConfirmTitle: 'Conferma importazione', importBackupDate: 'Data backup', importMatches: 'partite', importPlayers: 'giocatori', importGoalies: 'portieri', importConfirmBody: 'I dati attuali verranno sostituiti. Vuoi continuare?', importSuccess: 'Importazione completata. La pagina verrà ricaricata.', importFailed: 'Importazione fallita.', importReadError: 'Impossibile leggere il file.', clearStep1Title: 'Cancella tutti i dati', clearStep1Body: 'Stai per cancellare definitivamente partite, giocatori e statistiche.\n\nTi consigliamo di scaricare prima un backup. Vuoi farlo ora?', clearBackupFailedContinue: 'Il backup non è riuscito. Vuoi comunque procedere con la cancellazione?', clearKeyword: 'CANCELLA', clearStep2Body: 'Per confermare, scrivi la parola {KEY} (in maiuscolo):', clearKeywordMismatch: 'La parola digitata non corrisponde a {KEY}. Cancellazione annullata.', clearSuccess: 'Dati cancellati. La pagina verrà ricaricata.', clearFailed: 'Cancellazione fallita.', clearStep2Title: 'Conferma cancellazione', clearSkipBackup: 'Salta backup', clearDoBackup: 'Scarica backup', clearConfirmFinal: 'Cancella definitivamente', clearDoneTitle: 'Fatto', ok: 'OK', dialogNotice: 'Avviso', dialogConfirm: 'Conferma', authSubtitleLogin: 'Accedi per gestire le statistiche della tua squadra', authSubtitleRegister: 'Crea un account per iniziare', authEmail: 'Email', authPassword: 'Password', authNome: 'Nome', authCognome: 'Cognome', authErrEmptyNome: 'Inserisci il tuo nome.', authErrEmptyCognome: 'Inserisci il tuo cognome.', authLoginBtn: 'Accedi', authRegisterBtn: 'Registrati', authOr: 'oppure', authGoogleBtn: 'Continua con Google', authNoAccount: 'Non hai un account?', authGoRegister: 'Registrati', authHaveAccount: 'Hai già un account?', authGoLogin: 'Accedi', authForgot: 'Password dimenticata?', authResetEyebrow: 'Recupero password', authResetTitle: 'Hai dimenticato la password?', authResetSub: 'Inserisci la tua email: ti inviamo un link per reimpostarla.', authResetBtn: 'Invia link di reset', authResetSentBtn: 'Email inviata ✓', authBackToLogin: '← Torna all’accesso', verifyBannerText: 'Ti abbiamo inviato un’email di verifica. Controlla la casella (anche lo spam).', verifyResend: 'Reinvia email', cloudMigrateAsk: 'Vuoi caricare nel tuo account i dati presenti su questo dispositivo? Premi "Annulla" se questo non è l’account giusto.', accountTitle: 'Account', accountName: 'Nome', accountEmailLabel: 'Email', accountTeam: 'Squadra', accountTeamSoon: 'Selezione tra più squadre: in arrivo (per i piani Pro ed Enterprise).', accountChangeEmail: 'Cambia email', accountChangePass: 'Cambia password', accountCurrentPass: 'Password attuale', accountNewEmail: 'Nuova email', accountNewEmailConfirm: 'Ripeti nuova email', accountNewPass: 'Nuova password', accountNewPassConfirm: 'Ripeti nuova password', accountUpdateEmailBtn: 'Aggiorna email', accountUpdatePassBtn: 'Aggiorna password', accountGoogleNote: 'Accedi con Google: gestisci email e password dal tuo account Google.', accEmailUpdated: 'Email aggiornata ✓', accPassUpdated: 'Password aggiornata ✓', accEmailVerifySent: 'Ti abbiamo inviato un link di conferma alla nuova email. Aprila e clicca il link: il cambio sarà attivo solo dopo la conferma.', accErrNeedPass: 'Inserisci la password attuale.', accErrNeedEmail: 'Inserisci la nuova email.', accErrEmailMismatch: 'Le due email non coincidono.', accErrPassShort: 'La nuova password deve avere almeno 6 caratteri.', accErrPassMismatch: 'Le due password non coincidono.', accErrWrongPass: 'Password attuale errata.', accErrEmailInUse: 'Questa email è già in uso.', accErrInvalidEmail: 'Email non valida.', accErrRecentLogin: 'Per sicurezza, esci e rientra, poi riprova.', accErrTooMany: 'Troppi tentativi. Riprova più tardi.', accErrGeneric: 'Si è verificato un errore. Riprova.', verifyResent: 'Email inviata ✓', verifyRecheck: 'Ho verificato', verifyDone: 'Email verificata. Grazie!', verifyNotYet: 'Non risulta ancora verificata. Clicca il link nell’email (controlla anche lo spam).', authWorking: 'Attendi...', authResetSent: 'Ti abbiamo inviato un’email per reimpostare la password. Controlla la posta (anche lo spam).', authErrInvalidEmail: 'Indirizzo email non valido.', authErrNoUser: 'Nessun account trovato con questa email.', authErrWrongPass: 'Email o password errate.', authErrInUse: 'Esiste già un account con questa email.', authErrWeakPass: 'La password deve avere almeno 6 caratteri.', authErrEmptyEmail: 'Inserisci la tua email.', authErrEmptyPass: 'Inserisci la password.', authErrEmptyEmailReset: 'Scrivi la tua email qui sopra, poi premi di nuovo Password dimenticata.', authErrTooMany: 'Troppi tentativi. Riprova tra poco.', authErrNetwork: 'Problema di connessione. Controlla internet.', authErrGeneric: 'Si è verificato un errore. Riprova.',
     settingsReset: 'Cancella tutti i dati', settingsResetHint: 'Rimuove definitivamente partite, giocatori e statistiche',
     settingsTeamName: 'Nome squadra', settingsTeamNameHint: 'Personalizza il nome che appare nello scoreboard',
     settingsTeamLogo: 'Logo squadra', settingsTeamLogoHint: 'Carica il logo della tua squadra',
@@ -8718,15 +8721,17 @@ function accProvider() {
   }
   return res;
 }
-function accMsg(msg, ok) {
-  var e = document.getElementById('acc-msg');
-  var o = document.getElementById('acc-ok');
+function accMsg(section, msg, ok) {
+  var e = document.getElementById('acc-msg-' + section);
+  var o = document.getElementById('acc-ok-' + section);
   if (msg && ok) { if (o) { o.textContent = msg; o.style.display = ''; } if (e) { e.classList.remove('show'); e.textContent = ''; } }
   else if (msg) { if (e) { e.textContent = msg; e.classList.add('show'); } if (o) { o.style.display = 'none'; } }
   else { if (e) { e.textContent = ''; e.classList.remove('show'); } if (o) { o.style.display = 'none'; o.textContent = ''; } }
 }
+function accMsgClear() { accMsg('email', ''); accMsg('pass', ''); }
 function openAccount() {
   if (typeof closeProfileMenu === 'function') closeProfileMenu();
+  showPage('account');
   var u = window.fbAuth && window.fbAuth.currentUser;
   var name = '';
   try { name = ((localStorage.getItem('hexa_user_nome') || '') + ' ' + (localStorage.getItem('hexa_user_cognome') || '')).trim(); } catch (e) {}
@@ -8734,17 +8739,15 @@ function openAccount() {
   document.getElementById('acc-name').textContent = name || '—';
   document.getElementById('acc-email').textContent = (u && u.email) || '—';
   document.getElementById('acc-team').textContent = (typeof settings !== 'undefined' && settings.teamName) ? settings.teamName : '—';
-  var prov = accProvider();
-  var canPw = prov.password;
+  var canPw = accProvider().password;
   var emailSec = document.getElementById('acc-section-email');
   var passSec = document.getElementById('acc-section-pass');
-  var gNote = document.getElementById('acc-google-note');
+  var gWrap = document.getElementById('acc-google-note-wrap');
   if (emailSec) emailSec.style.display = canPw ? '' : 'none';
   if (passSec) passSec.style.display = canPw ? '' : 'none';
-  if (gNote) gNote.style.display = canPw ? 'none' : '';
+  if (gWrap) gWrap.style.display = canPw ? 'none' : '';
   ['acc-email-pass','acc-new-email1','acc-new-email2','acc-pass-current','acc-new-pass1','acc-new-pass2'].forEach(function(id){ var x = document.getElementById(id); if (x) x.value = ''; });
-  accMsg('');
-  openModal('modal-account');
+  accMsgClear();
 }
 function accAuthError(err) {
   var code = err && err.code ? err.code : '';
@@ -8763,38 +8766,39 @@ function accReauth(currentPass) {
 function accountUpdateEmail() {
   var u = window.fbAuth && window.fbAuth.currentUser;
   if (!u) return;
-  accMsg('');
+  accMsg('email', '');
   var cur = document.getElementById('acc-email-pass').value || '';
   var e1 = (document.getElementById('acc-new-email1').value || '').trim();
   var e2 = (document.getElementById('acc-new-email2').value || '').trim();
-  if (!cur) { accMsg(t('accErrNeedPass')); return; }
-  if (!e1)  { accMsg(t('accErrNeedEmail')); return; }
-  if (e1 !== e2) { accMsg(t('accErrEmailMismatch')); return; }
-  accReauth(cur).then(function(){ return u.updateEmail(e1); }).then(function(){
-    var lbl = document.getElementById('account-email-label'); if (lbl) lbl.textContent = e1;
-    document.getElementById('acc-email').textContent = e1;
-    accMsg(t('accEmailUpdated'), true);
+  if (!cur) { accMsg('email', t('accErrNeedPass')); return; }
+  if (!e1)  { accMsg('email', t('accErrNeedEmail')); return; }
+  if (e1 !== e2) { accMsg('email', t('accErrEmailMismatch')); return; }
+  accReauth(cur).then(function(){
+    if (u.verifyBeforeUpdateEmail) return u.verifyBeforeUpdateEmail(e1);
+    return u.updateEmail(e1);
+  }).then(function(){
+    accMsg('email', t('accEmailVerifySent'), true);
     document.getElementById('acc-email-pass').value = '';
     document.getElementById('acc-new-email1').value = '';
     document.getElementById('acc-new-email2').value = '';
-  }).catch(function(err){ accMsg(accAuthError(err)); });
+  }).catch(function(err){ accMsg('email', accAuthError(err)); });
 }
 function accountUpdatePassword() {
   var u = window.fbAuth && window.fbAuth.currentUser;
   if (!u) return;
-  accMsg('');
+  accMsg('pass', '');
   var cur = document.getElementById('acc-pass-current').value || '';
   var p1 = document.getElementById('acc-new-pass1').value || '';
   var p2 = document.getElementById('acc-new-pass2').value || '';
-  if (!cur) { accMsg(t('accErrNeedPass')); return; }
-  if (p1.length < 6) { accMsg(t('accErrPassShort')); return; }
-  if (p1 !== p2) { accMsg(t('accErrPassMismatch')); return; }
+  if (!cur) { accMsg('pass', t('accErrNeedPass')); return; }
+  if (p1.length < 6) { accMsg('pass', t('accErrPassShort')); return; }
+  if (p1 !== p2) { accMsg('pass', t('accErrPassMismatch')); return; }
   accReauth(cur).then(function(){ return u.updatePassword(p1); }).then(function(){
-    accMsg(t('accPassUpdated'), true);
+    accMsg('pass', t('accPassUpdated'), true);
     document.getElementById('acc-pass-current').value = '';
     document.getElementById('acc-new-pass1').value = '';
     document.getElementById('acc-new-pass2').value = '';
-  }).catch(function(err){ accMsg(accAuthError(err)); });
+  }).catch(function(err){ accMsg('pass', accAuthError(err)); });
 }
 
 function getPartitaById(id) {
