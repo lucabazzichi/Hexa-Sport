@@ -12985,6 +12985,24 @@ document.addEventListener("DOMContentLoaded", function() {
   if (typeof saveSettings === 'function'){ window.__origSaveSettings = saveSettings; saveSettings = function(){ window.__origSaveSettings(); window.cloudSave(); };   window.saveSettings = saveSettings; }
   // ============== fine Sincronizzazione cloud ==============
 
+  // Salva/aggiorna la scheda profilo dell'utente (per il pannello Admin)
+  function saveUserProfile(u){
+    try {
+      if (!u || !u.uid || !fbDB) return;
+      var prof = {
+        uid: u.uid,
+        email: u.email || '',
+        displayName: u.displayName || '',
+        emailVerified: !!u.emailVerified,
+        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      if (u.metadata && u.metadata.creationTime) {
+        prof.createdAt = new Date(u.metadata.creationTime);
+      }
+      fbDB.collection('users').doc(u.uid).set(prof, { merge: true });
+    } catch (e) { console.warn('saveUserProfile:', e); }
+  }
+
   fbAuth.onAuthStateChanged(function(user){
     var sp = el('auth-splash');
     if (sp) sp.style.display = 'none';
@@ -12998,6 +13016,7 @@ document.addEventListener("DOMContentLoaded", function() {
       window.__hexaUser = user;
       window.updateVerifyBanner(user);
       initCloudForUser(user);
+      saveUserProfile(user);
     } else {
       showAuthScreen(true);
       window.__hexaUser = null;
