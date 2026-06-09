@@ -1739,6 +1739,21 @@
   .toast-saved.show {
     opacity: 1; transform: translateX(-50%) translateY(0);
   }
+  #cloud-status {
+    position: fixed; left: 14px; bottom: 18px; z-index: 250;
+    display: none; align-items: center; gap: 7px;
+    padding: 7px 13px; border-radius: 999px;
+    background: var(--bg2); border: 1px solid var(--border2);
+    color: var(--text2); font-size: 12.5px; font-weight: 600;
+    box-shadow: 0 4px 14px rgba(0,0,0,.28);
+  }
+  #cloud-status.show { display: inline-flex; }
+  #cloud-status .cs-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
+  #cloud-status.cs-saving .cs-dot { background: var(--accent); animation: csPulse 1s ease-in-out infinite; }
+  #cloud-status.cs-saved .cs-dot { background: #2ecc71; }
+  #cloud-status.cs-error { color: var(--red); border-color: var(--red); }
+  #cloud-status.cs-error .cs-dot { background: var(--red); }
+  @keyframes csPulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
   /* Tooltip for abbreviations — fixed positioning so it never gets clipped by overflow:hidden parents */
   [data-tooltip] { position: relative; cursor: help; }
   .tooltip-floating {
@@ -2136,6 +2151,10 @@
     /* Toast must float above the tab bar */
     .toast-saved {
       bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+    #cloud-status {
+      bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+      left: 12px;
     }
 
     /* M1: Dashboard tables stack on mobile (Top Scorers + Goalies SV%) */
@@ -3406,6 +3425,7 @@ Ti consigliamo di scaricare prima un backup. Vuoi farlo ora?</p>
 </div>
 
 <div class="toast-saved" id="toast-saved" data-i18n="toastSaved">✓ Salvato</div>
+<div id="cloud-status"><span class="cs-dot"></span><span id="cloud-status-text">…</span></div>
 
 <script>
 window.onerror = function(msg, url, lineNo, colNo, error) {
@@ -3446,7 +3466,7 @@ var I18N = {
     settingsCompact: 'Modalità compatta', settingsCompactHint: 'Riduce gli spazi per vedere più informazioni (solo desktop)',
     settingsTemplate: 'Scarica template partita', settingsTemplateHint: 'Foglio cartaceo da portare al palazzetto in caso non si possa usare l'+String.fromCharCode(8217)+'app live', templateDownloadTitle: 'Scarica template partita', templateDownloadHint: 'Scegli il formato', templateFormatPdf: '📄 PDF (stampabile A4)', templateFormatXlsx: '📊 Excel (.xlsx)', templateInfoHeader: 'INFO PARTITA', templateDate: 'Data', templateOpponent: 'Avversario', templateVenue: 'Sede', templateHome: 'Casa', templateAway: 'Trasferta', templateCompetition: 'Competizione', templateResult: 'Risultato finale', templateShots: 'Tiri totali', templateUs: 'Noi', templateThem: 'Loro', templatePpRow: 'Powerplay (PP gol / PP totali)', templatePkRow: 'Penalty Kill (PK gol subiti / PK totali)', templatePkGolFatti: 'Gol fatti in PK', templatePpGolSubiti: 'Gol subiti in PP', templateNotes: 'Note', templatePlayersHeader: 'GIOCATORI', templateGoaliesHeader: 'PORTIERI', templateColName: 'Nome', settingsExport: 'Esporta dati', settingsExportHint: 'Scarica un backup di tutte le tue partite e giocatori',
     settingsImport: 'Importa dati', settingsImportHint: 'Ripristina da un file di backup',
-    exportFailed: 'Esportazione fallita.', importInvalidJson: 'Il file non è un JSON valido.', importInvalidBackup: 'Il file non è un backup valido di Hockey Tracker.', importConfirmTitle: 'Conferma importazione', importBackupDate: 'Data backup', importMatches: 'partite', importPlayers: 'giocatori', importGoalies: 'portieri', importConfirmBody: 'I dati attuali verranno sostituiti. Vuoi continuare?', importSuccess: 'Importazione completata. La pagina verrà ricaricata.', importFailed: 'Importazione fallita.', importReadError: 'Impossibile leggere il file.', clearStep1Title: 'Cancella tutti i dati', clearStep1Body: 'Stai per cancellare definitivamente partite, giocatori e statistiche.\n\nTi consigliamo di scaricare prima un backup. Vuoi farlo ora?', clearBackupFailedContinue: 'Il backup non è riuscito. Vuoi comunque procedere con la cancellazione?', clearKeyword: 'CANCELLA', clearStep2Body: 'Per confermare, scrivi la parola {KEY} (in maiuscolo):', clearKeywordMismatch: 'La parola digitata non corrisponde a {KEY}. Cancellazione annullata.', clearSuccess: 'Dati cancellati. La pagina verrà ricaricata.', clearFailed: 'Cancellazione fallita.', clearStep2Title: 'Conferma cancellazione', clearSkipBackup: 'Salta backup', clearDoBackup: 'Scarica backup', clearConfirmFinal: 'Cancella definitivamente', clearDoneTitle: 'Fatto', ok: 'OK', dialogNotice: 'Avviso', dialogConfirm: 'Conferma', authSubtitleLogin: 'Accedi per gestire le statistiche della tua squadra', authSubtitleRegister: 'Crea un account per iniziare', authEmail: 'Email', authPassword: 'Password', authNome: 'Nome', authCognome: 'Cognome', authErrEmptyNome: 'Inserisci il tuo nome.', authErrEmptyCognome: 'Inserisci il tuo cognome.', authLoginBtn: 'Accedi', authRegisterBtn: 'Registrati', authOr: 'oppure', authGoogleBtn: 'Continua con Google', authNoAccount: 'Non hai un account?', authGoRegister: 'Registrati', authHaveAccount: 'Hai già un account?', authGoLogin: 'Accedi', authForgot: 'Password dimenticata?', authResetEyebrow: 'Recupero password', authResetTitle: 'Hai dimenticato la password?', authResetSub: 'Inserisci la tua email: ti inviamo un link per reimpostarla.', authResetBtn: 'Invia link di reset', authResetSentBtn: 'Email inviata ✓', authBackToLogin: '← Torna all’accesso', verifyBannerText: 'Ti abbiamo inviato un’email di verifica. Controlla la casella (anche lo spam).', verifyResend: 'Reinvia email', cloudMigrateAsk: 'Vuoi caricare nel tuo account i dati presenti su questo dispositivo? Premi "Annulla" se questo non è l’account giusto.', accountTitle: 'Account', accountName: 'Nome', accountEmailLabel: 'Email', accountTeam: 'Squadra', accountTeamSoon: 'Selezione tra più squadre: in arrivo (per i piani Pro ed Enterprise).', accountChangeEmail: 'Cambia email', accountChangePass: 'Cambia password', accountCurrentPass: 'Password attuale', accountNewEmail: 'Nuova email', accountNewEmailConfirm: 'Ripeti nuova email', accountCurrentEmail: 'Email attuale', accountPassWhyEmail: 'Serve solo a confermare che sei tu (per sicurezza). Non è la nuova email.', accountNewPass: 'Nuova password', accountNewPassConfirm: 'Ripeti nuova password', accountUpdateEmailBtn: 'Aggiorna email', accountUpdatePassBtn: 'Aggiorna password', accountGoogleNote: 'Accedi con Google: gestisci email e password dal tuo account Google.', accEmailUpdated: 'Email aggiornata ✓', accPassUpdated: 'Password aggiornata ✓', accEmailVerifySent: 'Ti abbiamo inviato un link di conferma al nuovo indirizzo email. Apri quel messaggio (controlla anche lo spam) e clicca il link: il cambio sarà attivo solo dopo la conferma.', accErrNeedPass: 'Inserisci la password attuale.', accErrNeedEmail: 'Inserisci la nuova email.', accErrEmailMismatch: 'Le due email non coincidono.', accErrPassShort: 'La nuova password deve avere almeno 6 caratteri.', accErrPassMismatch: 'Le due password non coincidono.', accErrWrongPass: 'Password attuale errata.', accErrEmailInUse: 'Questa email è già in uso.', accErrInvalidEmail: 'Email non valida.', accErrRecentLogin: 'Per sicurezza, esci e rientra, poi riprova.', accErrTooMany: 'Troppi tentativi. Riprova più tardi.', accErrGeneric: 'Si è verificato un errore. Riprova.', verifyResent: 'Email inviata ✓', verifyRecheck: 'Ho verificato', verifyDone: 'Email verificata. Grazie!', verifyNotYet: 'Non risulta ancora verificata. Clicca il link nell’email (controlla anche lo spam).', authWorking: 'Attendi...', authResetSent: 'Ti abbiamo inviato un’email per reimpostare la password. Controlla la posta (anche lo spam).', authErrInvalidEmail: 'Indirizzo email non valido.', authErrNoUser: 'Nessun account trovato con questa email.', authErrWrongPass: 'Email o password errate.', authErrInUse: 'Esiste già un account con questa email.', authErrWeakPass: 'La password deve avere almeno 6 caratteri.', authErrEmptyEmail: 'Inserisci la tua email.', authErrEmptyPass: 'Inserisci la password.', authErrEmptyEmailReset: 'Scrivi la tua email qui sopra, poi premi di nuovo Password dimenticata.', authErrTooMany: 'Troppi tentativi. Riprova tra poco.', authErrNetwork: 'Problema di connessione. Controlla internet.', authErrGeneric: 'Si è verificato un errore. Riprova.',
+    exportFailed: 'Esportazione fallita.', importInvalidJson: 'Il file non è un JSON valido.', importInvalidBackup: 'Il file non è un backup valido di Hockey Tracker.', importConfirmTitle: 'Conferma importazione', importBackupDate: 'Data backup', importMatches: 'partite', importPlayers: 'giocatori', importGoalies: 'portieri', importConfirmBody: 'I dati attuali verranno sostituiti. Vuoi continuare?', importSuccess: 'Importazione completata. La pagina verrà ricaricata.', importFailed: 'Importazione fallita.', importReadError: 'Impossibile leggere il file.', clearStep1Title: 'Cancella tutti i dati', clearStep1Body: 'Stai per cancellare definitivamente partite, giocatori e statistiche.\n\nTi consigliamo di scaricare prima un backup. Vuoi farlo ora?', clearBackupFailedContinue: 'Il backup non è riuscito. Vuoi comunque procedere con la cancellazione?', clearKeyword: 'CANCELLA', clearStep2Body: 'Per confermare, scrivi la parola {KEY} (in maiuscolo):', clearKeywordMismatch: 'La parola digitata non corrisponde a {KEY}. Cancellazione annullata.', clearSuccess: 'Dati cancellati. La pagina verrà ricaricata.', clearFailed: 'Cancellazione fallita.', clearStep2Title: 'Conferma cancellazione', clearSkipBackup: 'Salta backup', clearDoBackup: 'Scarica backup', clearConfirmFinal: 'Cancella definitivamente', clearDoneTitle: 'Fatto', ok: 'OK', dialogNotice: 'Avviso', dialogConfirm: 'Conferma', authSubtitleLogin: 'Accedi per gestire le statistiche della tua squadra', authSubtitleRegister: 'Crea un account per iniziare', authEmail: 'Email', authPassword: 'Password', authNome: 'Nome', authCognome: 'Cognome', authErrEmptyNome: 'Inserisci il tuo nome.', authErrEmptyCognome: 'Inserisci il tuo cognome.', authLoginBtn: 'Accedi', authRegisterBtn: 'Registrati', authOr: 'oppure', authGoogleBtn: 'Continua con Google', authNoAccount: 'Non hai un account?', authGoRegister: 'Registrati', authHaveAccount: 'Hai già un account?', authGoLogin: 'Accedi', authForgot: 'Password dimenticata?', authResetEyebrow: 'Recupero password', authResetTitle: 'Hai dimenticato la password?', authResetSub: 'Inserisci la tua email: ti inviamo un link per reimpostarla.', authResetBtn: 'Invia link di reset', authResetSentBtn: 'Email inviata ✓', authBackToLogin: '← Torna all’accesso', verifyBannerText: 'Ti abbiamo inviato un’email di verifica. Controlla la casella (anche lo spam).', verifyResend: 'Reinvia email', cloudMigrateAsk: 'Vuoi caricare nel tuo account i dati presenti su questo dispositivo? Premi "Annulla" se questo non è l’account giusto.', accountTitle: 'Account', accountName: 'Nome', accountEmailLabel: 'Email', accountTeam: 'Squadra', accountTeamSoon: 'Selezione tra più squadre: in arrivo (per i piani Pro ed Enterprise).', accountChangeEmail: 'Cambia email', accountChangePass: 'Cambia password', accountCurrentPass: 'Password attuale', accountNewEmail: 'Nuova email', accountNewEmailConfirm: 'Ripeti nuova email', accountCurrentEmail: 'Email attuale', accountPassWhyEmail: 'Serve solo a confermare che sei tu (per sicurezza). Non è la nuova email.', accountNewPass: 'Nuova password', accountNewPassConfirm: 'Ripeti nuova password', accountUpdateEmailBtn: 'Aggiorna email', accountUpdatePassBtn: 'Aggiorna password', accountGoogleNote: 'Accedi con Google: gestisci email e password dal tuo account Google.', accEmailUpdated: 'Email aggiornata ✓', accPassUpdated: 'Password aggiornata ✓', accEmailVerifySent: 'Ti abbiamo inviato un link di conferma al nuovo indirizzo email. Apri quel messaggio (controlla anche lo spam) e clicca il link: il cambio sarà attivo solo dopo la conferma.', accErrNeedPass: 'Inserisci la password attuale.', accErrNeedEmail: 'Inserisci la nuova email.', accErrEmailMismatch: 'Le due email non coincidono.', accErrPassShort: 'La nuova password deve avere almeno 6 caratteri.', accErrPassMismatch: 'Le due password non coincidono.', accErrWrongPass: 'Password attuale errata.', accErrEmailInUse: 'Questa email è già in uso.', accErrInvalidEmail: 'Email non valida.', accErrRecentLogin: 'Per sicurezza, esci e rientra, poi riprova.', accErrTooMany: 'Troppi tentativi. Riprova più tardi.', accErrGeneric: 'Si è verificato un errore. Riprova.', cloudSaving: 'Salvataggio…', cloudSaved: 'Salvato nel cloud', cloudError: 'Non salvato online', verifyResent: 'Email inviata ✓', verifyRecheck: 'Ho verificato', verifyDone: 'Email verificata. Grazie!', verifyNotYet: 'Non risulta ancora verificata. Clicca il link nell’email (controlla anche lo spam).', authWorking: 'Attendi...', authResetSent: 'Ti abbiamo inviato un’email per reimpostare la password. Controlla la posta (anche lo spam).', authErrInvalidEmail: 'Indirizzo email non valido.', authErrNoUser: 'Nessun account trovato con questa email.', authErrWrongPass: 'Email o password errate.', authErrInUse: 'Esiste già un account con questa email.', authErrWeakPass: 'La password deve avere almeno 6 caratteri.', authErrEmptyEmail: 'Inserisci la tua email.', authErrEmptyPass: 'Inserisci la password.', authErrEmptyEmailReset: 'Scrivi la tua email qui sopra, poi premi di nuovo Password dimenticata.', authErrTooMany: 'Troppi tentativi. Riprova tra poco.', authErrNetwork: 'Problema di connessione. Controlla internet.', authErrGeneric: 'Si è verificato un errore. Riprova.',
     settingsReset: 'Cancella tutti i dati', settingsResetHint: 'Rimuove definitivamente partite, giocatori e statistiche',
     settingsTeamName: 'Nome squadra', settingsTeamNameHint: 'Personalizza il nome che appare nello scoreboard',
     settingsTeamLogo: 'Logo squadra', settingsTeamLogoHint: 'Carica il logo della tua squadra',
@@ -12851,23 +12871,53 @@ document.addEventListener("DOMContentLoaded", function() {
     } catch (e) { console.warn('applyCloudState:', e); }
   }
 
+  // Indicatore di sincronizzazione cloud (salvataggio / salvato / errore)
+  var __cloudStatusTimer = null;
+  window.cloudStatus = function(state) {
+    var box = document.getElementById('cloud-status');
+    var txt = document.getElementById('cloud-status-text');
+    if (!box || !txt) return;
+    box.classList.remove('cs-saving', 'cs-saved', 'cs-error');
+    if (__cloudStatusTimer) { clearTimeout(__cloudStatusTimer); __cloudStatusTimer = null; }
+    if (state === 'saving') {
+      box.classList.add('show', 'cs-saving');
+      txt.textContent = tt('cloudSaving', 'Salvataggio\u2026');
+    } else if (state === 'saved') {
+      box.classList.add('show', 'cs-saved');
+      txt.textContent = tt('cloudSaved', 'Salvato nel cloud');
+      __cloudStatusTimer = setTimeout(function(){ box.classList.remove('show'); }, 2500);
+    } else if (state === 'error') {
+      box.classList.add('show', 'cs-error');
+      txt.textContent = tt('cloudError', 'Non salvato online');
+      __cloudStatusTimer = setTimeout(function(){ box.classList.remove('show'); }, 5000);
+    } else {
+      box.classList.remove('show');
+    }
+  };
+
   // Salvataggio cloud immediato (usato dopo la conferma di migrazione)
   window.cloudSaveNow = function() {
     if (!fbDB || !cloudUid) return;
     var state = cloudState();
-    if (cloudSizeKB(state) > 900) { console.warn('Dati troppo grandi per il cloud: salvati solo in locale.'); return; }
+    if (cloudSizeKB(state) > 900) { console.warn('Dati troppo grandi per il cloud: salvati solo in locale.'); window.cloudStatus('error'); return; }
     cloudReady = true;
-    cloudDocRef(cloudUid).set(state).catch(function(e){ console.warn('cloudSaveNow:', e); });
+    window.cloudStatus('saving');
+    cloudDocRef(cloudUid).set(state)
+      .then(function(){ window.cloudStatus('saved'); })
+      .catch(function(e){ console.warn('cloudSaveNow:', e); window.cloudStatus('error'); });
   };
 
   // Salvataggio cloud "morbido" (con ritardo, chiamato a ogni modifica)
   window.cloudSave = function() {
     if (!fbDB || !cloudReady || !cloudUid) return;
     if (cloudTimer) clearTimeout(cloudTimer);
+    window.cloudStatus('saving');
     cloudTimer = setTimeout(function() {
       var state = cloudState();
-      if (cloudSizeKB(state) > 900) { console.warn('Dati troppo grandi per il cloud: salvati solo in locale.'); return; }
-      cloudDocRef(cloudUid).set(state).catch(function(e){ console.warn('cloudSave:', e); });
+      if (cloudSizeKB(state) > 900) { console.warn('Dati troppo grandi per il cloud: salvati solo in locale.'); window.cloudStatus('error'); return; }
+      cloudDocRef(cloudUid).set(state)
+        .then(function(){ window.cloudStatus('saved'); })
+        .catch(function(e){ console.warn('cloudSave:', e); window.cloudStatus('error'); });
     }, 1500);
   };
 
@@ -12909,6 +12959,7 @@ document.addEventListener("DOMContentLoaded", function() {
   function clearCloudBinding() {
     cloudReady = false; cloudUid = null;
     if (cloudTimer) { clearTimeout(cloudTimer); cloudTimer = null; }
+    if (window.cloudStatus) window.cloudStatus('hide');
   }
 
   // Collego il salvataggio locale a quello cloud (senza rompere quello esistente)
