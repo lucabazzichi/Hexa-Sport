@@ -6,17 +6,20 @@
    - gli altri file (script CDN, font): prima la cache, poi la rete (e li memorizza)
    - le chiamate a Firebase/Firestore NON vengono intercettate (servono in tempo reale)
 */
-var CACHE = 'hexa-sport-v1';
+var CACHE = 'hexa-sport-v3';
 var CORE = [
   './',
   './index.html',
   './manifest.json',
+  './favicon.ico',
+  './pwa_icons/favicon-hexa.png',
   './pwa_icons/icon-32.png',
   './pwa_icons/icon-152.png',
   './pwa_icons/icon-167.png',
   './pwa_icons/icon-180.png',
   './pwa_icons/icon-192.png',
-  './pwa_icons/icon-512.png'
+  './pwa_icons/icon-512.png',
+  './pwa_icons/icon-1024.png'
 ];
 
 self.addEventListener('install', function (e) {
