@@ -2636,6 +2636,40 @@
 .admin-empty { text-align:center; color:var(--text2); padding:30px 10px; font-size:14px; }
 @media (max-width:640px){ .admin-stats{ grid-template-columns:repeat(2,1fr);} .admin-sub{ display:none; } }
 </style>
+
+<style>
+/* ===== Sala di controllo Admin ===== */
+body.hexa-admin-only header,
+body.hexa-admin-only nav { display:none !important; }
+body.hexa-admin-only [id^="cloud"] { display:none !important; }
+body.hexa-admin-only .page:not(#page-admin) { display:none !important; }
+body.hexa-admin-only #page-admin { display:block !important; }
+body.hexa-admin-only main { padding:0 !important; margin:0 !important; max-width:none !important; }
+
+#page-admin .admin-console { display:flex; gap:0; min-height:100vh; }
+.admin-sidebar { flex:0 0 220px; background:var(--bg2); border-right:1px solid var(--border); padding:20px 14px; display:flex; flex-direction:column; gap:4px; }
+.admin-brand { display:flex; align-items:center; gap:10px; margin:4px 6px 16px; }
+.admin-brand b { font-size:18px; font-weight:700; color:var(--text); }
+.admin-navitem { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:var(--radius); color:var(--text2); cursor:pointer; font-size:14px; font-weight:500; border:0; background:none; width:100%; text-align:left; font-family:var(--font-body); }
+.admin-navitem span { font-size:16px; }
+.admin-navitem:hover { background:var(--bg3); color:var(--text); }
+.admin-navitem.active { background:rgba(232,160,32,.14); color:var(--accent); }
+.admin-spacer { flex:1 1 auto; }
+.admin-logout { color:var(--red); }
+.admin-logout:hover { background:rgba(248,81,73,.10); color:var(--red); }
+.admin-content { flex:1 1 auto; padding:26px 26px 50px; min-width:0; }
+.admin-panel { display:none; }
+.admin-panel.active { display:block; }
+.admin-soon { margin-top:18px; background:var(--bg2); border:1px dashed var(--border2); border-radius:var(--radius); padding:26px; color:var(--text2); font-size:14px; text-align:center; }
+@media (max-width:760px){
+  #page-admin .admin-console { flex-direction:column; min-height:auto; }
+  .admin-sidebar { flex:none; flex-direction:row; align-items:center; overflow-x:auto; border-right:0; border-bottom:1px solid var(--border); padding:8px 10px; gap:6px; position:sticky; top:0; z-index:5; }
+  .admin-brand { display:none; }
+  .admin-navitem { width:auto; white-space:nowrap; padding:8px 12px; }
+  .admin-spacer { display:none; }
+  .admin-content { padding:16px; }
+}
+</style>
 </head>
 <body>
 
@@ -3214,21 +3248,63 @@
 
 
   <div class="page" id="page-admin">
-    <h1 class="page-mobile-title"><span class="pmt-icon">🛡️</span>Admin</h1>
-    <div class="admin-wrap">
-      <div class="admin-head">
-        <div>
-          <div class="admin-eyebrow">Pannello Admin</div>
-          <div class="admin-title">Gestione Hexa Sport</div>
+    <div class="admin-console">
+      <aside class="admin-sidebar">
+        <div class="admin-brand">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:28px;height:28px;color:var(--accent)">
+            <polygon points="16,2 28.124,9 28.124,23 16,30 3.876,23 3.876,9" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" fill="none"/>
+            <rect x="10.5" y="18" width="3" height="5" rx="0.6" fill="currentColor"/>
+            <rect x="14.5" y="14.5" width="3" height="8.5" rx="0.6" fill="currentColor"/>
+            <rect x="18.5" y="11" width="3" height="12" rx="0.6" fill="currentColor"/>
+          </svg>
+          <b>Admin</b>
         </div>
-        <button class="admin-refresh" onclick="loadAdminUsers()">&#8635; Aggiorna</button>
-      </div>
-      <div class="admin-stats" id="admin-stats"></div>
-      <input id="admin-search" class="admin-search" type="text" placeholder="Cerca per nome o email..." oninput="renderAdminUsers()">
-      <div class="admin-list" id="admin-list"></div>
+        <button class="admin-navitem active" id="adminnav-panoramica" onclick="adminGo('panoramica')"><span>&#128202;</span> Panoramica</button>
+        <button class="admin-navitem" id="adminnav-utenti" onclick="adminGo('utenti')"><span>&#128101;</span> Utenti</button>
+        <button class="admin-navitem" id="adminnav-abbonamenti" onclick="adminGo('abbonamenti')"><span>&#128179;</span> Abbonamenti</button>
+        <button class="admin-navitem" id="adminnav-promo" onclick="adminGo('promo')"><span>&#127915;</span> Codici promo</button>
+        <button class="admin-navitem" id="adminnav-annunci" onclick="adminGo('annunci')"><span>&#128226;</span> Annunci</button>
+        <div class="admin-spacer"></div>
+        <button class="admin-navitem admin-logout" onclick="authLogout()"><span>&#128682;</span> Esci</button>
+      </aside>
+      <section class="admin-content">
+
+        <div class="admin-panel active" id="adminpanel-panoramica">
+          <div class="admin-eyebrow">Panoramica</div>
+          <div class="admin-title">Benvenuto nella console</div>
+          <div class="admin-stats" id="admin-stats" style="margin-top:18px"></div>
+        </div>
+
+        <div class="admin-panel" id="adminpanel-utenti">
+          <div class="admin-head">
+            <div><div class="admin-eyebrow">Utenti</div><div class="admin-title">Gestione accessi</div></div>
+            <button class="admin-refresh" onclick="loadAdminUsers()">&#8635; Aggiorna</button>
+          </div>
+          <input id="admin-search" class="admin-search" type="text" placeholder="Cerca per nome o email..." oninput="renderAdminUsers()">
+          <div class="admin-list" id="admin-list"></div>
+        </div>
+
+        <div class="admin-panel" id="adminpanel-abbonamenti">
+          <div class="admin-eyebrow">Abbonamenti</div>
+          <div class="admin-title">Piani Free / Pro / Societ&agrave;</div>
+          <div class="admin-soon">Sezione in arrivo &mdash; la costruiamo al prossimo passo.</div>
+        </div>
+
+        <div class="admin-panel" id="adminpanel-promo">
+          <div class="admin-eyebrow">Codici promo</div>
+          <div class="admin-title">Codici promozionali</div>
+          <div class="admin-soon">Sezione in arrivo.</div>
+        </div>
+
+        <div class="admin-panel" id="adminpanel-annunci">
+          <div class="admin-eyebrow">Annunci</div>
+          <div class="admin-title">Annunci e contenuti</div>
+          <div class="admin-soon">Sezione in arrivo.</div>
+        </div>
+
+      </section>
     </div>
   </div>
-
 </main>
 
 <div class="overlay" id="modal-partita">
@@ -13067,12 +13143,11 @@ document.addEventListener("DOMContentLoaded", function() {
       window.updateVerifyBanner(user);
       initCloudForUser(user);
       saveUserProfile(user);
-      try { var pmA = document.getElementById('pm-admin-item');
-        if (pmA) pmA.style.display = (user.email && user.email.toLowerCase() === 'support.hexasport@gmail.com' && user.emailVerified) ? '' : 'none';
-      } catch(e){}
+      if (window.applyHexaAdminMode) window.applyHexaAdminMode(user);
     } else {
       showAuthScreen(true);
       window.__hexaUser = null;
+      if (window.applyHexaAdminMode) window.applyHexaAdminMode(null);
       var vb = el('verify-banner'); if (vb) vb.style.display = 'none';
       clearCloudBinding();
     }
@@ -13097,7 +13172,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>
 
 <script>
-/* ===== Pannello Admin (sola lettura) ===== */
+/* ===== Sala di controllo Admin ===== */
 (function(){
   var ADMIN_EMAIL = 'support.hexasport@gmail.com';
   var __adminUsers = [];
@@ -13105,11 +13180,38 @@ document.addEventListener("DOMContentLoaded", function() {
   function escA(s){ s = String(s == null ? '' : s); return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function fmtDate(d){ if(!d) return '\u2014'; try { return d.toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}); } catch(e){ return '\u2014'; } }
   function toDate(v){ return (v && v.toDate) ? v.toDate() : null; }
+  function isAdminUser(u){ return !!(u && u.email && u.email.toLowerCase() === ADMIN_EMAIL && u.emailVerified); }
+
+  // Entra/esce dalla "sala di controllo": nasconde l'app normale per l'admin.
+  window.applyHexaAdminMode = function(user){
+    var on = isAdminUser(user);
+    var pmA = document.getElementById('pm-admin-item');
+    if (pmA) pmA.style.display = on ? '' : 'none';
+    if (on){
+      document.body.classList.add('hexa-admin-only');
+      try { if (typeof showPage === 'function') showPage('admin'); } catch(e){}
+      adminGo('panoramica');
+      loadAdminUsers();
+    } else {
+      document.body.classList.remove('hexa-admin-only');
+    }
+  };
 
   window.openAdmin = function(){
     if (typeof closeProfileMenu === 'function') closeProfileMenu();
     if (typeof showPage === 'function') showPage('admin');
+    adminGo('panoramica');
     loadAdminUsers();
+  };
+
+  // Navigazione tra le sezioni della console
+  window.adminGo = function(sec){
+    var panels = document.querySelectorAll('#page-admin .admin-panel');
+    for (var i=0;i<panels.length;i++) panels[i].classList.remove('active');
+    var items = document.querySelectorAll('#page-admin .admin-navitem');
+    for (var j=0;j<items.length;j++) items[j].classList.remove('active');
+    var p = document.getElementById('adminpanel-'+sec); if (p) p.classList.add('active');
+    var it = document.getElementById('adminnav-'+sec); if (it) it.classList.add('active');
   };
 
   window.loadAdminUsers = function(){
