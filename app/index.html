@@ -8,8 +8,10 @@
 <link rel="manifest" href="manifest.json">
 <!-- Colore della barra di stato in alto su mobile (arancione accent) -->
 <meta name="theme-color" content="#e8a020">
-<!-- Icona favicon per il tab del browser -->
-<link rel="icon" type="image/png" href="pwa_icons/icon-32.png">
+<!-- Icona favicon per il tab del browser (il ?v=2 forza il browser a riscaricarla, evita la cache vecchia) -->
+<link rel="icon" type="image/png" sizes="32x32" href="pwa_icons/icon-32.png?v=2">
+<link rel="icon" type="image/png" sizes="192x192" href="pwa_icons/icon-192.png?v=2">
+<link rel="shortcut icon" href="pwa_icons/icon-32.png?v=2">
 <!-- Apple touch icons (iOS usa questi quando aggiungi alla Home) -->
 <link rel="apple-touch-icon" sizes="180x180" href="pwa_icons/icon-180.png">
 <link rel="apple-touch-icon" sizes="167x167" href="pwa_icons/icon-167.png">
