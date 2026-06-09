@@ -2607,6 +2607,35 @@
   #verify-banner .vb-sep { color: var(--text3); }
   /* ============== fine Banner verifica email ============== */
 </style>
+
+<style>
+/* ===== Pannello Admin (Hexa Sport) ===== */
+#page-admin .admin-wrap { max-width: 900px; margin: 0 auto; }
+.admin-head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:18px; flex-wrap:wrap; }
+.admin-eyebrow { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); font-weight:700; }
+.admin-title { font-size:23px; font-weight:700; color:var(--text); margin-top:4px; }
+.admin-refresh { background:var(--bg2); border:1px solid var(--border2); color:var(--text); padding:9px 14px; border-radius:var(--radius); cursor:pointer; font-size:13px; font-weight:600; }
+.admin-refresh:hover { border-color:var(--accent); }
+.admin-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; }
+.admin-stat { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:16px; }
+.admin-stat .num { font-size:28px; font-weight:800; color:var(--accent); line-height:1; }
+.admin-stat .lbl { font-size:12px; color:var(--text2); margin-top:6px; }
+.admin-search { width:100%; box-sizing:border-box; background:var(--bg2); border:1px solid var(--border2); color:var(--text); padding:12px 14px; border-radius:var(--radius); font-size:14px; margin-bottom:14px; }
+.admin-search:focus { outline:none; border-color:var(--accent); }
+.admin-list { display:flex; flex-direction:column; gap:8px; }
+.admin-row { display:flex; align-items:center; gap:12px; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; }
+.admin-av { flex:0 0 40px; height:40px; border-radius:50%; background:var(--bg3); color:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; }
+.admin-main { flex:1 1 auto; min-width:0; }
+.admin-name { font-weight:600; color:var(--text); font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.admin-mail { font-size:12px; color:var(--text2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.admin-meta { display:flex; flex-direction:column; align-items:flex-end; gap:3px; flex:0 0 auto; text-align:right; }
+.admin-badge { font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; white-space:nowrap; }
+.admin-badge.ok { background:rgba(63,185,80,.15); color:var(--green); }
+.admin-badge.no { background:rgba(248,81,73,.12); color:var(--red); }
+.admin-sub { font-size:11px; color:var(--text3); white-space:nowrap; }
+.admin-empty { text-align:center; color:var(--text2); padding:30px 10px; font-size:14px; }
+@media (max-width:640px){ .admin-stats{ grid-template-columns:repeat(2,1fr);} .admin-sub{ display:none; } }
+</style>
 </head>
 <body>
 
@@ -2770,6 +2799,10 @@
       <button class="profile-menu-item" onclick="openSettings()">
         <span class="pm-icon">⚙️</span>
         <span class="pm-label" data-i18n="menuSettings">Impostazioni</span>
+      </button>
+      <button class="profile-menu-item" id="pm-admin-item" onclick="openAdmin()" style="display:none">
+        <span class="pm-icon">🛡️</span>
+        <span class="pm-label">Admin</span>
       </button>
       <div class="profile-menu-divider"></div>
       <button class="profile-menu-item" onclick="authLogout()">
@@ -3177,6 +3210,23 @@
       <span id="avv-breadcrumb" style="font-size:13px;color:var(--text3);"></span>
     </div>
     <div id="avv-detail-content"></div>
+  </div>
+
+
+  <div class="page" id="page-admin">
+    <h1 class="page-mobile-title"><span class="pmt-icon">🛡️</span>Admin</h1>
+    <div class="admin-wrap">
+      <div class="admin-head">
+        <div>
+          <div class="admin-eyebrow">Pannello Admin</div>
+          <div class="admin-title">Gestione Hexa Sport</div>
+        </div>
+        <button class="admin-refresh" onclick="loadAdminUsers()">&#8635; Aggiorna</button>
+      </div>
+      <div class="admin-stats" id="admin-stats"></div>
+      <input id="admin-search" class="admin-search" type="text" placeholder="Cerca per nome o email..." oninput="renderAdminUsers()">
+      <div class="admin-list" id="admin-list"></div>
+    </div>
   </div>
 
 </main>
@@ -13017,6 +13067,9 @@ document.addEventListener("DOMContentLoaded", function() {
       window.updateVerifyBanner(user);
       initCloudForUser(user);
       saveUserProfile(user);
+      try { var pmA = document.getElementById('pm-admin-item');
+        if (pmA) pmA.style.display = (user.email && user.email.toLowerCase() === 'support.hexasport@gmail.com' && user.emailVerified) ? '' : 'none';
+      } catch(e){}
     } else {
       showAuthScreen(true);
       window.__hexaUser = null;
@@ -13040,6 +13093,95 @@ document.addEventListener("DOMContentLoaded", function() {
       navigator.serviceWorker.register('sw.js').catch(function (e) { console.warn('SW non registrato:', e); });
     });
   }
+})();
+</script>
+
+<script>
+/* ===== Pannello Admin (sola lettura) ===== */
+(function(){
+  var ADMIN_EMAIL = 'support.hexasport@gmail.com';
+  var __adminUsers = [];
+
+  function escA(s){ s = String(s == null ? '' : s); return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function fmtDate(d){ if(!d) return '\u2014'; try { return d.toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}); } catch(e){ return '\u2014'; } }
+  function toDate(v){ return (v && v.toDate) ? v.toDate() : null; }
+
+  window.openAdmin = function(){
+    if (typeof closeProfileMenu === 'function') closeProfileMenu();
+    if (typeof showPage === 'function') showPage('admin');
+    loadAdminUsers();
+  };
+
+  window.loadAdminUsers = function(){
+    var list = document.getElementById('admin-list');
+    if (list) list.innerHTML = '<div class="admin-empty">Caricamento\u2026</div>';
+    var db = window.fbDB;
+    if (!db) { if(list) list.innerHTML = '<div class="admin-empty">Database non disponibile.</div>'; return; }
+    db.collection('users').get().then(function(snap){
+      __adminUsers = [];
+      snap.forEach(function(doc){
+        var d = doc.data() || {};
+        __adminUsers.push({
+          uid: doc.id,
+          email: d.email || '',
+          name: d.displayName || '',
+          verified: !!d.emailVerified,
+          createdAt: toDate(d.createdAt),
+          lastLogin: toDate(d.lastLogin)
+        });
+      });
+      renderAdminStats();
+      renderAdminUsers();
+    }).catch(function(err){
+      if (list) list.innerHTML = '<div class="admin-empty">Errore: ' + escA(err && err.message ? err.message : 'impossibile leggere gli utenti') + '</div>';
+    });
+  };
+
+  function statCard(n,l){ return '<div class="admin-stat"><div class="num">'+n+'</div><div class="lbl">'+escA(l)+'</div></div>'; }
+
+  function renderAdminStats(){
+    var stats = document.getElementById('admin-stats');
+    if (!stats) return;
+    var now = Date.now(), week = 7*24*60*60*1000, total = __adminUsers.length, ver=0, rec=0, act=0;
+    for (var i=0;i<__adminUsers.length;i++){
+      var u = __adminUsers[i];
+      if (u.verified) ver++;
+      if (u.createdAt && (now - u.createdAt.getTime()) <= week) rec++;
+      if (u.lastLogin && (now - u.lastLogin.getTime()) <= week) act++;
+    }
+    stats.innerHTML = statCard(total,'Utenti totali') + statCard(ver,'Email verificate') + statCard(rec,'Nuovi (7 giorni)') + statCard(act,'Attivi (7 giorni)');
+  }
+
+  window.renderAdminUsers = function(){
+    var list = document.getElementById('admin-list');
+    if (!list) return;
+    var box = document.getElementById('admin-search');
+    var q = (box && box.value ? box.value : '').toLowerCase().trim();
+    var rows = __adminUsers.filter(function(u){
+      if (!q) return true;
+      return (u.name && u.name.toLowerCase().indexOf(q) >= 0) || (u.email && u.email.toLowerCase().indexOf(q) >= 0);
+    });
+    rows.sort(function(a,b){ return (b.lastLogin?b.lastLogin.getTime():0) - (a.lastLogin?a.lastLogin.getTime():0); });
+    if (!rows.length){ list.innerHTML = '<div class="admin-empty">Nessun utente trovato.</div>'; return; }
+    var html = '';
+    for (var i=0;i<rows.length;i++){
+      var u = rows[i];
+      var initial = escA((u.name || u.email || '?').charAt(0).toUpperCase());
+      html += '<div class="admin-row">'
+        + '<div class="admin-av">' + initial + '</div>'
+        + '<div class="admin-main">'
+          + '<div class="admin-name">' + escA(u.name || '(senza nome)') + '</div>'
+          + '<div class="admin-mail">' + escA(u.email || '\u2014') + '</div>'
+        + '</div>'
+        + '<div class="admin-meta">'
+          + '<span class="admin-badge ' + (u.verified?'ok':'no') + '">' + (u.verified?'Verificato':'Non verif.') + '</span>'
+          + '<span class="admin-sub">Iscritto ' + fmtDate(u.createdAt) + '</span>'
+          + '<span class="admin-sub">Accesso ' + fmtDate(u.lastLogin) + '</span>'
+        + '</div>'
+      + '</div>';
+    }
+    list.innerHTML = html;
+  };
 })();
 </script>
 </body>
