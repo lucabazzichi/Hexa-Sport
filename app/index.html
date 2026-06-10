@@ -2732,14 +2732,41 @@ body.hexa-admin-only main { padding:0 !important; margin:0 !important; max-width
 </style>
 
 <style>
-/* ===== Admin promo v1 ===== */
-.promo-create { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:16px; }
-.promo-create-row { display:flex; gap:14px; align-items:flex-end; flex-wrap:wrap; }
-.promo-create-row label { display:flex; flex-direction:column; gap:6px; font-size:12px; color:var(--text2); font-weight:600; }
-.promo-code-input { display:flex; gap:6px; }
-select.abb-input { width:160px; height:38px; }
-.promo-code { font-family:ui-monospace,Menlo,Consolas,monospace; font-weight:700; color:var(--accent); background:var(--bg3); border:1px solid var(--border2); border-radius:8px; padding:8px 10px; font-size:14px; flex:0 0 auto; letter-spacing:.06em; }
-@media (max-width:760px){ .promo-create-row label { width:100%; } .promo-code-input { width:100%; } .promo-code-input .abb-input { flex:1; } }
+/* ===== Admin promo v2 ===== */
+.promo-create { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; }
+.promo-create-row { display:grid; grid-template-columns:repeat(auto-fit, minmax(190px,1fr)); gap:16px; align-items:end; }
+.promo-create-row label { display:flex; flex-direction:column; gap:7px; font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--text2); font-weight:700; min-width:0; }
+.promo-create-row .abb-input { width:100%; box-sizing:border-box; height:40px; }
+.promo-code-input { display:flex; gap:8px; }
+.promo-code-input .abb-input { flex:1 1 auto; min-width:0; }
+.promo-code-input .admin-btn { flex:0 0 auto; height:40px; }
+.promo-create-actions { display:flex; justify-content:flex-end; margin-top:16px; }
+.promo-create-actions .abb-save { height:40px; padding:0 22px; }
+.promo-code { font-family:ui-monospace,Menlo,Consolas,monospace; font-weight:700; color:var(--accent); background:var(--bg3); border:1px solid var(--border2); border-radius:8px; padding:8px 12px; font-size:14px; flex:0 0 auto; letter-spacing:.08em; }
+@media (max-width:760px){ .promo-create-actions { justify-content:stretch; } .promo-create-actions .abb-save { width:100%; } }
+</style>
+
+<style>
+/* ===== Admin annunci v1 ===== */
+.ann-create { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; }
+.ann-create-grid { display:grid; grid-template-columns:2fr 1fr; gap:16px; }
+.ann-create label, .ann-msg-label { display:flex; flex-direction:column; gap:7px; font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--text2); font-weight:700; }
+.ann-create .abb-input { width:100%; box-sizing:border-box; }
+.ann-create-grid .abb-input { height:40px; }
+.ann-msg-label { margin-top:14px; }
+.ann-textarea { resize:vertical; min-height:62px; font-family:var(--font-body); padding:10px 12px; height:auto; }
+@media (max-width:760px){ .ann-create-grid { grid-template-columns:1fr; } }
+/* striscia annunci per gli utenti */
+#hexa-announce-bar { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+#hexa-announce-bar:empty { display:none; }
+.ann-banner { display:flex; align-items:flex-start; gap:12px; padding:12px 14px; border-radius:var(--radius); border:1px solid var(--border2); background:var(--bg2); }
+.ann-banner-txt { flex:1; display:flex; flex-direction:column; gap:3px; font-size:13px; color:var(--text); }
+.ann-banner-txt span { color:var(--text2); }
+.ann-banner-x { background:none; border:0; color:var(--text2); font-size:22px; line-height:1; cursor:pointer; padding:0 2px; }
+.ann-banner.ann-info { border-left:4px solid var(--blue); }
+.ann-banner.ann-warning { border-left:4px solid var(--accent); }
+.ann-banner.ann-success { border-left:4px solid var(--green); }
+body.hexa-admin-only #hexa-announce-bar { display:none !important; }
 </style>
 </head>
 <body>
@@ -2919,6 +2946,7 @@ select.abb-input { width:160px; height:38px; }
 </header>
 
 <main>
+  <div id="hexa-announce-bar"></div>
 
   <div class="page active" id="page-dashboard">
     <h1 class="page-mobile-title"><span class="pmt-icon">📊</span><span data-i18n="navDashboard">Riepilogo</span></h1>
@@ -3386,9 +3414,9 @@ select.abb-input { width:160px; height:38px; }
               <label>Piano regalato<select id="promo-plan" class="abb-input"><option value="pro">Pro</option><option value="societa">Societ&agrave;</option></select></label>
               <label>Durata (giorni, 0=illimitato)<input type="number" id="promo-days" class="abb-input" min="0" value="30"></label>
               <label>Usi massimi (0=illimitati)<input type="number" id="promo-maxuses" class="abb-input" min="0" placeholder="0"></label>
-              <label>Scadenza codice (opz.)<input type="date" id="promo-expiry" class="abb-input"></label>
-              <button class="admin-btn abb-save" onclick="createPromo()">Crea codice</button>
+              <label>Scadenza codice (opzionale)<input type="date" id="promo-expiry" class="abb-input"></label>
             </div>
+            <div class="promo-create-actions"><button class="admin-btn abb-save" onclick="createPromo()">Crea codice</button></div>
           </div>
           <div class="admin-list" id="promo-list" style="margin-top:16px"></div>
         </div>
@@ -3396,7 +3424,15 @@ select.abb-input { width:160px; height:38px; }
         <div class="admin-panel" id="adminpanel-annunci">
           <div class="admin-eyebrow">Annunci</div>
           <div class="admin-title">Annunci e contenuti</div>
-          <div class="admin-soon">Sezione in arrivo.</div>
+          <div class="ann-create">
+            <div class="ann-create-grid">
+              <label>Titolo<input type="text" id="ann-title" class="abb-input" placeholder="Es. Manutenzione programmata"></label>
+              <label>Tipo<select id="ann-type" class="abb-input"><option value="info">Info (blu)</option><option value="warning">Avviso (giallo)</option><option value="success">Positivo (verde)</option></select></label>
+            </div>
+            <label class="ann-msg-label">Messaggio<textarea id="ann-body" class="abb-input ann-textarea" rows="2" placeholder="Scrivi qui il messaggio per gli utenti..."></textarea></label>
+            <div class="promo-create-actions"><button class="admin-btn abb-save" onclick="createAnnuncio()">Pubblica annuncio</button></div>
+          </div>
+          <div class="admin-list" id="ann-list" style="margin-top:16px"></div>
         </div>
 
       </section>
@@ -13242,6 +13278,7 @@ document.addEventListener("DOMContentLoaded", function() {
       saveUserProfile(user);
       if (window.applyHexaAdminMode) window.applyHexaAdminMode(user);
       if (window.enforceHexaBlock) window.enforceHexaBlock(user);
+      if (window.showUserAnnouncements) window.showUserAnnouncements();
     } else {
       showAuthScreen(true);
       window.__hexaUser = null;
@@ -13288,7 +13325,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if(on){
       document.body.classList.add('hexa-admin-only');
       try{ if(typeof showPage==='function') showPage('admin'); }catch(e){}
-      adminGo('panoramica'); loadAdminUsers(); loadPricing(); loadPromos();
+      adminGo('panoramica'); loadAdminUsers(); loadPricing(); loadPromos(); loadAnnunci();
     } else { document.body.classList.remove('hexa-admin-only'); }
   };
 
@@ -13306,7 +13343,7 @@ document.addEventListener("DOMContentLoaded", function() {
   window.openAdmin=function(){
     if(typeof closeProfileMenu==='function') closeProfileMenu();
     if(typeof showPage==='function') showPage('admin');
-    adminGo('panoramica'); loadAdminUsers(); loadPricing(); loadPromos();
+    adminGo('panoramica'); loadAdminUsers(); loadPricing(); loadPromos(); loadAnnunci();
   };
 
   window.adminGo=function(sec){
@@ -13316,7 +13353,7 @@ document.addEventListener("DOMContentLoaded", function() {
     for(var j=0;j<items.length;j++) items[j].classList.remove('active');
     var p=document.getElementById('adminpanel-'+sec); if(p) p.classList.add('active');
     var it=document.getElementById('adminnav-'+sec); if(it) it.classList.add('active');
-    if(sec==='abbonamenti') renderAbbonamenti(); if(sec==='panoramica') renderAdminCharts(); if(sec==='promo') renderPromos();
+    if(sec==='abbonamenti') renderAbbonamenti(); if(sec==='panoramica') renderAdminCharts(); if(sec==='promo') renderPromos(); if(sec==='annunci') renderAnnunci();
   };
 
   window.loadAdminUsers=function(){
@@ -13507,6 +13544,61 @@ document.addEventListener("DOMContentLoaded", function() {
       html+='<div class="admin-row"><div class="promo-code">'+escA(p.code)+'</div><div class="admin-main"><div class="admin-name">'+planLabel+' &middot; '+dur+'</div><div class="admin-mail">'+usesTxt+' &middot; '+expTxt+'</div></div><div class="admin-meta"><span class="admin-badge '+status[1]+'">'+status[0]+'</span></div><div class="admin-actions"><button class="admin-btn" onclick="copyPromo(\''+p.code+'\')">Copia</button><button class="admin-btn" onclick="togglePromo(\''+p.code+'\')">'+(p.active?'Disattiva':'Attiva')+'</button><button class="admin-btn danger" onclick="deletePromo(\''+p.code+'\')">Elimina</button></div></div>';
     }
     list.innerHTML=html;
+  };
+  var __annunci=[];
+  window.loadAnnunci=function(){
+    var db=window.fbDB; if(!db) return;
+    db.collection('config').doc('announcements').get().then(function(doc){
+      var d=doc.exists?doc.data():{}; __annunci=(d&&d.items)?d.items:[]; renderAnnunci();
+    }).catch(function(){ __annunci=[]; renderAnnunci(); });
+  };
+  function saveAnnunci(cb){
+    var db=window.fbDB; if(!db) return;
+    db.collection('config').doc('announcements').set({items:__annunci},{merge:true}).then(function(){ if(cb)cb(); }).catch(function(err){ alert('Errore: '+(err&&err.message?err.message:'non salvato')); });
+  }
+  window.createAnnuncio=function(){
+    var it=document.getElementById('ann-title'), ib=document.getElementById('ann-body');
+    var t=((it&&it.value)||'').trim(), b=((ib&&ib.value)||'').trim();
+    var ty=(document.getElementById('ann-type')||{}).value||'info';
+    if(!t&&!b){ alert('Scrivi almeno un titolo o un messaggio.'); return; }
+    __annunci.unshift({ id:'a'+Date.now()+Math.floor(Math.random()*1000), title:t, body:b, type:ty, active:true, createdAt:new Date().toISOString() });
+    saveAnnunci(function(){ renderAnnunci(); if(it) it.value=''; if(ib) ib.value=''; });
+  };
+  window.toggleAnnuncio=function(id){
+    for(var i=0;i<__annunci.length;i++){ if(__annunci[i].id===id){ __annunci[i].active=!__annunci[i].active; break; } }
+    saveAnnunci(function(){ renderAnnunci(); });
+  };
+  window.deleteAnnuncio=function(id){
+    if(!confirm('Eliminare questo annuncio?')) return;
+    __annunci=__annunci.filter(function(a){ return a.id!==id; });
+    saveAnnunci(function(){ renderAnnunci(); });
+  };
+  window.renderAnnunci=function(){
+    var list=document.getElementById('ann-list'); if(!list) return;
+    if(!__annunci.length){ list.innerHTML='<div class="admin-empty">Nessun annuncio.</div>'; return; }
+    var TY={info:'Info',warning:'Avviso',success:'Positivo'}, html='';
+    for(var i=0;i<__annunci.length;i++){ var a=__annunci[i];
+      html+='<div class="admin-row"><div class="admin-main"><div class="admin-name">'+escA(a.title||'(senza titolo)')+'</div><div class="admin-mail">'+escA(a.body||'')+'</div></div><div class="admin-meta"><span class="admin-badge '+(a.active?'ok':'no')+'">'+(a.active?'Pubblicato':'Nascosto')+'</span><span class="admin-sub">'+(TY[a.type]||'Info')+'</span></div><div class="admin-actions"><button class="admin-btn" onclick="toggleAnnuncio(\''+a.id+'\')">'+(a.active?'Nascondi':'Pubblica')+'</button><button class="admin-btn danger" onclick="deleteAnnuncio(\''+a.id+'\')">Elimina</button></div></div>';
+    }
+    list.innerHTML=html;
+  };
+  window.showUserAnnouncements=function(){
+    var bar=document.getElementById('hexa-announce-bar'); if(!bar) return;
+    var db=window.fbDB; if(!db) return;
+    db.collection('config').doc('announcements').get().then(function(doc){
+      var d=doc.exists?doc.data():{}; var items=(d&&d.items)?d.items:[];
+      var dis={}; try{ dis=JSON.parse(localStorage.getItem('hexa_dismissed_ann')||'{}'); }catch(e){}
+      var html='';
+      for(var i=0;i<items.length;i++){ var a=items[i]; if(!a||!a.active||dis[a.id]) continue;
+        html+='<div class="ann-banner ann-'+(a.type||'info')+'"><div class="ann-banner-txt"><b>'+escA(a.title||'')+'</b>'+(a.body?'<span>'+escA(a.body)+'</span>':'')+'</div><button class="ann-banner-x" onclick="dismissAnnouncement(\''+a.id+'\')" aria-label="Chiudi">&times;</button></div>';
+      }
+      bar.innerHTML=html;
+    }).catch(function(){});
+  };
+  window.dismissAnnouncement=function(id){
+    var dis={}; try{ dis=JSON.parse(localStorage.getItem('hexa_dismissed_ann')||'{}'); }catch(e){}
+    dis[id]=1; try{ localStorage.setItem('hexa_dismissed_ann',JSON.stringify(dis)); }catch(e){}
+    showUserAnnouncements();
   };
   window.renderAbbonamenti=function(){
     var sum=document.getElementById('abb-summary'); var list=document.getElementById('abb-list');
