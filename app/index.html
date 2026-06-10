@@ -2699,6 +2699,37 @@ body.hexa-admin-only main { padding:0 !important; margin:0 !important; max-width
 .plan-btn.active { background:var(--accent); color:#1a1300; border-color:var(--accent); }
 @media (max-width:760px){ .abb-plan-btns { width:100%; margin-left:52px; margin-top:6px; } }
 </style>
+
+<style>
+/* ===== Admin grafici v1 ===== */
+.admin-charts { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:18px; }
+.chart-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:16px; }
+.chart-title { font-size:13px; font-weight:700; color:var(--text); margin-bottom:14px; }
+.chart-body { min-height:150px; display:flex; flex-direction:column; justify-content:center; }
+.chart-empty,.chart-note { color:var(--text2); font-size:12px; text-align:center; padding:8px; }
+.vbars { display:flex; align-items:flex-end; gap:8px; height:150px; }
+.vbar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; height:100%; justify-content:flex-end; }
+.vbar-num { font-size:11px; color:var(--text2); font-weight:700; }
+.vbar-col { width:100%; height:100px; display:flex; align-items:flex-end; }
+.vbar { width:62%; margin:0 auto; background:var(--accent); border-radius:4px 4px 0 0; min-height:3px; }
+.vbar-label { font-size:11px; color:var(--text3); }
+.donut-wrap { display:flex; align-items:center; gap:18px; justify-content:center; flex-wrap:wrap; }
+.donut { width:120px; height:120px; border-radius:50%; position:relative; flex:0 0 auto; }
+.donut-hole { position:absolute; inset:18px; background:var(--bg2); border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:22px; font-weight:800; color:var(--text); }
+.donut-hole span { font-size:10px; font-weight:600; color:var(--text2); }
+.donut-legend { display:flex; flex-direction:column; gap:8px; font-size:13px; color:var(--text); }
+.donut-legend div { display:flex; align-items:center; gap:8px; }
+.donut-legend i { width:12px; height:12px; border-radius:3px; display:inline-block; }
+.hbar-row { display:flex; align-items:center; gap:10px; margin:9px 0; }
+.hbar-label { font-size:12px; color:var(--text2); width:96px; flex:0 0 auto; }
+.hbar-track { flex:1; height:10px; background:var(--bg3); border-radius:6px; overflow:hidden; }
+.hbar-fill { display:block; height:100%; background:var(--accent); border-radius:6px; }
+.hbar-fill.purple { background:var(--purple); }
+.hbar-val { font-size:12px; font-weight:700; color:var(--text); width:58px; text-align:right; flex:0 0 auto; }
+.mrr-big { font-size:30px; font-weight:800; color:var(--accent); margin-bottom:14px; }
+.mrr-big span { font-size:13px; font-weight:600; color:var(--text2); }
+@media (max-width:760px){ .admin-charts { grid-template-columns:1fr; } }
+</style>
 </head>
 <body>
 
@@ -3302,6 +3333,12 @@ body.hexa-admin-only main { padding:0 !important; margin:0 !important; max-width
           <div class="admin-eyebrow">Panoramica</div>
           <div class="admin-title">Benvenuto nella console</div>
           <div class="admin-stats" id="admin-stats" style="margin-top:18px"></div>
+          <div class="admin-charts">
+            <div class="chart-card"><div class="chart-title">Crescita iscritti</div><div id="chart-growth" class="chart-body"></div></div>
+            <div class="chart-card"><div class="chart-title">Distribuzione piani</div><div id="chart-plans" class="chart-body"></div></div>
+            <div class="chart-card"><div class="chart-title">Incasso mensile (stima)</div><div id="chart-mrr" class="chart-body"></div></div>
+            <div class="chart-card"><div class="chart-title">Utenti attivi</div><div id="chart-active" class="chart-body"></div></div>
+          </div>
         </div>
 
         <div class="admin-panel" id="adminpanel-utenti">
@@ -13258,7 +13295,7 @@ document.addEventListener("DOMContentLoaded", function() {
     for(var j=0;j<items.length;j++) items[j].classList.remove('active');
     var p=document.getElementById('adminpanel-'+sec); if(p) p.classList.add('active');
     var it=document.getElementById('adminnav-'+sec); if(it) it.classList.add('active');
-    if(sec==='abbonamenti') renderAbbonamenti();
+    if(sec==='abbonamenti') renderAbbonamenti(); if(sec==='panoramica') renderAdminCharts();
   };
 
   window.loadAdminUsers=function(){
@@ -13272,7 +13309,7 @@ document.addEventListener("DOMContentLoaded", function() {
         var d=doc.data()||{};
         __adminUsers.push({ uid:doc.id, email:d.email||'', name:d.displayName||'', verified:!!d.emailVerified, blocked:d.blocked===true, plan:d.plan||'free', createdAt:toDate(d.createdAt), lastLogin:toDate(d.lastLogin) });
       });
-      renderAdminStats(); renderAdminUsers(); renderAbbonamenti();
+      renderAdminStats(); renderAdminUsers(); renderAbbonamenti(); renderAdminCharts();
     }).catch(function(err){ if(list) list.innerHTML='<div class="admin-empty">Errore: '+escA(err&&err.message?err.message:'impossibile leggere gli utenti')+'</div>'; });
   };
 
@@ -13328,7 +13365,7 @@ document.addEventListener("DOMContentLoaded", function() {
       var pp=document.getElementById('price-pro'), ps=document.getElementById('price-societa');
       if(pp&&__pricing.pro) pp.value=__pricing.pro;
       if(ps&&__pricing.societa) ps.value=__pricing.societa;
-      renderAbbonamenti();
+      renderAbbonamenti(); renderAdminCharts();
     }).catch(function(){});
   };
   window.savePricing=function(){
@@ -13347,6 +13384,49 @@ document.addEventListener("DOMContentLoaded", function() {
     var db=window.fbDB; if(!db) return;
     db.collection('users').doc(uid).set({plan:plan},{merge:true}).then(function(){ u.plan=plan; renderAbbonamenti(); }).catch(function(err){ alert('Errore: '+(err&&err.message?err.message:'non salvato')); });
   };
+  var MONTHS=['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+  window.renderAdminCharts=function(){ renderGrowthChart(); renderPlansChart(); renderMrrChart(); renderActiveChart(); };
+  function renderGrowthChart(){
+    var el=document.getElementById('chart-growth'); if(!el) return;
+    var now=new Date(), months=[];
+    for(var i=5;i>=0;i--){ var d=new Date(now.getFullYear(),now.getMonth()-i,1); months.push({y:d.getFullYear(),m:d.getMonth(),label:MONTHS[d.getMonth()],count:0}); }
+    for(var k=0;k<__adminUsers.length;k++){ var c=__adminUsers[k].createdAt; if(!c) continue; for(var j=0;j<months.length;j++){ if(c.getFullYear()===months[j].y&&c.getMonth()===months[j].m){ months[j].count++; break; } } }
+    var max=1; for(var a=0;a<months.length;a++) max=Math.max(max,months[a].count);
+    var html='<div class="vbars">';
+    for(var n=0;n<months.length;n++){ var h=Math.round(months[n].count/max*100); html+='<div class="vbar-wrap"><div class="vbar-num">'+months[n].count+'</div><div class="vbar-col"><div class="vbar" style="height:'+h+'%"></div></div><div class="vbar-label">'+months[n].label+'</div></div>'; }
+    html+='</div>'; el.innerHTML=html;
+  }
+  function renderPlansChart(){
+    var el=document.getElementById('chart-plans'); if(!el) return;
+    var free=0,pro=0,soc=0;
+    for(var i=0;i<__adminUsers.length;i++){ var p=__adminUsers[i].plan||'free'; if(p==='pro')pro++; else if(p==='societa')soc++; else free++; }
+    var total=free+pro+soc;
+    if(!total){ el.innerHTML='<div class="chart-empty">Nessun utente.</div>'; return; }
+    var pf=free/total*100, c2=pf+(pro/total*100);
+    var grad='conic-gradient(var(--text3) 0 '+pf+'%, var(--accent) '+pf+'% '+c2+'%, var(--purple) '+c2+'% 100%)';
+    el.innerHTML='<div class="donut-wrap"><div class="donut" style="background:'+grad+'"><div class="donut-hole">'+total+'<span>utenti</span></div></div>'
+      +'<div class="donut-legend"><div><i style="background:var(--text3)"></i>Free <b>'+free+'</b></div><div><i style="background:var(--accent)"></i>Pro <b>'+pro+'</b></div><div><i style="background:var(--purple)"></i>Societ\u00e0 <b>'+soc+'</b></div></div></div>';
+  }
+  function renderMrrChart(){
+    var el=document.getElementById('chart-mrr'); if(!el) return;
+    var pro=0,soc=0;
+    for(var i=0;i<__adminUsers.length;i++){ var p=__adminUsers[i].plan||'free'; if(p==='pro')pro++; else if(p==='societa')soc++; }
+    var proRev=pro*__pricing.pro, socRev=soc*__pricing.societa, total=proRev+socRev, max=Math.max(total,1);
+    var html='<div class="mrr-big">\u20ac'+total.toFixed(2)+'<span>/mese</span></div>'
+      +'<div class="hbar-row"><span class="hbar-label">Pro</span><span class="hbar-track"><span class="hbar-fill" style="width:'+(proRev/max*100)+'%"></span></span><span class="hbar-val">\u20ac'+proRev.toFixed(0)+'</span></div>'
+      +'<div class="hbar-row"><span class="hbar-label">Societ\u00e0</span><span class="hbar-track"><span class="hbar-fill purple" style="width:'+(socRev/max*100)+'%"></span></span><span class="hbar-val">\u20ac'+socRev.toFixed(0)+'</span></div>';
+    if(!__pricing.pro&&!__pricing.societa) html+='<div class="chart-note">Imposta i prezzi in "Abbonamenti" per vedere l\'incasso.</div>';
+    el.innerHTML=html;
+  }
+  function renderActiveChart(){
+    var el=document.getElementById('chart-active'); if(!el) return;
+    var now=Date.now(), D=86400000, total=__adminUsers.length, a7=0,a30=0,a90=0;
+    for(var i=0;i<__adminUsers.length;i++){ var l=__adminUsers[i].lastLogin; if(!l) continue; var diff=now-l.getTime(); if(diff<=7*D)a7++; if(diff<=30*D)a30++; if(diff<=90*D)a90++; }
+    var rows=[['Attivi 7 giorni',a7],['Attivi 30 giorni',a30],['Attivi 90 giorni',a90],['Inattivi',total-a90]];
+    var max=Math.max(total,1), html='';
+    for(var k=0;k<rows.length;k++){ html+='<div class="hbar-row"><span class="hbar-label">'+rows[k][0]+'</span><span class="hbar-track"><span class="hbar-fill" style="width:'+(rows[k][1]/max*100)+'%"></span></span><span class="hbar-val">'+rows[k][1]+'</span></div>'; }
+    el.innerHTML=html;
+  }
   window.renderAbbonamenti=function(){
     var sum=document.getElementById('abb-summary'); var list=document.getElementById('abb-list');
     if(!sum&&!list) return;
