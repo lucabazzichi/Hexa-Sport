@@ -2613,7 +2613,7 @@
 #page-admin .admin-wrap { max-width: 900px; margin: 0 auto; }
 .admin-head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:18px; flex-wrap:wrap; }
 .admin-eyebrow { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); font-weight:700; }
-.admin-title { font-size:23px; font-weight:700; color:var(--text); margin-top:4px; }
+.admin-title { font-size:23px; font-weight:700; color:var(--text); margin-top:4px; margin-bottom:24px; }
 .admin-refresh { background:var(--bg2); border:1px solid var(--border2); color:var(--text); padding:9px 14px; border-radius:var(--radius); cursor:pointer; font-size:13px; font-weight:600; }
 .admin-refresh:hover { border-color:var(--accent); }
 .admin-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; }
@@ -12956,9 +12956,17 @@ document.addEventListener("DOMContentLoaded", function() {
 
     var btn = el('auth-submit-btn');
     if (btn) { btn.disabled = true; btn.textContent = tt('authWorking', 'Attendi...'); }
+    setTimeout(function(){
+      var b = el('auth-submit-btn'), scr = el('auth-screen');
+      if (b && scr && scr.style.display !== 'none' && b.textContent === tt('authWorking', 'Attendi...')) {
+        b.disabled = false;
+        b.textContent = (authMode === 'register') ? tt('authRegisterBtn', 'Registrati') : tt('authLoginBtn', 'Accedi');
+      }
+    }, 12000);
 
-    var done = function(){ if (btn) { btn.disabled = false; window.authToggleMode(); window.authToggleMode(); } };
-    var fail = function(err){ setAuthError(friendlyAuthError(err)); done(); };
+    var resetBtn = function(){ if (btn) { btn.disabled = false; btn.textContent = (authMode === 'register') ? tt('authRegisterBtn', 'Registrati') : tt('authLoginBtn', 'Accedi'); } };
+    var done = function(){ resetBtn(); };
+    var fail = function(err){ resetBtn(); setAuthError(friendlyAuthError(err)); };
 
     if (authMode === 'register') {
       fbAuth.createUserWithEmailAndPassword(email, pass)
@@ -12980,7 +12988,7 @@ document.addEventListener("DOMContentLoaded", function() {
         .catch(fail);
     } else {
       fbAuth.signInWithEmailAndPassword(email, pass)
-        .then(function(){ /* onAuthStateChanged hides the screen */ })
+        .then(function(){ showAuthScreen(false); resetBtn(); })
         .catch(fail);
     }
   };
@@ -12995,7 +13003,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var gbtn = el('auth-google-btn');
     if (gbtn) gbtn.disabled = true;
     fbAuth.signInWithPopup(provider)
-      .then(function(){ /* onAuthStateChanged hides the screen */ })
+      .then(function(){ showAuthScreen(false); if (gbtn) gbtn.disabled = false; })
       .catch(function(err){
         if (gbtn) gbtn.disabled = false;
         // L'utente ha chiuso la finestra: non è un errore da mostrare
