@@ -2730,6 +2730,17 @@ body.hexa-admin-only main { padding:0 !important; margin:0 !important; max-width
 .mrr-big span { font-size:13px; font-weight:600; color:var(--text2); }
 @media (max-width:760px){ .admin-charts { grid-template-columns:1fr; } }
 </style>
+
+<style>
+/* ===== Admin promo v1 ===== */
+.promo-create { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:16px; }
+.promo-create-row { display:flex; gap:14px; align-items:flex-end; flex-wrap:wrap; }
+.promo-create-row label { display:flex; flex-direction:column; gap:6px; font-size:12px; color:var(--text2); font-weight:600; }
+.promo-code-input { display:flex; gap:6px; }
+select.abb-input { width:160px; height:38px; }
+.promo-code { font-family:ui-monospace,Menlo,Consolas,monospace; font-weight:700; color:var(--accent); background:var(--bg3); border:1px solid var(--border2); border-radius:8px; padding:8px 10px; font-size:14px; flex:0 0 auto; letter-spacing:.06em; }
+@media (max-width:760px){ .promo-create-row label { width:100%; } .promo-code-input { width:100%; } .promo-code-input .abb-input { flex:1; } }
+</style>
 </head>
 <body>
 
@@ -3369,7 +3380,17 @@ body.hexa-admin-only main { padding:0 !important; margin:0 !important; max-width
         <div class="admin-panel" id="adminpanel-promo">
           <div class="admin-eyebrow">Codici promo</div>
           <div class="admin-title">Codici promozionali</div>
-          <div class="admin-soon">Sezione in arrivo.</div>
+          <div class="promo-create">
+            <div class="promo-create-row">
+              <label>Codice<span class="promo-code-input"><input type="text" id="promo-code" class="abb-input" placeholder="ES. PROVA30" style="text-transform:uppercase"><button class="admin-btn" type="button" onclick="genPromoCode()">Genera</button></span></label>
+              <label>Piano regalato<select id="promo-plan" class="abb-input"><option value="pro">Pro</option><option value="societa">Societ&agrave;</option></select></label>
+              <label>Durata (giorni, 0=illimitato)<input type="number" id="promo-days" class="abb-input" min="0" value="30"></label>
+              <label>Usi massimi (0=illimitati)<input type="number" id="promo-maxuses" class="abb-input" min="0" placeholder="0"></label>
+              <label>Scadenza codice (opz.)<input type="date" id="promo-expiry" class="abb-input"></label>
+              <button class="admin-btn abb-save" onclick="createPromo()">Crea codice</button>
+            </div>
+          </div>
+          <div class="admin-list" id="promo-list" style="margin-top:16px"></div>
         </div>
 
         <div class="admin-panel" id="adminpanel-annunci">
@@ -13267,7 +13288,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if(on){
       document.body.classList.add('hexa-admin-only');
       try{ if(typeof showPage==='function') showPage('admin'); }catch(e){}
-      adminGo('panoramica'); loadAdminUsers(); loadPricing();
+      adminGo('panoramica'); loadAdminUsers(); loadPricing(); loadPromos();
     } else { document.body.classList.remove('hexa-admin-only'); }
   };
 
@@ -13285,7 +13306,7 @@ document.addEventListener("DOMContentLoaded", function() {
   window.openAdmin=function(){
     if(typeof closeProfileMenu==='function') closeProfileMenu();
     if(typeof showPage==='function') showPage('admin');
-    adminGo('panoramica'); loadAdminUsers(); loadPricing();
+    adminGo('panoramica'); loadAdminUsers(); loadPricing(); loadPromos();
   };
 
   window.adminGo=function(sec){
@@ -13295,7 +13316,7 @@ document.addEventListener("DOMContentLoaded", function() {
     for(var j=0;j<items.length;j++) items[j].classList.remove('active');
     var p=document.getElementById('adminpanel-'+sec); if(p) p.classList.add('active');
     var it=document.getElementById('adminnav-'+sec); if(it) it.classList.add('active');
-    if(sec==='abbonamenti') renderAbbonamenti(); if(sec==='panoramica') renderAdminCharts();
+    if(sec==='abbonamenti') renderAbbonamenti(); if(sec==='panoramica') renderAdminCharts(); if(sec==='promo') renderPromos();
   };
 
   window.loadAdminUsers=function(){
@@ -13427,6 +13448,66 @@ document.addEventListener("DOMContentLoaded", function() {
     for(var k=0;k<rows.length;k++){ html+='<div class="hbar-row"><span class="hbar-label">'+rows[k][0]+'</span><span class="hbar-track"><span class="hbar-fill" style="width:'+(rows[k][1]/max*100)+'%"></span></span><span class="hbar-val">'+rows[k][1]+'</span></div>'; }
     el.innerHTML=html;
   }
+  var __promos=[];
+  window.loadPromos=function(){
+    var db=window.fbDB; if(!db) return;
+    db.collection('config').doc('promos').get().then(function(doc){
+      var d=doc.exists?doc.data():{}; __promos=(d&&d.codes)?d.codes:[]; renderPromos();
+    }).catch(function(){ __promos=[]; renderPromos(); });
+  };
+  function savePromos(cb){
+    var db=window.fbDB; if(!db) return;
+    db.collection('config').doc('promos').set({codes:__promos},{merge:true}).then(function(){ if(cb)cb(); }).catch(function(err){ alert('Errore: '+(err&&err.message?err.message:'non salvato')); });
+  }
+  window.genPromoCode=function(){
+    var s='ABCDEFGHJKLMNPQRSTUVWXYZ23456789', c='';
+    for(var i=0;i<8;i++) c+=s.charAt(Math.floor(Math.random()*s.length));
+    var inp=document.getElementById('promo-code'); if(inp) inp.value=c;
+  };
+  window.createPromo=function(){
+    var ic=document.getElementById('promo-code');
+    var code=((ic&&ic.value)||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+    if(!code){ alert('Inserisci un codice (o premi Genera).'); return; }
+    for(var i=0;i<__promos.length;i++){ if(__promos[i].code===code){ alert('Esiste gi\u00e0 un codice '+code+'.'); return; } }
+    var plan=(document.getElementById('promo-plan')||{}).value||'pro';
+    var days=Number((document.getElementById('promo-days')||{}).value)||0;
+    var maxUses=Number((document.getElementById('promo-maxuses')||{}).value)||0;
+    var exp=(document.getElementById('promo-expiry')||{}).value||'';
+    __promos.push({ code:code, plan:plan, days:days, maxUses:maxUses, uses:0, active:true, expiresAt:exp||null, createdAt:new Date().toISOString() });
+    savePromos(function(){
+      renderPromos();
+      if(ic) ic.value='';
+      var im=document.getElementById('promo-maxuses'); if(im) im.value='';
+      var ie=document.getElementById('promo-expiry'); if(ie) ie.value='';
+    });
+  };
+  window.togglePromo=function(code){
+    for(var i=0;i<__promos.length;i++){ if(__promos[i].code===code){ __promos[i].active=!__promos[i].active; break; } }
+    savePromos(function(){ renderPromos(); });
+  };
+  window.deletePromo=function(code){
+    if(!confirm('Eliminare il codice '+code+'?')) return;
+    __promos=__promos.filter(function(p){ return p.code!==code; });
+    savePromos(function(){ renderPromos(); });
+  };
+  window.copyPromo=function(code){ try{ if(navigator.clipboard) navigator.clipboard.writeText(code); }catch(e){} };
+  window.renderPromos=function(){
+    var list=document.getElementById('promo-list'); if(!list) return;
+    if(!__promos.length){ list.innerHTML='<div class="admin-empty">Nessun codice creato.</div>'; return; }
+    var now=Date.now(), html='';
+    for(var i=0;i<__promos.length;i++){
+      var p=__promos[i];
+      var expired = p.expiresAt && (new Date(p.expiresAt).getTime()<now);
+      var usedUp = p.maxUses>0 && p.uses>=p.maxUses;
+      var status = (!p.active)?['Disattivato','no']:(expired?['Scaduto','no']:(usedUp?['Esaurito','no']:['Attivo','ok']));
+      var planLabel = (p.plan==='societa')?'Societ\u00e0':'Pro';
+      var dur = (p.days>0)?(p.days+' giorni'):'illimitato';
+      var usesTxt = (p.maxUses>0)?(p.uses+'/'+p.maxUses+' usi'):(p.uses+' usi');
+      var expTxt = p.expiresAt?('scade '+new Date(p.expiresAt).toLocaleDateString('it-IT')):'nessuna scadenza';
+      html+='<div class="admin-row"><div class="promo-code">'+escA(p.code)+'</div><div class="admin-main"><div class="admin-name">'+planLabel+' &middot; '+dur+'</div><div class="admin-mail">'+usesTxt+' &middot; '+expTxt+'</div></div><div class="admin-meta"><span class="admin-badge '+status[1]+'">'+status[0]+'</span></div><div class="admin-actions"><button class="admin-btn" onclick="copyPromo(\''+p.code+'\')">Copia</button><button class="admin-btn" onclick="togglePromo(\''+p.code+'\')">'+(p.active?'Disattiva':'Attiva')+'</button><button class="admin-btn danger" onclick="deletePromo(\''+p.code+'\')">Elimina</button></div></div>';
+    }
+    list.innerHTML=html;
+  };
   window.renderAbbonamenti=function(){
     var sum=document.getElementById('abb-summary'); var list=document.getElementById('abb-list');
     if(!sum&&!list) return;
