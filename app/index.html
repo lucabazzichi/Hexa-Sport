@@ -2768,6 +2768,33 @@ body.hexa-admin-only main { padding:0 !important; margin:0 !important; max-width
 .ann-banner.ann-success { border-left:4px solid var(--green); }
 body.hexa-admin-only #hexa-announce-bar { display:none !important; }
 </style>
+
+<style>
+/* ===== Scheda piano utente v1 ===== */
+#acc-section-plan .plan-current { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+.plan-badge { font-size:13px; font-weight:700; padding:4px 12px; border-radius:20px; }
+.plan-badge.plan-free { background:var(--bg3); color:var(--text2); }
+.plan-badge.plan-pro { background:rgba(232,160,32,.18); color:var(--accent); }
+.plan-badge.plan-societa { background:rgba(167,139,250,.18); color:var(--purple); }
+.plan-renew { font-size:13px; color:var(--text2); }
+.plan-renew b { color:var(--text); }
+.plan-opts { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; max-width:520px; }
+.plan-opt { border:1px solid var(--border); border-radius:var(--radius); padding:12px 8px; text-align:center; }
+.plan-opt.current { border:2px solid var(--accent); }
+.plan-opt-n { font-weight:600; color:var(--text); font-size:14px; }
+.plan-opt-p { font-size:12px; color:var(--text2); margin-top:2px; }
+.plan-opt-cur { font-size:11px; color:var(--accent); margin-top:4px; font-weight:600; }
+.plan-change-btn { display:inline-flex; align-items:center; gap:8px; background:var(--bg3); border:1px solid var(--border2); color:var(--text2); padding:9px 16px; border-radius:var(--radius); font-size:13px; font-weight:600; cursor:not-allowed; }
+.plan-change-btn span { font-size:11px; color:var(--text3); }
+.plan-coupon { margin-top:18px; max-width:420px; }
+.plan-coupon label { display:block; font-size:13px; color:var(--text2); font-weight:600; margin-bottom:8px; }
+.plan-coupon-row { display:flex; gap:8px; }
+.plan-coupon-row input { flex:1; min-width:0; background:var(--bg3); border:1px solid var(--border2); color:var(--text); padding:10px 12px; border-radius:8px; font-size:14px; box-sizing:border-box; }
+.plan-coupon-row input:focus { outline:none; border-color:var(--accent); }
+.plan-redeem-btn { background:var(--accent); color:#1a1300; border:0; padding:0 18px; border-radius:8px; font-weight:700; font-size:14px; cursor:pointer; }
+.plan-coupon-msg { font-size:13px; margin-top:8px; min-height:16px; }
+.plan-norenew { margin-top:18px; font-size:12px; color:var(--text3); }
+</style>
 </head>
 <body>
 
@@ -3296,6 +3323,11 @@ body.hexa-admin-only #hexa-announce-bar { display:none !important; }
         <div class="acc-row"><span class="acc-k" data-i18n="accountTeam">Squadra</span><span class="acc-v" id="acc-team">—</span></div>
       </div>
       <div class="acc-note" data-i18n="accountTeamSoon">Selezione tra più squadre: in arrivo (per i piani Pro ed Enterprise).</div>
+    </div>
+
+    <div class="settings-page-section" id="acc-section-plan">
+      <div class="settings-page-section-title">💳 <span>Il tuo piano</span></div>
+      <div id="acc-plan-body"></div>
     </div>
 
     <div class="settings-page-section" id="acc-section-email">
@@ -9020,6 +9052,7 @@ function accMsgClear() { accMsg('email', ''); accMsg('pass', ''); }
 function openAccount() {
   if (typeof closeProfileMenu === 'function') closeProfileMenu();
   showPage('account');
+  if (window.renderUserPlan) window.renderUserPlan();
   var u = window.fbAuth && window.fbAuth.currentUser;
   var name = '';
   try { name = ((localStorage.getItem('hexa_user_nome') || '') + ' ' + (localStorage.getItem('hexa_user_cognome') || '')).trim(); } catch (e) {}
@@ -13627,5 +13660,73 @@ document.addEventListener("DOMContentLoaded", function() {
   };
 })();
 </script>
-</body>
+<script>
+/* ===== Scheda "Il tuo piano" (menu Account utente) ===== */
+(function(){
+  var __pu={pro:0,societa:0}, __puLoaded=false;
+  function planName(p){ return p==='pro'?'Pro':(p==='societa'?'Societ\u00e0':'Free'); }
+  function fmtD(d){ try{ return d.toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}); }catch(e){ return ''; } }
+  function ensurePricing(cb){
+    if(__puLoaded||!window.fbDB){ cb(); return; }
+    window.fbDB.collection('config').doc('pricing').get().then(function(doc){
+      var d=doc.exists?doc.data():{}; __pu={pro:Number(d.pro)||0,societa:Number(d.societa)||0}; __puLoaded=true; cb();
+    }).catch(function(){ cb(); });
+  }
+  window.renderUserPlan=function(){
+    var box=document.getElementById('acc-plan-body'); if(!box) return;
+    var u=window.fbAuth && window.fbAuth.currentUser;
+    if(!u||!window.fbDB){ box.innerHTML='<div class="acc-note">Accedi per vedere il tuo piano.</div>'; return; }
+    box.innerHTML='<div class="acc-note">Caricamento\u2026</div>';
+    ensurePricing(function(){
+      window.fbDB.collection('users').doc(u.uid).get().then(function(doc){
+        var d=doc.exists?doc.data():{};
+        var plan=d.plan||'free';
+        var exp=d.planExpiresAt?new Date(d.planExpiresAt):null;
+        if(exp && exp.getTime()<Date.now()){
+          plan='free'; exp=null;
+          try{ window.fbDB.collection('users').doc(u.uid).set({plan:'free',planExpiresAt:null},{merge:true}); }catch(e){}
+        }
+        drawPlan(box, plan, exp);
+      }).catch(function(){ box.innerHTML='<div class="acc-note">Impossibile caricare il piano.</div>'; });
+    });
+  };
+  function drawPlan(box, plan, exp){
+    var h='<div class="plan-current"><span class="plan-badge plan-'+plan+'">'+planName(plan)+'</span>';
+    if(exp){ var days=Math.max(0,Math.ceil((exp.getTime()-Date.now())/86400000)); h+='<span class="plan-renew">Scade il '+fmtD(exp)+' \u00b7 <b>tra '+days+' giorni</b></span>'; }
+    else if(plan!=='free'){ h+='<span class="plan-renew">Senza scadenza</span>'; }
+    h+='</div>';
+    function pc(k,l,p){ return '<div class="plan-opt'+(plan===k?' current':'')+'"><div class="plan-opt-n">'+l+'</div><div class="plan-opt-p">'+p+'</div>'+(plan===k?'<div class="plan-opt-cur">Attuale</div>':'')+'</div>'; }
+    h+='<div class="plan-opts">'+pc('free','Free','\u20ac0')+pc('pro','Pro','\u20ac'+(__pu.pro||0)+'/mese')+pc('societa','Societ\u00e0','\u20ac'+(__pu.societa||0)+'/mese')+'</div>';
+    h+='<button class="plan-change-btn" disabled>\U0001F512 Cambia piano <span>coi pagamenti</span></button>';
+    h+='<div class="plan-coupon"><label>Hai un codice promo?</label><div class="plan-coupon-row"><input type="text" id="plan-coupon-input" placeholder="Inserisci codice" style="text-transform:uppercase"><button class="plan-redeem-btn" onclick="redeemCoupon()">Riscatta</button></div><div id="plan-coupon-msg" class="plan-coupon-msg"></div></div>';
+    h+='<div class="plan-norenew">Non rinnovare \u00b7 coi pagamenti</div>';
+    box.innerHTML=h;
+  }
+  window.redeemCoupon=function(){
+    var inp=document.getElementById('plan-coupon-input'), msg=document.getElementById('plan-coupon-msg');
+    function show(t,ok){ if(msg){ msg.textContent=t; msg.style.color=ok?'var(--green)':'var(--red)'; } }
+    var code=((inp&&inp.value)||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+    if(!code){ show('Inserisci un codice.',false); return; }
+    var u=window.fbAuth && window.fbAuth.currentUser; if(!u||!window.fbDB){ show('Errore di accesso.',false); return; }
+    show('Verifica\u2026',true);
+    window.fbDB.collection('config').doc('promos').get().then(function(doc){
+      var d=doc.exists?doc.data():{}; var codes=(d&&d.codes)?d.codes:[]; var promo=null;
+      for(var i=0;i<codes.length;i++){ if((codes[i].code||'').toUpperCase()===code){ promo=codes[i]; break; } }
+      if(!promo){ show('Codice non valido.',false); return; }
+      if(!promo.active){ show('Questo codice non \u00e8 attivo.',false); return; }
+      if(promo.expiresAt && new Date(promo.expiresAt).getTime()<Date.now()){ show('Questo codice \u00e8 scaduto.',false); return; }
+      window.fbDB.collection('users').doc(u.uid).get().then(function(ud){
+        var udata=ud.exists?ud.data():{}; var red=udata.redeemedCodes||[];
+        if(red.indexOf(code)>=0){ show('Hai gi\u00e0 usato questo codice.',false); return; }
+        var exp=null; if(promo.days>0){ exp=new Date(Date.now()+promo.days*86400000).toISOString(); }
+        var upd={ plan:promo.plan||'pro', planExpiresAt:exp, redeemedCodes:firebase.firestore.FieldValue.arrayUnion(code) };
+        window.fbDB.collection('users').doc(u.uid).set(upd,{merge:true}).then(function(){
+          show('Codice applicato! Piano '+planName(promo.plan)+' attivato \u2713',true);
+          if(inp) inp.value=''; window.renderUserPlan();
+        }).catch(function(err){ show('Errore: '+(err&&err.message?err.message:'non applicato'),false); });
+      }).catch(function(){ show('Errore di lettura.',false); });
+    }).catch(function(){ show('Errore di lettura codici.',false); });
+  };
+})();
+</script></body>
 </html>
