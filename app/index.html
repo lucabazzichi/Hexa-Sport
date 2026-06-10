@@ -13367,7 +13367,13 @@ document.addEventListener("DOMContentLoaded", function() {
       document.body.classList.add('hexa-admin-only');
       try{ if(typeof showPage==='function') showPage('admin'); }catch(e){}
       adminGo('panoramica'); loadAdminUsers(); loadPricing(); loadPromos(); loadAnnunci();
-    } else { document.body.classList.remove('hexa-admin-only'); }
+    } else {
+      document.body.classList.remove('hexa-admin-only');
+      try{
+        var ap=document.getElementById('page-admin');
+        if(ap && ap.classList.contains('active') && typeof showPage==='function') showPage('dashboard');
+      }catch(e){}
+    }
   };
 
   window.enforceHexaBlock=function(user){
