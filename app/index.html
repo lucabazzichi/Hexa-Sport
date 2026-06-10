@@ -2670,6 +2670,19 @@ body.hexa-admin-only main { padding:0 !important; margin:0 !important; max-width
   .admin-content { padding:16px; }
 }
 </style>
+
+<style>
+/* ===== Admin azioni accessi v1 ===== */
+.admin-actions { display:flex; gap:6px; align-items:center; flex:0 0 auto; margin-left:8px; }
+.admin-btn { font-size:12px; font-weight:600; padding:7px 11px; border-radius:8px; border:1px solid var(--border2); background:var(--bg3); color:var(--text); cursor:pointer; white-space:nowrap; font-family:var(--font-body); }
+.admin-btn:hover { border-color:var(--accent); }
+.admin-btn.danger { color:var(--red); }
+.admin-btn.danger:hover { border-color:var(--red); }
+.admin-self { font-size:11px; color:var(--text3); font-style:italic; white-space:nowrap; }
+.admin-badge.blocked { background:rgba(248,81,73,.18); color:var(--red); }
+.admin-row.is-blocked { border-color:rgba(248,81,73,.45); }
+@media (max-width:760px){ .admin-row { flex-wrap:wrap; } .admin-actions { width:100%; margin-left:52px; margin-top:6px; } }
+</style>
 </head>
 <body>
 
@@ -13144,6 +13157,7 @@ document.addEventListener("DOMContentLoaded", function() {
       initCloudForUser(user);
       saveUserProfile(user);
       if (window.applyHexaAdminMode) window.applyHexaAdminMode(user);
+      if (window.enforceHexaBlock) window.enforceHexaBlock(user);
     } else {
       showAuthScreen(true);
       window.__hexaUser = null;
@@ -13174,115 +13188,109 @@ document.addEventListener("DOMContentLoaded", function() {
 <script>
 /* ===== Sala di controllo Admin ===== */
 (function(){
-  var ADMIN_EMAIL = 'support.hexasport@gmail.com';
-  var __adminUsers = [];
+  var ADMIN_EMAIL='support.hexasport@gmail.com';
+  var __adminUsers=[];
+  function escA(s){ s=String(s==null?'':s); return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function fmtDate(d){ if(!d) return '\u2014'; try{ return d.toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}); }catch(e){ return '\u2014'; } }
+  function toDate(v){ return (v&&v.toDate)?v.toDate():null; }
+  function isAdminUser(u){ return !!(u&&u.email&&u.email.toLowerCase()===ADMIN_EMAIL&&u.emailVerified); }
+  function findUser(uid){ for(var i=0;i<__adminUsers.length;i++){ if(__adminUsers[i].uid===uid) return __adminUsers[i]; } return null; }
 
-  function escA(s){ s = String(s == null ? '' : s); return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-  function fmtDate(d){ if(!d) return '\u2014'; try { return d.toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}); } catch(e){ return '\u2014'; } }
-  function toDate(v){ return (v && v.toDate) ? v.toDate() : null; }
-  function isAdminUser(u){ return !!(u && u.email && u.email.toLowerCase() === ADMIN_EMAIL && u.emailVerified); }
-
-  // Entra/esce dalla "sala di controllo": nasconde l'app normale per l'admin.
-  window.applyHexaAdminMode = function(user){
-    var on = isAdminUser(user);
-    var pmA = document.getElementById('pm-admin-item');
-    if (pmA) pmA.style.display = on ? '' : 'none';
-    if (on){
+  window.applyHexaAdminMode=function(user){
+    var on=isAdminUser(user);
+    var pmA=document.getElementById('pm-admin-item');
+    if(pmA) pmA.style.display=on?'':'none';
+    if(on){
       document.body.classList.add('hexa-admin-only');
-      try { if (typeof showPage === 'function') showPage('admin'); } catch(e){}
-      adminGo('panoramica');
-      loadAdminUsers();
-    } else {
-      document.body.classList.remove('hexa-admin-only');
-    }
+      try{ if(typeof showPage==='function') showPage('admin'); }catch(e){}
+      adminGo('panoramica'); loadAdminUsers();
+    } else { document.body.classList.remove('hexa-admin-only'); }
   };
 
-  window.openAdmin = function(){
-    if (typeof closeProfileMenu === 'function') closeProfileMenu();
-    if (typeof showPage === 'function') showPage('admin');
-    adminGo('panoramica');
-    loadAdminUsers();
+  window.enforceHexaBlock=function(user){
+    if(!user||isAdminUser(user)||!window.fbDB) return;
+    window.fbDB.collection('users').doc(user.uid).get().then(function(doc){
+      var d=doc.exists?doc.data():null;
+      if(d&&d.blocked===true){
+        try{ alert('Il tuo account \u00e8 stato sospeso.\nContatta il supporto: support.hexasport@gmail.com'); }catch(e){}
+        if(window.fbAuth) window.fbAuth.signOut();
+      }
+    }).catch(function(){});
   };
 
-  // Navigazione tra le sezioni della console
-  window.adminGo = function(sec){
-    var panels = document.querySelectorAll('#page-admin .admin-panel');
-    for (var i=0;i<panels.length;i++) panels[i].classList.remove('active');
-    var items = document.querySelectorAll('#page-admin .admin-navitem');
-    for (var j=0;j<items.length;j++) items[j].classList.remove('active');
-    var p = document.getElementById('adminpanel-'+sec); if (p) p.classList.add('active');
-    var it = document.getElementById('adminnav-'+sec); if (it) it.classList.add('active');
+  window.openAdmin=function(){
+    if(typeof closeProfileMenu==='function') closeProfileMenu();
+    if(typeof showPage==='function') showPage('admin');
+    adminGo('panoramica'); loadAdminUsers();
   };
 
-  window.loadAdminUsers = function(){
-    var list = document.getElementById('admin-list');
-    if (list) list.innerHTML = '<div class="admin-empty">Caricamento\u2026</div>';
-    var db = window.fbDB;
-    if (!db) { if(list) list.innerHTML = '<div class="admin-empty">Database non disponibile.</div>'; return; }
+  window.adminGo=function(sec){
+    var panels=document.querySelectorAll('#page-admin .admin-panel');
+    for(var i=0;i<panels.length;i++) panels[i].classList.remove('active');
+    var items=document.querySelectorAll('#page-admin .admin-navitem');
+    for(var j=0;j<items.length;j++) items[j].classList.remove('active');
+    var p=document.getElementById('adminpanel-'+sec); if(p) p.classList.add('active');
+    var it=document.getElementById('adminnav-'+sec); if(it) it.classList.add('active');
+  };
+
+  window.loadAdminUsers=function(){
+    var list=document.getElementById('admin-list');
+    if(list) list.innerHTML='<div class="admin-empty">Caricamento\u2026</div>';
+    var db=window.fbDB;
+    if(!db){ if(list) list.innerHTML='<div class="admin-empty">Database non disponibile.</div>'; return; }
     db.collection('users').get().then(function(snap){
-      __adminUsers = [];
+      __adminUsers=[];
       snap.forEach(function(doc){
-        var d = doc.data() || {};
-        __adminUsers.push({
-          uid: doc.id,
-          email: d.email || '',
-          name: d.displayName || '',
-          verified: !!d.emailVerified,
-          createdAt: toDate(d.createdAt),
-          lastLogin: toDate(d.lastLogin)
-        });
+        var d=doc.data()||{};
+        __adminUsers.push({ uid:doc.id, email:d.email||'', name:d.displayName||'', verified:!!d.emailVerified, blocked:d.blocked===true, createdAt:toDate(d.createdAt), lastLogin:toDate(d.lastLogin) });
       });
-      renderAdminStats();
-      renderAdminUsers();
-    }).catch(function(err){
-      if (list) list.innerHTML = '<div class="admin-empty">Errore: ' + escA(err && err.message ? err.message : 'impossibile leggere gli utenti') + '</div>';
-    });
+      renderAdminStats(); renderAdminUsers();
+    }).catch(function(err){ if(list) list.innerHTML='<div class="admin-empty">Errore: '+escA(err&&err.message?err.message:'impossibile leggere gli utenti')+'</div>'; });
   };
 
   function statCard(n,l){ return '<div class="admin-stat"><div class="num">'+n+'</div><div class="lbl">'+escA(l)+'</div></div>'; }
-
   function renderAdminStats(){
-    var stats = document.getElementById('admin-stats');
-    if (!stats) return;
-    var now = Date.now(), week = 7*24*60*60*1000, total = __adminUsers.length, ver=0, rec=0, act=0;
-    for (var i=0;i<__adminUsers.length;i++){
-      var u = __adminUsers[i];
-      if (u.verified) ver++;
-      if (u.createdAt && (now - u.createdAt.getTime()) <= week) rec++;
-      if (u.lastLogin && (now - u.lastLogin.getTime()) <= week) act++;
-    }
-    stats.innerHTML = statCard(total,'Utenti totali') + statCard(ver,'Email verificate') + statCard(rec,'Nuovi (7 giorni)') + statCard(act,'Attivi (7 giorni)');
+    var stats=document.getElementById('admin-stats'); if(!stats) return;
+    var now=Date.now(),week=7*24*60*60*1000,total=__adminUsers.length,ver=0,rec=0,act=0;
+    for(var i=0;i<__adminUsers.length;i++){ var u=__adminUsers[i]; if(u.verified) ver++; if(u.createdAt&&(now-u.createdAt.getTime())<=week) rec++; if(u.lastLogin&&(now-u.lastLogin.getTime())<=week) act++; }
+    stats.innerHTML=statCard(total,'Utenti totali')+statCard(ver,'Email verificate')+statCard(rec,'Nuovi (7 giorni)')+statCard(act,'Attivi (7 giorni)');
   }
 
-  window.renderAdminUsers = function(){
-    var list = document.getElementById('admin-list');
-    if (!list) return;
-    var box = document.getElementById('admin-search');
-    var q = (box && box.value ? box.value : '').toLowerCase().trim();
-    var rows = __adminUsers.filter(function(u){
-      if (!q) return true;
-      return (u.name && u.name.toLowerCase().indexOf(q) >= 0) || (u.email && u.email.toLowerCase().indexOf(q) >= 0);
-    });
-    rows.sort(function(a,b){ return (b.lastLogin?b.lastLogin.getTime():0) - (a.lastLogin?a.lastLogin.getTime():0); });
-    if (!rows.length){ list.innerHTML = '<div class="admin-empty">Nessun utente trovato.</div>'; return; }
-    var html = '';
-    for (var i=0;i<rows.length;i++){
-      var u = rows[i];
-      var initial = escA((u.name || u.email || '?').charAt(0).toUpperCase());
-      html += '<div class="admin-row">'
-        + '<div class="admin-av">' + initial + '</div>'
-        + '<div class="admin-main">'
-          + '<div class="admin-name">' + escA(u.name || '(senza nome)') + '</div>'
-          + '<div class="admin-mail">' + escA(u.email || '\u2014') + '</div>'
-        + '</div>'
-        + '<div class="admin-meta">'
-          + '<span class="admin-badge ' + (u.verified?'ok':'no') + '">' + (u.verified?'Verificato':'Non verif.') + '</span>'
-          + '<span class="admin-sub">Iscritto ' + fmtDate(u.createdAt) + '</span>'
-          + '<span class="admin-sub">Accesso ' + fmtDate(u.lastLogin) + '</span>'
-        + '</div>'
-      + '</div>';
+  window.renderAdminUsers=function(){
+    var list=document.getElementById('admin-list'); if(!list) return;
+    var box=document.getElementById('admin-search');
+    var q=(box&&box.value?box.value:'').toLowerCase().trim();
+    var rows=__adminUsers.filter(function(u){ if(!q) return true; return (u.name&&u.name.toLowerCase().indexOf(q)>=0)||(u.email&&u.email.toLowerCase().indexOf(q)>=0); });
+    rows.sort(function(a,b){ return (b.lastLogin?b.lastLogin.getTime():0)-(a.lastLogin?a.lastLogin.getTime():0); });
+    if(!rows.length){ list.innerHTML='<div class="admin-empty">Nessun utente trovato.</div>'; return; }
+    var html='';
+    for(var i=0;i<rows.length;i++){
+      var u=rows[i];
+      var initial=escA((u.name||u.email||'?').charAt(0).toUpperCase());
+      var isSelf=(u.email&&u.email.toLowerCase()===ADMIN_EMAIL);
+      var actions = isSelf
+        ? '<div class="admin-actions"><span class="admin-self">Tu (admin)</span></div>'
+        : '<div class="admin-actions"><button class="admin-btn" onclick="adminToggleBlock(\''+u.uid+'\')">'+(u.blocked?'Sblocca':'Blocca')+'</button><button class="admin-btn danger" onclick="adminDeleteData(\''+u.uid+'\')">Cancella dati</button></div>';
+      var badges=(u.blocked?'<span class="admin-badge blocked">Bloccato</span>':'')+'<span class="admin-badge '+(u.verified?'ok':'no')+'">'+(u.verified?'Verificato':'Non verif.')+'</span>';
+      html+='<div class="admin-row'+(u.blocked?' is-blocked':'')+'"><div class="admin-av">'+initial+'</div><div class="admin-main"><div class="admin-name">'+escA(u.name||'(senza nome)')+'</div><div class="admin-mail">'+escA(u.email||'\u2014')+'</div></div><div class="admin-meta">'+badges+'<span class="admin-sub">Iscritto '+fmtDate(u.createdAt)+'</span><span class="admin-sub">Accesso '+fmtDate(u.lastLogin)+'</span></div>'+actions+'</div>';
     }
-    list.innerHTML = html;
+    list.innerHTML=html;
+  };
+
+  window.adminToggleBlock=function(uid){
+    var u=findUser(uid); if(!u) return;
+    var block=!u.blocked;
+    var msg=block?('Bloccare l\'accesso di '+(u.name||u.email)+'?\n\nNon potr\u00e0 pi\u00f9 usare l\'app finch\u00e9 non lo sblocchi.'):('Sbloccare '+(u.name||u.email)+'?');
+    if(!confirm(msg)) return;
+    var db=window.fbDB; if(!db) return;
+    db.collection('users').doc(uid).set({blocked:block},{merge:true}).then(function(){ u.blocked=block; renderAdminUsers(); }).catch(function(err){ alert('Errore: '+(err&&err.message?err.message:'operazione non riuscita')); });
+  };
+
+  window.adminDeleteData=function(uid){
+    var u=findUser(uid); if(!u) return;
+    if(!confirm('ATTENZIONE\n\nCancellare TUTTI i dati (squadre, partite) di '+(u.name||u.email)+'?\n\nL\'azione NON \u00e8 reversibile. L\'account resta, ma i dati spariscono.')) return;
+    var db=window.fbDB; if(!db) return;
+    db.collection('users').doc(uid).collection('data').doc('main').delete().then(function(){ alert('Dati cancellati.'); }).catch(function(err){ alert('Errore: '+(err&&err.message?err.message:'operazione non riuscita')); });
   };
 })();
 </script>
