@@ -2683,6 +2683,22 @@ body.hexa-admin-only main { padding:0 !important; margin:0 !important; max-width
 .admin-row.is-blocked { border-color:rgba(248,81,73,.45); }
 @media (max-width:760px){ .admin-row { flex-wrap:wrap; } .admin-actions { width:100%; margin-left:52px; margin-top:6px; } }
 </style>
+
+<style>
+/* ===== Admin abbonamenti v1 ===== */
+.abb-pricing { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:16px; }
+.abb-pricing-row { display:flex; gap:14px; align-items:flex-end; flex-wrap:wrap; }
+.abb-pricing-row label { display:flex; flex-direction:column; gap:6px; font-size:12px; color:var(--text2); font-weight:600; }
+.abb-input { background:var(--bg3); border:1px solid var(--border2); color:var(--text); padding:9px 12px; border-radius:8px; font-size:14px; width:160px; box-sizing:border-box; }
+.abb-input:focus { outline:none; border-color:var(--accent); }
+.abb-save { padding:9px 16px; }
+.abb-saved { font-size:12px; color:var(--green); margin-top:8px; min-height:16px; }
+.abb-plan-btns { display:flex; gap:6px; flex:0 0 auto; }
+.plan-btn { font-size:12px; font-weight:600; padding:6px 10px; border-radius:8px; border:1px solid var(--border2); background:var(--bg3); color:var(--text2); cursor:pointer; font-family:var(--font-body); }
+.plan-btn:hover { border-color:var(--accent); }
+.plan-btn.active { background:var(--accent); color:#1a1300; border-color:var(--accent); }
+@media (max-width:760px){ .abb-plan-btns { width:100%; margin-left:52px; margin-top:6px; } }
+</style>
 </head>
 <body>
 
@@ -3299,8 +3315,18 @@ body.hexa-admin-only main { padding:0 !important; margin:0 !important; max-width
 
         <div class="admin-panel" id="adminpanel-abbonamenti">
           <div class="admin-eyebrow">Abbonamenti</div>
-          <div class="admin-title">Piani Free / Pro / Societ&agrave;</div>
-          <div class="admin-soon">Sezione in arrivo &mdash; la costruiamo al prossimo passo.</div>
+          <div class="admin-title">Piani e prezzi</div>
+          <div class="abb-pricing">
+            <div class="abb-pricing-row">
+              <label>Prezzo Pro (&euro;/mese)<input type="number" id="price-pro" class="abb-input" min="0" step="0.01" placeholder="es. 9.99"></label>
+              <label>Prezzo Societ&agrave; (&euro;/mese)<input type="number" id="price-societa" class="abb-input" min="0" step="0.01" placeholder="es. 29.99"></label>
+              <button class="admin-btn abb-save" onclick="savePricing()">Salva prezzi</button>
+            </div>
+            <div class="abb-saved" id="abb-saved"></div>
+          </div>
+          <div class="admin-stats" id="abb-summary" style="margin:16px 0"></div>
+          <input id="abb-search" class="admin-search" type="text" placeholder="Cerca utente..." oninput="renderAbbonamenti()">
+          <div class="admin-list" id="abb-list"></div>
         </div>
 
         <div class="admin-panel" id="adminpanel-promo">
@@ -13190,6 +13216,7 @@ document.addEventListener("DOMContentLoaded", function() {
 (function(){
   var ADMIN_EMAIL='support.hexasport@gmail.com';
   var __adminUsers=[];
+  var __pricing={pro:0,societa:0};
   function escA(s){ s=String(s==null?'':s); return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function fmtDate(d){ if(!d) return '\u2014'; try{ return d.toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}); }catch(e){ return '\u2014'; } }
   function toDate(v){ return (v&&v.toDate)?v.toDate():null; }
@@ -13203,7 +13230,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if(on){
       document.body.classList.add('hexa-admin-only');
       try{ if(typeof showPage==='function') showPage('admin'); }catch(e){}
-      adminGo('panoramica'); loadAdminUsers();
+      adminGo('panoramica'); loadAdminUsers(); loadPricing();
     } else { document.body.classList.remove('hexa-admin-only'); }
   };
 
@@ -13221,7 +13248,7 @@ document.addEventListener("DOMContentLoaded", function() {
   window.openAdmin=function(){
     if(typeof closeProfileMenu==='function') closeProfileMenu();
     if(typeof showPage==='function') showPage('admin');
-    adminGo('panoramica'); loadAdminUsers();
+    adminGo('panoramica'); loadAdminUsers(); loadPricing();
   };
 
   window.adminGo=function(sec){
@@ -13231,6 +13258,7 @@ document.addEventListener("DOMContentLoaded", function() {
     for(var j=0;j<items.length;j++) items[j].classList.remove('active');
     var p=document.getElementById('adminpanel-'+sec); if(p) p.classList.add('active');
     var it=document.getElementById('adminnav-'+sec); if(it) it.classList.add('active');
+    if(sec==='abbonamenti') renderAbbonamenti();
   };
 
   window.loadAdminUsers=function(){
@@ -13242,9 +13270,9 @@ document.addEventListener("DOMContentLoaded", function() {
       __adminUsers=[];
       snap.forEach(function(doc){
         var d=doc.data()||{};
-        __adminUsers.push({ uid:doc.id, email:d.email||'', name:d.displayName||'', verified:!!d.emailVerified, blocked:d.blocked===true, createdAt:toDate(d.createdAt), lastLogin:toDate(d.lastLogin) });
+        __adminUsers.push({ uid:doc.id, email:d.email||'', name:d.displayName||'', verified:!!d.emailVerified, blocked:d.blocked===true, plan:d.plan||'free', createdAt:toDate(d.createdAt), lastLogin:toDate(d.lastLogin) });
       });
-      renderAdminStats(); renderAdminUsers();
+      renderAdminStats(); renderAdminUsers(); renderAbbonamenti();
     }).catch(function(err){ if(list) list.innerHTML='<div class="admin-empty">Errore: '+escA(err&&err.message?err.message:'impossibile leggere gli utenti')+'</div>'; });
   };
 
@@ -13268,8 +13296,7 @@ document.addEventListener("DOMContentLoaded", function() {
       var u=rows[i];
       var initial=escA((u.name||u.email||'?').charAt(0).toUpperCase());
       var isSelf=(u.email&&u.email.toLowerCase()===ADMIN_EMAIL);
-      var actions = isSelf
-        ? '<div class="admin-actions"><span class="admin-self">Tu (admin)</span></div>'
+      var actions = isSelf ? '<div class="admin-actions"><span class="admin-self">Tu (admin)</span></div>'
         : '<div class="admin-actions"><button class="admin-btn" onclick="adminToggleBlock(\''+u.uid+'\')">'+(u.blocked?'Sblocca':'Blocca')+'</button><button class="admin-btn danger" onclick="adminDeleteData(\''+u.uid+'\')">Cancella dati</button></div>';
       var badges=(u.blocked?'<span class="admin-badge blocked">Bloccato</span>':'')+'<span class="admin-badge '+(u.verified?'ok':'no')+'">'+(u.verified?'Verificato':'Non verif.')+'</span>';
       html+='<div class="admin-row'+(u.blocked?' is-blocked':'')+'"><div class="admin-av">'+initial+'</div><div class="admin-main"><div class="admin-name">'+escA(u.name||'(senza nome)')+'</div><div class="admin-mail">'+escA(u.email||'\u2014')+'</div></div><div class="admin-meta">'+badges+'<span class="admin-sub">Iscritto '+fmtDate(u.createdAt)+'</span><span class="admin-sub">Accesso '+fmtDate(u.lastLogin)+'</span></div>'+actions+'</div>';
@@ -13285,12 +13312,65 @@ document.addEventListener("DOMContentLoaded", function() {
     var db=window.fbDB; if(!db) return;
     db.collection('users').doc(uid).set({blocked:block},{merge:true}).then(function(){ u.blocked=block; renderAdminUsers(); }).catch(function(err){ alert('Errore: '+(err&&err.message?err.message:'operazione non riuscita')); });
   };
-
   window.adminDeleteData=function(uid){
     var u=findUser(uid); if(!u) return;
     if(!confirm('ATTENZIONE\n\nCancellare TUTTI i dati (squadre, partite) di '+(u.name||u.email)+'?\n\nL\'azione NON \u00e8 reversibile. L\'account resta, ma i dati spariscono.')) return;
     var db=window.fbDB; if(!db) return;
     db.collection('users').doc(uid).collection('data').doc('main').delete().then(function(){ alert('Dati cancellati.'); }).catch(function(err){ alert('Errore: '+(err&&err.message?err.message:'operazione non riuscita')); });
+  };
+
+  /* ---- Abbonamenti ---- */
+  window.loadPricing=function(){
+    var db=window.fbDB; if(!db) return;
+    db.collection('config').doc('pricing').get().then(function(doc){
+      var d=doc.exists?doc.data():{};
+      __pricing={ pro:Number(d.pro)||0, societa:Number(d.societa)||0 };
+      var pp=document.getElementById('price-pro'), ps=document.getElementById('price-societa');
+      if(pp&&__pricing.pro) pp.value=__pricing.pro;
+      if(ps&&__pricing.societa) ps.value=__pricing.societa;
+      renderAbbonamenti();
+    }).catch(function(){});
+  };
+  window.savePricing=function(){
+    var pp=document.getElementById('price-pro'), ps=document.getElementById('price-societa');
+    var pro=Number(pp&&pp.value)||0, soc=Number(ps&&ps.value)||0;
+    var db=window.fbDB; if(!db) return;
+    var s=document.getElementById('abb-saved');
+    db.collection('config').doc('pricing').set({pro:pro,societa:soc},{merge:true}).then(function(){
+      __pricing={pro:pro,societa:soc};
+      if(s){ s.style.color='var(--green)'; s.textContent='Prezzi salvati \u2713'; setTimeout(function(){ if(s) s.textContent=''; },2500); }
+      renderAbbonamenti();
+    }).catch(function(err){ if(s){ s.style.color='var(--red)'; s.textContent='Errore: '+(err&&err.message?err.message:'non salvato'); } });
+  };
+  window.adminSetPlan=function(uid,plan){
+    var u=findUser(uid); if(!u||u.plan===plan) return;
+    var db=window.fbDB; if(!db) return;
+    db.collection('users').doc(uid).set({plan:plan},{merge:true}).then(function(){ u.plan=plan; renderAbbonamenti(); }).catch(function(err){ alert('Errore: '+(err&&err.message?err.message:'non salvato')); });
+  };
+  window.renderAbbonamenti=function(){
+    var sum=document.getElementById('abb-summary'); var list=document.getElementById('abb-list');
+    if(!sum&&!list) return;
+    var free=0,pro=0,soc=0;
+    for(var i=0;i<__adminUsers.length;i++){ var p=__adminUsers[i].plan||'free'; if(p==='pro')pro++; else if(p==='societa')soc++; else free++; }
+    var mrr=pro*__pricing.pro+soc*__pricing.societa;
+    if(sum) sum.innerHTML=statCard(free,'Free')+statCard(pro,'Pro')+statCard(soc,'Societ\u00e0')+statCard('\u20ac'+mrr.toFixed(2),'Incasso/mese (stima)');
+    if(list){
+      var box=document.getElementById('abb-search'); var q=(box&&box.value?box.value:'').toLowerCase().trim();
+      var rows=__adminUsers.filter(function(u){ if(!q) return true; return (u.name&&u.name.toLowerCase().indexOf(q)>=0)||(u.email&&u.email.toLowerCase().indexOf(q)>=0); });
+      var ord={societa:0,pro:1,free:2};
+      rows.sort(function(a,b){ return (ord[a.plan||'free'])-(ord[b.plan||'free']); });
+      if(!rows.length){ list.innerHTML='<div class="admin-empty">Nessun utente.</div>'; return; }
+      var html='';
+      for(var k=0;k<rows.length;k++){
+        var u=rows[k]; var plan=u.plan||'free';
+        html+='<div class="admin-row"><div class="admin-av">'+escA((u.name||u.email||'?').charAt(0).toUpperCase())+'</div><div class="admin-main"><div class="admin-name">'+escA(u.name||'(senza nome)')+'</div><div class="admin-mail">'+escA(u.email||'\u2014')+'</div></div><div class="abb-plan-btns">'
+          +'<button class="plan-btn'+(plan==='free'?' active':'')+'" onclick="adminSetPlan(\''+u.uid+'\',\'free\')">Free</button>'
+          +'<button class="plan-btn'+(plan==='pro'?' active':'')+'" onclick="adminSetPlan(\''+u.uid+'\',\'pro\')">Pro</button>'
+          +'<button class="plan-btn'+(plan==='societa'?' active':'')+'" onclick="adminSetPlan(\''+u.uid+'\',\'societa\')">Societ\u00e0</button>'
+          +'</div></div>';
+      }
+      list.innerHTML=html;
+    }
   };
 })();
 </script>
