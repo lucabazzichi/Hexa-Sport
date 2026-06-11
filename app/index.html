@@ -2819,6 +2819,12 @@ body.hexa-admin-only #hexa-announce-bar { display:none !important; }
 .hexa-guide-btn { background:var(--accent); color:#1a1300; border:0; width:100%; padding:12px; border-radius:10px; font-weight:700; font-size:15px; cursor:pointer; }
 body.hexa-admin-only .hexa-guide-overlay { display:none !important; }
 </style>
+
+<style>
+/* ===== Durata tempo (Inizia Live) ===== */
+.live-duration-select { width: 100%; box-sizing: border-box; background: var(--bg3); border: 1px solid var(--border2); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: 14px; }
+.live-duration-select:focus { outline: none; border-color: var(--accent); }
+</style>
 </head>
 <body>
 
@@ -3629,6 +3635,16 @@ body.hexa-admin-only .hexa-guide-overlay { display:none !important; }
       <div class="live-start-section">
         <div class="live-start-section-title">🥅 <span data-i18n="livePickGoalie">Portiere</span></div>
         <div class="live-pick-list" id="live-start-goalies"></div>
+      </div>
+      <div class="live-start-section">
+        <div class="live-start-section-title">⏱ <span>Durata tempo</span></div>
+        <select id="live-start-duration" class="live-duration-select">
+          <option value="10">10 minuti</option>
+          <option value="12">12 minuti</option>
+          <option value="15">15 minuti</option>
+          <option value="20">20 minuti</option>
+          <option value="25" selected>25 minuti</option>
+        </select>
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModal('modal-live-start')" data-i18n="cancel">Annulla</button>
@@ -8104,9 +8120,17 @@ function saveLiveState() {
 }
 
 // Current elapsed match time in ms (accumulated + running period if active)
-// Period duration cap: in hockey su pista a period is 25 minutes.
+// Period duration cap: configurabile per partita (scelta in "Inizia Live"; default 25 min).
 // We clamp the elapsed clock so it never goes past this — and auto-pause when reached.
-var MATCH_PERIOD_MAX_MS = 25 * 60 * 1000;
+function livePeriodMaxMs() {
+  var m = (liveState && liveState.periodMin) ? liveState.periodMin : 25;
+  return m * 60 * 1000;
+}
+// "Quinto giocatore": disponibile negli ultimi 5 minuti del tempo (durata configurabile).
+function liveFifthThresholdSec() {
+  var m = (liveState && liveState.periodMin) ? liveState.periodMin : 25;
+  return (m - 5) * 60;
+}
 
 function liveElapsedMs() {
   if (!liveState) return 0;
@@ -8115,10 +8139,10 @@ function liveElapsedMs() {
     ms += Date.now() - liveState.startedAt;
   }
   // Cap at 25:00 — if we've reached the limit while running, auto-pause.
-  if (ms >= MATCH_PERIOD_MAX_MS) {
+  if (ms >= livePeriodMaxMs()) {
     if (liveState.running) {
       // Fold the exact time up to the cap into accumulatedMs, then pause.
-      liveState.accumulatedMs = MATCH_PERIOD_MAX_MS;
+      liveState.accumulatedMs = livePeriodMaxMs();
       liveState.startedAt = null;
       liveState.running = false;
       // Stop per-player / per-goalie running periods so their minutes stay correct
@@ -8142,7 +8166,7 @@ function liveElapsedMs() {
       }
       saveLiveState();
     }
-    ms = MATCH_PERIOD_MAX_MS;
+    ms = livePeriodMaxMs();
   }
   return ms;
 }
@@ -8255,6 +8279,11 @@ async function openLiveStartModal() {
   // Build picker UI
   renderLiveStartPicker(p);
   openModal('modal-live-start');
+  try {
+    var dsel = document.getElementById('live-start-duration');
+    var savedMin = parseInt(localStorage.getItem('hexa_period_min'), 10);
+    if (dsel && savedMin) dsel.value = String(savedMin);
+  } catch (e) {}
 }
 
 function renderLiveStartPicker(p) {
@@ -8338,6 +8367,9 @@ function confirmLiveStart() {
   for (var jj = 0; jj < (p.convocatiP || []).length; jj++) {
     gt[p.convocatiP[jj]] = { totalMs: 0, lastEnteredAt: null };
   }
+  var durSel = document.getElementById('live-start-duration');
+  var periodMin = durSel ? (parseInt(durSel.value, 10) || 25) : 25;
+  try { localStorage.setItem('hexa_period_min', String(periodMin)); } catch (e) {}
   liveState = {
     matchId: currentDetailMatchId,
     running: false,
@@ -8347,7 +8379,8 @@ function confirmLiveStart() {
     goalieOnField: pickedGo,
     playerTimers: pt,
     goalieTimers: gt,
-    currentPeriod: 1   // Q7.f: 1 or 2
+    currentPeriod: 1,   // Q7.f: 1 or 2
+    periodMin: periodMin
   };
   saveLiveState();
   closeModal('modal-live-start');
@@ -8636,7 +8669,7 @@ function updateLiveClocks() {
   // 5th player threshold: when clock crosses 23:00 of 2nd period, refresh the UI so the button appears
   var period = liveState.currentPeriod || 1;
   var elapsedSec = Math.floor(liveElapsedMs() / 1000);
-  var fifthShouldShow = (period === 2) && (elapsedSec >= 20 * 60) && (liveState.onField.length < 5);
+  var fifthShouldShow = (period === 2) && (elapsedSec >= liveFifthThresholdSec()) && (liveState.onField.length < 5);
   var fifthIsShown = !!document.querySelector('.live-fifth-btn');
   if (fifthShouldShow !== fifthIsShown) {
     renderLiveUI();
@@ -8694,7 +8727,7 @@ function renderLiveUI() {
   // N5d.4 Q2: 5th player button — available as soon as clock reaches 20:00 of 2nd period (last 5 min).
   var fifthBtnHtml = '';
   var elapsedSec = Math.floor(liveElapsedMs() / 1000);
-  var canFifth = (period === 2) && (elapsedSec >= 20 * 60) && (liveState.onField.length < 5);
+  var canFifth = (period === 2) && (elapsedSec >= liveFifthThresholdSec()) && (liveState.onField.length < 5);
   if (canFifth) {
     fifthBtnHtml = '<button class="live-fifth-btn" onclick="openLiveFifthMenu()">⚡ ' + t('liveAddFifth') + '</button>';
   }
