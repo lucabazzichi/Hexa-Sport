@@ -355,7 +355,7 @@
   .lac-time { font-variant-numeric: tabular-nums; font-weight: 800; margin-left: auto; }
 
   /* 5th player wrap */
-  .live-fifth-wrap { margin-top: 10px; }
+  .live-fifth-wrap { margin-top: 10px; text-align: center; }
 
   /* Mobile compaction */
   @media (max-width: 768px) {
@@ -574,19 +574,22 @@
 
   /* N5d.4 Q2: 5th player button in live header */
   .live-fifth-btn {
-    width: 100%;
-    margin-top: 6px;
-    background: linear-gradient(135deg, var(--accent), #ff6b00);
-    border: none;
-    color: #0d1117;
-    font-size: 13px; font-weight: 700;
-    padding: 10px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: auto;
+    margin: 0;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-size: 12px; font-weight: 600;
+    padding: 6px 12px;
     border-radius: 8px;
     cursor: pointer;
     transition: all .15s;
-    letter-spacing: .04em;
+    letter-spacing: .02em;
   }
-  .live-fifth-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(232,160,32,0.4); }
+  .live-fifth-btn:hover { background: rgba(232,160,32,0.12); }
 
   /* N5d.4 Q1.B.3: live banner ("a player can re-enter") */
   .live-banner {
@@ -2795,6 +2798,27 @@ body.hexa-admin-only #hexa-announce-bar { display:none !important; }
 .plan-coupon-msg { font-size:13px; margin-top:8px; min-height:16px; }
 .plan-norenew { margin-top:18px; font-size:12px; color:var(--text3); }
 </style>
+
+<style>
+/* ===== Guida "Come funziona" ===== */
+.hexa-guide-overlay { position:fixed; inset:0; background:rgba(5,8,13,.72); display:flex; align-items:center; justify-content:center; z-index:10000; padding:20px; }
+.hexa-guide-card { background:var(--bg2); border:1px solid var(--border2); border-radius:16px; max-width:420px; width:100%; padding:26px 24px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.5); }
+.hexa-guide-logo { font-size:34px; line-height:1; }
+.hexa-guide-eyebrow { color:var(--accent); font-size:11px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; margin-top:6px; }
+.hexa-guide-title { font-size:22px; font-weight:700; color:var(--text); margin:4px 0 6px; }
+.hexa-guide-sub { color:var(--text2); font-size:14px; margin:0 0 18px; }
+.hexa-guide-steps { text-align:left; display:flex; flex-direction:column; gap:14px; margin-bottom:18px; }
+.hexa-guide-step { display:flex; gap:12px; align-items:flex-start; }
+.hgs-ico { font-size:22px; flex:0 0 auto; width:30px; text-align:center; line-height:1.2; }
+.hexa-guide-step > div { display:flex; flex-direction:column; gap:2px; }
+.hexa-guide-step > div > b { color:var(--text); font-size:14px; }
+.hexa-guide-step > div > span { color:var(--text2); font-size:13px; }
+.hexa-guide-step > div > span b { color:var(--accent); font-weight:600; }
+.hexa-guide-note { color:var(--text3); font-size:12px; margin:0 0 18px; line-height:1.5; }
+.hexa-guide-note b { color:var(--text2); }
+.hexa-guide-btn { background:var(--accent); color:#1a1300; border:0; width:100%; padding:12px; border-radius:10px; font-weight:700; font-size:15px; cursor:pointer; }
+body.hexa-admin-only .hexa-guide-overlay { display:none !important; }
+</style>
 </head>
 <body>
 
@@ -2958,6 +2982,10 @@ body.hexa-admin-only #hexa-announce-bar { display:none !important; }
       <button class="profile-menu-item" onclick="openSettings()">
         <span class="pm-icon">⚙️</span>
         <span class="pm-label" data-i18n="menuSettings">Impostazioni</span>
+      </button>
+      <button class="profile-menu-item" onclick="openGuide()">
+        <span class="pm-icon">❓</span>
+        <span class="pm-label">Come funziona</span>
       </button>
       <button class="profile-menu-item" id="pm-admin-item" onclick="openAdmin()" style="display:none">
         <span class="pm-icon">🛡️</span>
@@ -8608,7 +8636,7 @@ function updateLiveClocks() {
   // 5th player threshold: when clock crosses 23:00 of 2nd period, refresh the UI so the button appears
   var period = liveState.currentPeriod || 1;
   var elapsedSec = Math.floor(liveElapsedMs() / 1000);
-  var fifthShouldShow = (period === 2) && (elapsedSec >= 23 * 60) && (liveState.onField.length < 5);
+  var fifthShouldShow = (period === 2) && (elapsedSec >= 20 * 60) && (liveState.onField.length < 5);
   var fifthIsShown = !!document.querySelector('.live-fifth-btn');
   if (fifthShouldShow !== fifthIsShown) {
     renderLiveUI();
@@ -8663,10 +8691,10 @@ function renderLiveUI() {
     ? '<span class="live-pulse-indicator running">🔴 LIVE</span>'
     : '<span class="live-pulse-indicator paused">⏸ PAUSA</span>';
 
-  // N5d.4 Q2: 5th player button — available as soon as clock reaches 23:00 of 2nd period.
+  // N5d.4 Q2: 5th player button — available as soon as clock reaches 20:00 of 2nd period (last 5 min).
   var fifthBtnHtml = '';
   var elapsedSec = Math.floor(liveElapsedMs() / 1000);
-  var canFifth = (period === 2) && (elapsedSec >= 23 * 60) && (liveState.onField.length < 5);
+  var canFifth = (period === 2) && (elapsedSec >= 20 * 60) && (liveState.onField.length < 5);
   if (canFifth) {
     fifthBtnHtml = '<button class="live-fifth-btn" onclick="openLiveFifthMenu()">⚡ ' + t('liveAddFifth') + '</button>';
   }
@@ -13279,6 +13307,22 @@ document.addEventListener("DOMContentLoaded", function() {
     if (fbDB && cloudReady && cloudUid && window.cloudSave) window.cloudSave();
   });
 
+  // Salvataggio immediato quando l'app va in background o si chiude:
+  // evita di perdere l'ultima modifica fatta poco prima di chiudere (la finestra dei 1,5s).
+  function cloudFlush() {
+    if (!cloudTimer) return;            // niente in sospeso da salvare
+    if (!fbDB || !cloudUid) return;
+    clearTimeout(cloudTimer); cloudTimer = null;
+    if (navigator && navigator.onLine === false) return;
+    try {
+      var state = cloudState();
+      if (cloudSizeKB(state) > 900) return;
+      cloudDocRef(cloudUid).set(state).then(function(){ if (window.cloudStatus) window.cloudStatus('saved'); }).catch(function(){});
+    } catch (e) {}
+  }
+  document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'hidden') cloudFlush(); });
+  window.addEventListener('pagehide', cloudFlush);
+
   // Collego il salvataggio locale a quello cloud (senza rompere quello esistente)
   if (typeof save === 'function')        { window.__origSave = save;               save = function(){ window.__origSave(); window.cloudSave(); };                 window.save = save; }
   if (typeof saveSeason === 'function')  { window.__origSaveSeason = saveSeason;     saveSeason = function(){ window.__origSaveSeason(); window.cloudSave(); };       window.saveSeason = saveSeason; }
@@ -13320,6 +13364,7 @@ document.addEventListener("DOMContentLoaded", function() {
       if (window.applyHexaAdminMode) window.applyHexaAdminMode(user);
       if (window.enforceHexaBlock) window.enforceHexaBlock(user);
       if (window.showUserAnnouncements) window.showUserAnnouncements();
+      if (window.maybeShowGuide) window.maybeShowGuide();
     } else {
       showAuthScreen(true);
       window.__hexaUser = null;
@@ -13742,5 +13787,31 @@ document.addEventListener("DOMContentLoaded", function() {
     }).catch(function(){ show('Errore di lettura codici.',false); });
   };
 })();
-</script></body>
+</script><div id="hexa-guide-overlay" class="hexa-guide-overlay" style="display:none" onclick="if(event.target===this)closeGuide()">
+  <div class="hexa-guide-card">
+    <div class="hexa-guide-logo">📊</div>
+    <div class="hexa-guide-eyebrow">Benvenuto</div>
+    <h2 class="hexa-guide-title">Hexa Sport, in 3 passi</h2>
+    <p class="hexa-guide-sub">Ecco come tieni le statistiche della tua squadra.</p>
+    <div class="hexa-guide-steps">
+      <div class="hexa-guide-step"><span class="hgs-ico">👥</span><div><b>Aggiungi la squadra</b><span>In <b>Giocatori</b> e <b>Portieri</b> inserisci i tuoi atleti.</span></div></div>
+      <div class="hexa-guide-step"><span class="hgs-ico">🏑</span><div><b>Registra le partite</b><span>In <b>Partite</b> crei una gara e segni gol, assist e altro.</span></div></div>
+      <div class="hexa-guide-step"><span class="hgs-ico">📊</span><div><b>Guarda i numeri</b><span>Nel <b>Riepilogo</b> trovi classifiche e statistiche aggiornate.</span></div></div>
+    </div>
+    <p class="hexa-guide-note">I dati si salvano da soli nel cloud. Puoi riaprire questa guida da <b>Menù → Come funziona</b>.</p>
+    <button class="hexa-guide-btn" onclick="closeGuide()">Iniziamo</button>
+  </div>
+</div>
+<script>
+(function(){
+  window.openGuide=function(){ var o=document.getElementById('hexa-guide-overlay'); if(o) o.style.display='flex'; if(typeof closeProfileMenu==='function'){ try{ closeProfileMenu(); }catch(e){} } };
+  window.closeGuide=function(){ var o=document.getElementById('hexa-guide-overlay'); if(o) o.style.display='none'; try{ localStorage.setItem('hexa_guide_seen','1'); }catch(e){} };
+  window.maybeShowGuide=function(){
+    try{ if(document.body.classList.contains('hexa-admin-only')) return; }catch(e){}
+    var seen=null; try{ seen=localStorage.getItem('hexa_guide_seen'); }catch(e){}
+    if(!seen){ setTimeout(window.openGuide, 600); }
+  };
+})();
+</script>
+</body>
 </html>
