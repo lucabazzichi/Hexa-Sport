@@ -8131,6 +8131,12 @@ function liveFifthThresholdSec() {
   var m = (liveState && liveState.periodMin) ? liveState.periodMin : 25;
   return (m - 5) * 60;
 }
+// Il "quinto giocatore" si usa solo nelle categorie con tempi lunghi (20 o 25 min):
+// negli under con tempi corti (10/12/15) il portiere non si toglie.
+function liveFifthEnabledForDuration() {
+  var m = (liveState && liveState.periodMin) ? liveState.periodMin : 25;
+  return m >= 20;
+}
 
 function liveElapsedMs() {
   if (!liveState) return 0;
@@ -8669,7 +8675,7 @@ function updateLiveClocks() {
   // 5th player threshold: when clock crosses 23:00 of 2nd period, refresh the UI so the button appears
   var period = liveState.currentPeriod || 1;
   var elapsedSec = Math.floor(liveElapsedMs() / 1000);
-  var fifthShouldShow = (period === 2) && (elapsedSec >= liveFifthThresholdSec()) && (liveState.onField.length < 5);
+  var fifthShouldShow = (period === 2) && liveFifthEnabledForDuration() && (elapsedSec >= liveFifthThresholdSec()) && (liveState.onField.length < 5);
   var fifthIsShown = !!document.querySelector('.live-fifth-btn');
   if (fifthShouldShow !== fifthIsShown) {
     renderLiveUI();
@@ -8727,7 +8733,7 @@ function renderLiveUI() {
   // N5d.4 Q2: 5th player button — available as soon as clock reaches 20:00 of 2nd period (last 5 min).
   var fifthBtnHtml = '';
   var elapsedSec = Math.floor(liveElapsedMs() / 1000);
-  var canFifth = (period === 2) && (elapsedSec >= liveFifthThresholdSec()) && (liveState.onField.length < 5);
+  var canFifth = (period === 2) && liveFifthEnabledForDuration() && (elapsedSec >= liveFifthThresholdSec()) && (liveState.onField.length < 5);
   if (canFifth) {
     fifthBtnHtml = '<button class="live-fifth-btn" onclick="openLiveFifthMenu()">⚡ ' + t('liveAddFifth') + '</button>';
   }
