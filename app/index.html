@@ -5508,6 +5508,8 @@ function handleImportFile(event) {
       if (parsed.lang) localStorage.setItem('hockey_lang', parsed.lang);
       // Drop any stale live-match state so the imported data is the source of truth
       try { localStorage.removeItem('hockey_live_state'); } catch(_){}
+      // Manda i dati importati anche nel cloud, altrimenti al riavvio il cloud (vecchi dati) li sovrascrive.
+      if (window.cloudPushImported) { try { await window.cloudPushImported(parsed); } catch(e){} }
       appAlert(t('importSuccess'));
       window.location.reload();
     } catch(err) {
@@ -5582,7 +5584,7 @@ function onClearInputChange() {
   }
 }
 
-function clearFlowFinalize() {
+async function clearFlowFinalize() {
   var input = document.getElementById('clear-confirm-input');
   var typed = input ? (input.value || '').trim().toUpperCase() : '';
   var keyword = (t('clearKeyword') || '').toUpperCase();
@@ -5594,6 +5596,8 @@ function clearFlowFinalize() {
     }
     return;
   }
+  // Spegne e cancella il cloud PRIMA di svuotare il telefono (altrimenti il sync ripristina tutto).
+  if (window.cloudWipeAndStop) { try { await window.cloudWipeAndStop(); } catch (e) {} }
   try {
     localStorage.removeItem('hockey_db_v3');
     localStorage.removeItem('hockey_settings');
@@ -8544,6 +8548,12 @@ async function liveSwitchToPeriod(period) {
   if (alreadyOnPeriod) return;
   // Q10.A.1: ask confirmation when actually switching (general clock will restart from 0)
   if (!(await appConfirm(t('livePeriodSwitchConfirm')))) return;
+  // N: trasporta i cartellini (inferiorità) nel nuovo tempo conservando il tempo che resta.
+  // Il cronometro generale sta per ripartire da 0, quindi sposto l'inizio-penalità di pari passo.
+  var elapsedBeforeSwitch = (liveState.accumulatedMs || 0) + (liveState.running && liveState.startedAt ? (Date.now() - liveState.startedAt) : 0);
+  if (Array.isArray(liveState.activeCards)) {
+    liveState.activeCards.forEach(function(card){ card.startedAtElapsedMs = (card.startedAtElapsedMs || 0) - elapsedBeforeSwitch; });
+  }
   // 1) Flush current minutes into the match (so they're truly persisted)
   liveFlushTimesToMatch();
   // 2) Reset the GENERAL clock to 0:00 — accumulatedMs only
@@ -13283,6 +13293,29 @@ document.addEventListener("DOMContentLoaded", function() {
   };
 
   // Salvataggio cloud "morbido" (con ritardo, chiamato a ogni modifica)
+  // Scrive nel cloud i dati di un backup importato (presi dal file, non dalla memoria),
+  // così al riavvio il cloud combacia con ciò che si è importato.
+  window.cloudPushImported = function(parsed) {
+    if (!fbDB || !cloudUid) return Promise.resolve();
+    var state = {
+      db: (parsed && parsed.db) ? parsed.db : { partite: [], giocatori: [], portieri: [] },
+      currentSeason: (parsed && parsed.currentSeason) ? parsed.currentSeason : null,
+      settings: (parsed && parsed.settings) ? parsed.settings : null,
+      updatedAt: Date.now()
+    };
+    try { if (cloudTimer) { clearTimeout(cloudTimer); cloudTimer = null; } } catch (e) {}
+    return cloudDocRef(cloudUid).set(state);
+  };
+  // Cancella il documento cloud dell'utente e SPEGNE il salvataggio fino al riavvio,
+  // così la cancellazione dei dati non viene riscritta dal sync.
+  window.cloudWipeAndStop = function() {
+    try { if (cloudTimer) { clearTimeout(cloudTimer); cloudTimer = null; } } catch (e) {}
+    var uid = cloudUid;
+    cloudUid = null;
+    cloudReady = false;
+    if (fbDB && uid) { return cloudDocRef(uid).delete(); }
+    return Promise.resolve();
+  };
   window.cloudSave = function() {
     if (!fbDB || !cloudReady || !cloudUid) return;
     if (navigator && navigator.onLine === false) { window.cloudStatus('offline'); return; }
