@@ -8611,9 +8611,10 @@ function liveSubstitute(pidOut, pidIn) {
     liveState.onField.push(pidIn);
     if (liveState.running) liveState.playerTimers[pidIn].lastEnteredAt = now;
   }
-  // N5g.3 Q2.C.3: if a player just entered AND field reaches 4 AND there's an expired card → consume it
-  if (pidIn && liveState.onField.length >= 4 && liveHasExpiredCards()) {
-    liveConsumeOneExpiredCard();
+  // N5g.3 Q2.C.3: se un giocatore è appena entrato e la squadra è tornata al completo,
+  // libera TUTTI i cartellini scaduti (gestisce anche due penalità contemporanee).
+  if (pidIn && liveState.onField.length >= 4) {
+    while (liveHasExpiredCards()) { liveConsumeOneExpiredCard(); }
   }
   saveLiveState();
   renderLiveUI();
@@ -10274,6 +10275,10 @@ async function deleteGiocatore(id) {
   if (!(await appConfirm(t('confirmDeletePlayer')))) return;
   for (var i = 0; i < DB.partite.length; i++) {
     var p = DB.partite[i];
+    // Se il giocatore aveva partecipato, CONGELIAMO il risultato: i totali non si ricalcolano più
+    // (restano com'erano, col contributo del giocatore cancellato).
+    var partecipava = (p.convocatiG && p.convocatiG.indexOf(id) !== -1) || (p.statsG && p.statsG[id]);
+    if (partecipava) { p.autoGolF = false; p.autoTiriF = false; }
     if (p.convocatiG) {
       var newConv = [];
       for (var j = 0; j < p.convocatiG.length; j++) { if (p.convocatiG[j] !== id) newConv.push(p.convocatiG[j]); }
@@ -10323,6 +10328,9 @@ async function deletePortiere(id) {
   if (!(await appConfirm(t('confirmDeleteGoalie')))) return;
   for (var i = 0; i < DB.partite.length; i++) {
     var p = DB.partite[i];
+    // Se il portiere aveva partecipato, CONGELIAMO il risultato: i totali subiti non si ricalcolano più.
+    var partecipava = (p.convocatiP && p.convocatiP.indexOf(id) !== -1) || (p.statsP && p.statsP[id]);
+    if (partecipava) { p.autoGolS = false; p.autoTiriS = false; }
     if (p.convocatiP) {
       var newConv = [];
       for (var j = 0; j < p.convocatiP.length; j++) { if (p.convocatiP[j] !== id) newConv.push(p.convocatiP[j]); }
@@ -11677,11 +11685,13 @@ function renderDashboard() {
   var totPkGolFatti = 0, totPpGolSubiti = 0;
   for (var i = 0; i < n; i++) {
     var m = pt[i];
-    if (m.golF > m.golS) V++; else if (m.golF === m.golS) P++; else S++;
-    totGolF += m.golF; totGolS += m.golS;
-    totTiriF += m.tiriF; totTiriS += m.tiriS;
-    totPP += m.pp; totPPgol += m.ppGol;
-    totPK += m.pk; totPKgol += m.pkGol;
+    // Blindatura: forziamo i valori a numero, così una partita malformata non manda in NaN i totali.
+    var mGolF = Number(m.golF) || 0, mGolS = Number(m.golS) || 0;
+    if (mGolF > mGolS) V++; else if (mGolF === mGolS) P++; else S++;
+    totGolF += mGolF; totGolS += mGolS;
+    totTiriF += Number(m.tiriF) || 0; totTiriS += Number(m.tiriS) || 0;
+    totPP += Number(m.pp) || 0; totPPgol += Number(m.ppGol) || 0;
+    totPK += Number(m.pk) || 0; totPKgol += Number(m.pkGol) || 0;
     totPkGolFatti  += Number(m.pkGolFatti)  || 0;
     totPpGolSubiti += Number(m.ppGolSubiti) || 0;
   }
