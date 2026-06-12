@@ -353,9 +353,9 @@
   .live-active-card.lac-expired { opacity: 0.55; text-decoration: line-through; }
   .lac-name { font-weight: 500; }
   .lac-time { font-variant-numeric: tabular-nums; font-weight: 800; margin-left: auto; }
-  .lac-undo { width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border2);
+  .lac-undo { width: 30px; height: 30px; border-radius: 7px; border: 1px solid var(--border2);
     background: transparent; color: inherit; font-size: 13px; line-height: 1; cursor: pointer;
-    display: inline-flex; align-items: center; justify-content: center; flex: none; padding: 0; opacity: 0.85; }
+    display: inline-flex; align-items: center; justify-content: center; flex: none; padding: 0; opacity: 0.9; font-size: 16px; }
   .lac-undo:active { background: rgba(255,255,255,0.10); }
 
   /* 5th player wrap */
@@ -5000,6 +5000,7 @@ try {
         if (parsed.accentColor) settings.accentColor = parsed.accentColor;
         if (parsed.compactMode === true) settings.compactMode = true;
         if (typeof parsed.teamName === 'string') settings.teamName = parsed.teamName;
+        if (parsed.teamNameBySeason && typeof parsed.teamNameBySeason === 'object') settings.teamNameBySeason = parsed.teamNameBySeason;
         if (typeof parsed.teamLogo === 'string') settings.teamLogo = parsed.teamLogo;
         if (parsed.opponentLogos && typeof parsed.opponentLogos === 'object') settings.opponentLogos = parsed.opponentLogos;
       }
@@ -5057,8 +5058,27 @@ function setCompactMode(enabled) {
 }
 
 // N4: Team identity setters
+function getTeamName(season) {
+  season = season || currentSeason;
+  if (settings.teamNameBySeason && settings.teamNameBySeason[season]) return settings.teamNameBySeason[season];
+  return settings.teamName || '';
+}
 function setTeamName(name) {
-  settings.teamName = (name || '').trim().slice(0, 60);
+  var newName = (name || '').trim().slice(0, 60);
+  var oldName = settings.teamName || '';
+  if (!settings.teamNameBySeason) settings.teamNameBySeason = {};
+  // Blocca il nome attuale sulle stagioni che hanno già partite ma nessun nome esplicito,
+  // così cambiando squadra le stagioni passate mantengono il loro nome.
+  if (oldName) {
+    var _seen = {};
+    for (var _i = 0; _i < DB.partite.length; _i++) {
+      var _s = DB.partite[_i].season;
+      if (_s && !_seen[_s]) { _seen[_s] = true; if (!settings.teamNameBySeason[_s]) settings.teamNameBySeason[_s] = oldName; }
+    }
+  }
+  // La stagione corrente prende il nuovo nome (che resta anche il default per le stagioni future)
+  settings.teamNameBySeason[currentSeason] = newName;
+  settings.teamName = newName;
   saveSettings();
   applyTeamIdentity();
   syncSettingsUI();
@@ -5166,7 +5186,7 @@ function escapeHtml(s) {
 // Returns just the team name if no logo; logo + name if logo is set.
 function teamDisplayHtml(extraCls) {
   var cls = extraCls || '';
-  var name = settings.teamName || t('yourTeam');
+  var name = getTeamName(currentSeason) || t('yourTeam');
   if (!settings.teamLogo) return '<span class="' + cls + '">' + escapeAttr(name) + '</span>';
   var logoHtml;
   if (isImageLogo(settings.teamLogo)) {
@@ -5209,7 +5229,7 @@ function syncSettingsUI() {
   if (compactToggle) compactToggle.checked = !!settings.compactMode;
   // N4: Sync team name input + logo preview
   var nameInput = document.getElementById('settings-team-name');
-  if (nameInput) nameInput.value = settings.teamName || '';
+  if (nameInput) nameInput.value = getTeamName(currentSeason) || '';
   var logoPrev = document.getElementById('settings-team-logo-preview');
   if (logoPrev) {
     if (settings.teamLogo) {
@@ -5942,7 +5962,7 @@ function generateTemplatePDF() {
   var y = 10;
 
   // ---- TITLE ROW ----
-  var teamName = (settings.teamName || 'Team').toUpperCase();
+  var teamName = (getTeamName(currentSeason) || 'Team').toUpperCase();
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(13);
   doc.setTextColor(40, 40, 40);
@@ -6157,7 +6177,7 @@ function downloadTemplateXLSX() {
 }
 
 function generateTemplateXLSX() {
-  var teamName = settings.teamName || 'Team';
+  var teamName = getTeamName(currentSeason) || 'Team';
   var wb = XLSX.utils.book_new();
 
   // ============ Helper: cell with styles ============
@@ -6460,7 +6480,7 @@ function doExportPNG(width, height) {
     var parts = p.data.split('-');
     if (parts.length === 3) dateFmt = parts[2] + '/' + parts[1] + '/' + parts[0];
   }
-  var teamName = (settings.teamName || 'HOCKEY');
+  var teamName = (getTeamName(currentSeason) || 'HOCKEY');
   var medals = ['\ud83e\udd47', '\ud83e\udd48', '\ud83e\udd49'];
 
   // ===== Helper: draws header strip (team + date) =====
@@ -6846,7 +6866,7 @@ function exportPlayersCSV() {
     row.push(rigTot > 0 ? ((agg.rigSeg / rigTot * 100).toFixed(1) + '%') : '—');
     rows.push(row);
   }
-  var teamSlug = (settings.teamName || 'team').replace(/[^a-zA-Z0-9]/g, '_');
+  var teamSlug = (getTeamName(currentSeason) || 'team').replace(/[^a-zA-Z0-9]/g, '_');
   var fname = 'Hockey_Stats_giocatori_' + currentSeason.replace('/', '-') + '_' + teamSlug + '.csv';
   downloadCsv(fname, rows);
 }
@@ -6880,7 +6900,7 @@ function exportGoaliesCSV() {
     row.push(sv, gaa, agg.clean || 0);
     rows.push(row);
   }
-  var teamSlug = (settings.teamName || 'team').replace(/[^a-zA-Z0-9]/g, '_');
+  var teamSlug = (getTeamName(currentSeason) || 'team').replace(/[^a-zA-Z0-9]/g, '_');
   var fname = 'Hockey_Stats_portieri_' + currentSeason.replace('/', '-') + '_' + teamSlug + '.csv';
   downloadCsv(fname, rows);
 }
@@ -6938,7 +6958,7 @@ function buildStatsXLSX(headers, rows, colWidths) {
     if (r > range.e.r) range.e.r = r;
     if (c > range.e.c) range.e.c = c;
   }
-  var teamName = settings.teamName || 'Team';
+  var teamName = getTeamName(currentSeason) || 'Team';
   var nCols = headers.length;
 
   // Row 0: title band (team + season)
@@ -7020,7 +7040,7 @@ function exportPlayersXLSX() {
 
       var built = buildStatsXLSX(headers, rows, colWidths);
       XLSX.utils.book_append_sheet(built.wb, built.ws, t('menuGiocatori') || 'Giocatori');
-      var teamSlug = (settings.teamName || 'team').replace(/[^a-zA-Z0-9]/g, '_');
+      var teamSlug = (getTeamName(currentSeason) || 'team').replace(/[^a-zA-Z0-9]/g, '_');
       var fname = 'Hockey_Stats_giocatori_' + currentSeason.replace('/', '-') + '_' + teamSlug + '.xlsx';
       XLSX.writeFile(built.wb, fname);
     } catch (e) { console.error(e); }
@@ -7063,7 +7083,7 @@ function exportGoaliesXLSX() {
 
       var built = buildStatsXLSX(headers, rows, colWidths);
       XLSX.utils.book_append_sheet(built.wb, built.ws, t('menuPortieri') || 'Portieri');
-      var teamSlug = (settings.teamName || 'team').replace(/[^a-zA-Z0-9]/g, '_');
+      var teamSlug = (getTeamName(currentSeason) || 'team').replace(/[^a-zA-Z0-9]/g, '_');
       var fname = 'Hockey_Stats_portieri_' + currentSeason.replace('/', '-') + '_' + teamSlug + '.xlsx';
       XLSX.writeFile(built.wb, fname);
     } catch (e) { console.error(e); }
@@ -7160,7 +7180,7 @@ function doExportPDF() {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(20);
   doc.setTextColor(accent[0], accent[1], accent[2]);
-  doc.text((settings.teamName || 'HOCKEY').toUpperCase(), marginX + 18, y + 9);
+  doc.text((getTeamName(currentSeason) || 'HOCKEY').toUpperCase(), marginX + 18, y + 9);
 
   // Date + venue on the right
   var dateFmt = '';
@@ -7184,7 +7204,7 @@ function doExportPDF() {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);
   doc.setTextColor(30, 30, 30);
-  doc.text((settings.teamName || 'TEAM'), marginX, y + 10);
+  doc.text((getTeamName(currentSeason) || 'TEAM'), marginX, y + 10);
   doc.text((p.avversario || 'OPP'), pageW - marginX, y + 10, { align: 'right' });
 
   // Big score in center
@@ -7453,12 +7473,12 @@ function doExportPDF() {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
-    doc.text((settings.teamName || 'Hockey Stats'), marginX, pageH - 6);
+    doc.text((getTeamName(currentSeason) || 'Hockey Stats'), marginX, pageH - 6);
     doc.text((t('pageOf') || 'Pagina') + ' ' + pp + '/' + pageCount, pageW - marginX, pageH - 6, { align: 'right' });
   }
 
   // Download
-  var teamSlug = (settings.teamName || 'team').replace(/[^a-zA-Z0-9]/g, '_');
+  var teamSlug = (getTeamName(currentSeason) || 'team').replace(/[^a-zA-Z0-9]/g, '_');
   var oppSlug = (p.avversario || 'opp').replace(/[^a-zA-Z0-9]/g, '_');
   var fname = 'Hockey_' + teamSlug + '_vs_' + oppSlug + '_' + (p.data || 'undated') + '.pdf';
   doc.save(fname);
@@ -7503,7 +7523,7 @@ function drawSeasonPdfHeader(doc, title) {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(20);
   doc.setTextColor(accent[0], accent[1], accent[2]);
-  doc.text((settings.teamName || 'HOCKEY').toUpperCase(), marginX + 18, y + 9);
+  doc.text((getTeamName(currentSeason) || 'HOCKEY').toUpperCase(), marginX + 18, y + 9);
   // Season + report title on right
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
@@ -7526,7 +7546,7 @@ function drawSeasonPdfFooter(doc) {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
-    doc.text((settings.teamName || 'Hockey Stats'), marginX, pageH - 6);
+    doc.text((getTeamName(currentSeason) || 'Hockey Stats'), marginX, pageH - 6);
     doc.text((t('pageOf') || 'Pagina') + ' ' + pp + '/' + pageCount, pageW - marginX, pageH - 6, { align: 'right' });
   }
 }
@@ -7640,7 +7660,7 @@ function doExportSeasonPDF() {
   }
 
   drawSeasonPdfFooter(doc);
-  var teamSlug = (settings.teamName || 'team').replace(/[^a-zA-Z0-9]/g, '_');
+  var teamSlug = (getTeamName(currentSeason) || 'team').replace(/[^a-zA-Z0-9]/g, '_');
   doc.save('Hockey_statistiche_' + currentSeason.replace('/', '-') + '_' + teamSlug + '.pdf');
 }
 
@@ -9182,7 +9202,7 @@ function openAccount() {
   document.getElementById('acc-name').textContent = name || '—';
   document.getElementById('acc-email').textContent = (u && u.email) || '—';
   var curEmailEl = document.getElementById('acc-current-email'); if (curEmailEl) curEmailEl.textContent = (u && u.email) || '—';
-  document.getElementById('acc-team').textContent = (typeof settings !== 'undefined' && settings.teamName) ? settings.teamName : '—';
+  document.getElementById('acc-team').textContent = (typeof settings !== 'undefined' && getTeamName(currentSeason)) ? getTeamName(currentSeason) : '—';
   var canPw = accProvider().password;
   var emailSec = document.getElementById('acc-section-email');
   var passSec = document.getElementById('acc-section-pass');
@@ -9651,7 +9671,7 @@ function renderAvversarioDetail(name) {
   if (bc) bc.textContent = name;
   if (!container) return;
 
-  var teamName = settings.teamName || 'Team';
+  var teamName = getTeamName(currentSeason) || 'Team';
   var n = s.partite.length;
   var scopeLabel = seasonFilter ? (t('avvScopeSeason') + ' ' + currentSeason) : t('allSeasons');
 
@@ -12125,7 +12145,7 @@ function renderPartite() {
       '<div class="match-select-check">✓</div>' +
       '<div>' +
         '<div class="match-date">' + dataFmt + ' · ' + (p.sede === 'casa' ? t('home') : t('away')) + (p.competizione ? ' · ' + p.competizione : '') + '</div>' +
-        '<div class="match-team">' + (settings.teamName || t('yourTeam')) + '</div>' +
+        '<div class="match-team">' + (getTeamName(currentSeason) || t('yourTeam')) + '</div>' +
         '<div style="font-size:11px;color:var(--text3);margin-top:4px;">👤 ' + nG + ' · 🥅 ' + nP + ' · ' + t('clickForDetails') + '</div>' +
       '</div>' +
       '<div>' +
@@ -13453,7 +13473,7 @@ document.addEventListener("DOMContentLoaded", function() {
           } else {
             // Account diverso: parti pulito (i dati restano comunque salvati in locale finora)
             DB.partite = []; DB.giocatori = []; DB.portieri = [];
-            if (typeof settings !== 'undefined') { settings.teamName = ''; settings.teamLogo = ''; settings.opponentLogos = {}; }
+            if (typeof settings !== 'undefined') { settings.teamName = ''; settings.teamNameBySeason = {}; settings.teamLogo = ''; settings.opponentLogos = {}; }
             if (typeof window.__origSave === 'function') window.__origSave();
             if (typeof window.__origSaveSettings === 'function') window.__origSaveSettings();
             if (typeof renderAll === 'function') renderAll();
