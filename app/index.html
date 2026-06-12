@@ -11595,13 +11595,56 @@ function editStatInline(spanEl, type, playerId, statKey) {
   });
 }
 
+// Radar a scala relativa: ogni asse \u00e8 rapportato al migliore (della rosa o dei convocati),
+// cos\u00ec voci di grandezza diversa (gol vs tiri) diventano confrontabili. Il valore vero resta nel tooltip.
+function normRadar(datasets, axisMax) {
+  if (!datasets) return datasets;
+  for (var d = 0; d < datasets.length; d++) {
+    var ds = datasets[d];
+    if (!ds._raw) ds._raw = (ds.data || []).slice();
+    var nd = [];
+    for (var k = 0; k < ds._raw.length; k++) {
+      var m = axisMax[k] || 0;
+      nd.push(m > 0 ? +(((Number(ds._raw[k]) || 0) / m) * 100).toFixed(1) : 0);
+    }
+    ds.data = nd;
+  }
+  return datasets;
+}
+function radarAxisMaxSeason(keys, isGoalie) {
+  var pool = isGoalie ? DB.portieri : DB.giocatori;
+  var mx = []; for (var a = 0; a < keys.length; a++) mx[a] = 0;
+  for (var i = 0; i < pool.length; i++) {
+    var s = isGoalie ? aggregateGoalieStats(pool[i].id) : aggregatePlayerStats(pool[i].id);
+    for (var a2 = 0; a2 < keys.length; a2++) { var v = Number(s[keys[a2]]) || 0; if (v > mx[a2]) mx[a2] = v; }
+  }
+  return mx;
+}
+function radarAxisMaxMatch(match, keys, isGoalie) {
+  var conv = (isGoalie ? match.convocatiP : match.convocatiG) || [];
+  var statsObj = (isGoalie ? match.statsP : match.statsG) || {};
+  var mx = []; for (var a = 0; a < keys.length; a++) mx[a] = 0;
+  for (var i = 0; i < conv.length; i++) {
+    var s = statsObj[conv[i]] || {};
+    for (var a2 = 0; a2 < keys.length; a2++) { var v = Number(s[keys[a2]]) || 0; if (v > mx[a2]) mx[a2] = v; }
+  }
+  return mx;
+}
 function makeRadarOptions(textColor, gridColor) {
   return {
     maintainAspectRatio: false,
-    plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 11 } } } },
+    plugins: {
+      legend: { position: 'bottom', labels: { color: textColor, font: { size: 11 } } },
+      tooltip: { callbacks: { label: function(ctx) {
+        var ds = ctx.dataset || {};
+        var raw = (ds._raw && ds._raw[ctx.dataIndex] != null) ? ds._raw[ctx.dataIndex] : (ctx.parsed && ctx.parsed.r);
+        var axis = (ctx.chart && ctx.chart.data && ctx.chart.data.labels) ? ctx.chart.data.labels[ctx.dataIndex] : '';
+        return (ds.label || '') + ' \u00b7 ' + axis + ': ' + raw;
+      } } }
+    },
     scales: { r: {
-      beginAtZero: true, suggestedMax: 3,
-      ticks: { display: false, stepSize: 1 },
+      beginAtZero: true, min: 0, max: 100,
+      ticks: { display: false, stepSize: 25 },
       grid: { color: gridColor },
       pointLabels: { color: textColor, font: { size: 10, weight: 'bold' } },
       angleLines: { color: gridColor }
@@ -11656,7 +11699,9 @@ function updateDetailCharts() {
     disciplineDatasets.push({ label:ptD.nome + ' 🥅', data:[stD.cartGiallo||0, stD.cartBlu||0, stD.cartRosso||0],
                               backgroundColor:colD.border, borderColor:colD.border, borderWidth:1 });
   }
+  normRadar(dsAttack, radarAxisMaxMatch(p, ['gol','assist','tiri','tiriPorta'], false));
   detailCharts.pAttack    = rebuildChart('dc-p-attack',    'radar', [t('chartGol'), t('chartAssistShort'), t('chartShotsShort'), t('chartShotsOnShort')], dsAttack, radarOpt, detailCharts.pAttack);
+  normRadar(dsDefense, radarAxisMaxMatch(p, ['recuperi','persi','falli'], false));
   detailCharts.pDefense   = rebuildChart('dc-p-defense',   'radar', [t('chartRec'), t('chartLost'), t('chartFoul')], dsDefense, radarOpt, detailCharts.pDefense);
   detailCharts.pDiscipline= rebuildChart('dc-p-discipline','bar',   [t('chartCGiallo'), t('chartCBlu'), t('chartCRed')], disciplineDatasets, barOpt, detailCharts.pDiscipline);
   var dsSaves = [], dsSetPieces = [];
@@ -11672,6 +11717,7 @@ function updateDetailCharts() {
                        borderColor:col2.border, backgroundColor:col2.bg, borderWidth:2, fill:true, pointBackgroundColor:col2.border });
   }
   detailCharts.gSaves     = rebuildChart('dc-g-saves',     'bar',   [t('chartParate'), t('chartGSub')], dsSaves, barOpt, detailCharts.gSaves);
+  normRadar(dsSetPieces, radarAxisMaxMatch(p, ['rigPar','rigSub','tdPar','tdSub'], true));
   detailCharts.gSetPieces = rebuildChart('dc-g-setpieces', 'radar', [t('chartRigPar'), t('chartRigSub'), t('chartTDPar'), t('chartTDSub')], dsSetPieces, radarOpt, detailCharts.gSetPieces);
 }
 
@@ -11896,7 +11942,9 @@ function rebuildDashCharts() {
       dsDisc.push({ label:pt3.nome + ' 🥅', data:[sp.cartGiallo, sp.cartBlu, sp.cartRosso],
                     backgroundColor:colD.border, borderColor:colD.border, borderWidth:1 });
     }
+    normRadar(dsA, radarAxisMaxSeason(['gol','assist','tiri','tiriPorta'], false));
     dashCharts.pA = rebuildChart('dash-p-attack', 'radar', [t('chartGol'), t('chartAssistShort'), t('chartShotsShort'), t('chartShotsOnShort')], dsA, radarOpt, dashCharts.pA);
+    normRadar(dsD, radarAxisMaxSeason(['recuperi','persi','falli'], false));
     dashCharts.pD = rebuildChart('dash-p-defense', 'radar', [t('chartRec'), t('chartLost'), t('chartFoul')], dsD, radarOpt, dashCharts.pD);
     dashCharts.pDisc = rebuildChart('dash-p-discipline', 'bar', [t('chartCGiallo'), t('chartCBlu'), t('chartCRed')], dsDisc, barOpt, dashCharts.pDisc);
   }
@@ -11914,6 +11962,7 @@ function rebuildDashCharts() {
                   borderColor:col2.border, backgroundColor:col2.bg, borderWidth:2, fill:true, pointBackgroundColor:col2.border });
     }
     dashCharts.gSv = rebuildChart('dash-g-saves', 'bar', [t('chartParate'), t('chartGSub')], dsSv, barOpt, dashCharts.gSv);
+    normRadar(dsSp, radarAxisMaxSeason(['rigPar','rigSub','tdPar','tdSub'], true));
     dashCharts.gSp = rebuildChart('dash-g-setpieces', 'radar', [t('chartRigPar'), t('chartRigSub'), t('chartTDPar'), t('chartTDSub')], dsSp, radarOpt, dashCharts.gSp);
   }
 }
