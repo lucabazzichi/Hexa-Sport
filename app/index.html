@@ -353,9 +353,9 @@
   .live-active-card.lac-expired { opacity: 0.55; text-decoration: line-through; }
   .lac-name { font-weight: 500; }
   .lac-time { font-variant-numeric: tabular-nums; font-weight: 800; margin-left: auto; }
-  .lac-undo { width: 30px; height: 30px; border-radius: 7px; border: 1px solid var(--border2);
+  .lac-undo { width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border2);
     background: transparent; color: inherit; font-size: 13px; line-height: 1; cursor: pointer;
-    display: inline-flex; align-items: center; justify-content: center; flex: none; padding: 0; opacity: 0.9; font-size: 16px; }
+    display: inline-flex; align-items: center; justify-content: center; flex: none; padding: 0; opacity: 0.85; font-size: 13px; }
   .lac-undo:active { background: rgba(255,255,255,0.10); }
 
   /* 5th player wrap */
@@ -3293,7 +3293,7 @@ body.hexa-admin-only .hexa-guide-overlay { display:none !important; }
           <div class="settings-item-label">🏷️ <span data-i18n="settingsTeamName">Nome squadra</span></div>
           <div class="settings-item-hint" data-i18n="settingsTeamNameHint">Personalizza il nome che appare nello scoreboard</div>
         </div>
-        <input type="text" id="settings-team-name" class="settings-text-input" data-i18n-ph="settingsTeamNamePh" placeholder="La tua squadra" onchange="setTeamName(this.value)" onblur="setTeamName(this.value)">
+        <div style="position:relative;"><input type="text" id="settings-team-name" class="settings-text-input" autocomplete="off" data-i18n-ph="settingsTeamNamePh" placeholder="La tua squadra" oninput="onTeamNameInput()" onfocus="onTeamNameInput()" onchange="setTeamName(this.value)" onblur="setTimeout(hideTeamNameSuggestions, 200); setTeamName(this.value);"><div id="team-name-suggestions" class="opponent-suggestions" style="display:none;"></div></div>
       </div>
 
       <div class="settings-item team-logo-item">
@@ -5002,6 +5002,7 @@ try {
         if (typeof parsed.teamName === 'string') settings.teamName = parsed.teamName;
         if (parsed.teamNameBySeason && typeof parsed.teamNameBySeason === 'object') settings.teamNameBySeason = parsed.teamNameBySeason;
         if (typeof parsed.teamLogo === 'string') settings.teamLogo = parsed.teamLogo;
+        if (parsed.teamLogoBySeason && typeof parsed.teamLogoBySeason === 'object') settings.teamLogoBySeason = parsed.teamLogoBySeason;
         if (parsed.opponentLogos && typeof parsed.opponentLogos === 'object') settings.opponentLogos = parsed.opponentLogos;
       }
     }
@@ -5092,8 +5093,25 @@ function setTeamName(name) {
   }
 }
 
+function getTeamLogo(season) {
+  season = season || currentSeason;
+  if (settings.teamLogoBySeason && settings.teamLogoBySeason[season]) return settings.teamLogoBySeason[season];
+  return settings.teamLogo || '';
+}
 function setTeamLogo(value) {
-  settings.teamLogo = value || '';
+  var newLogo = value || '';
+  var oldLogo = settings.teamLogo || '';
+  if (!settings.teamLogoBySeason) settings.teamLogoBySeason = {};
+  // Blocca il logo attuale sulle stagioni passate che non ne hanno già uno esplicito.
+  if (oldLogo) {
+    var _li = {};
+    for (var _k = 0; _k < DB.partite.length; _k++) {
+      var _ls = DB.partite[_k].season;
+      if (_ls && !_li[_ls]) { _li[_ls] = true; if (!settings.teamLogoBySeason[_ls]) settings.teamLogoBySeason[_ls] = oldLogo; }
+    }
+  }
+  settings.teamLogoBySeason[currentSeason] = newLogo;
+  settings.teamLogo = newLogo;
   saveSettings();
   applyTeamIdentity();
   syncSettingsUI();
@@ -5146,15 +5164,15 @@ function applyTeamIdentity() {
     var existing = logoSlot.querySelector('.header-team-logo');
     if (existing) existing.remove();
     var svg = logoSlot.querySelector('svg');
-    if (settings.teamLogo) {
+    if (getTeamLogo(currentSeason)) {
       // Hide the default svg and inject the team logo
       if (svg) svg.style.display = 'none';
       var injected = document.createElement('span');
       injected.className = 'header-team-logo';
-      if (isImageLogo(settings.teamLogo)) {
-        injected.innerHTML = '<img src="' + escapeAttr(settings.teamLogo) + '" alt="">';
+      if (isImageLogo(getTeamLogo(currentSeason))) {
+        injected.innerHTML = '<img src="' + escapeAttr(getTeamLogo(currentSeason)) + '" alt="">';
       } else {
-        injected.textContent = settings.teamLogo;
+        injected.textContent = getTeamLogo(currentSeason);
       }
       logoSlot.insertBefore(injected, logoSlot.firstChild);
     } else {
@@ -5187,12 +5205,12 @@ function escapeHtml(s) {
 function teamDisplayHtml(extraCls) {
   var cls = extraCls || '';
   var name = getTeamName(currentSeason) || t('yourTeam');
-  if (!settings.teamLogo) return '<span class="' + cls + '">' + escapeAttr(name) + '</span>';
+  if (!getTeamLogo(currentSeason)) return '<span class="' + cls + '">' + escapeAttr(name) + '</span>';
   var logoHtml;
-  if (isImageLogo(settings.teamLogo)) {
-    logoHtml = '<span class="sb-team-logo"><img src="' + escapeAttr(settings.teamLogo) + '" alt=""></span>';
+  if (isImageLogo(getTeamLogo(currentSeason))) {
+    logoHtml = '<span class="sb-team-logo"><img src="' + escapeAttr(getTeamLogo(currentSeason)) + '" alt=""></span>';
   } else {
-    logoHtml = '<span class="sb-team-logo">' + settings.teamLogo + '</span>';
+    logoHtml = '<span class="sb-team-logo">' + getTeamLogo(currentSeason) + '</span>';
   }
   return logoHtml + '<span class="' + cls + '">' + escapeAttr(name) + '</span>';
 }
@@ -5232,12 +5250,12 @@ function syncSettingsUI() {
   if (nameInput) nameInput.value = getTeamName(currentSeason) || '';
   var logoPrev = document.getElementById('settings-team-logo-preview');
   if (logoPrev) {
-    if (settings.teamLogo) {
+    if (getTeamLogo(currentSeason)) {
       logoPrev.classList.remove('empty');
-      if (isImageLogo(settings.teamLogo)) {
-        logoPrev.innerHTML = '<img src="' + escapeAttr(settings.teamLogo) + '" alt="">';
+      if (isImageLogo(getTeamLogo(currentSeason))) {
+        logoPrev.innerHTML = '<img src="' + escapeAttr(getTeamLogo(currentSeason)) + '" alt="">';
       } else {
-        logoPrev.textContent = settings.teamLogo;
+        logoPrev.textContent = getTeamLogo(currentSeason);
       }
     } else {
       logoPrev.classList.add('empty');
@@ -7170,9 +7188,9 @@ function doExportPDF() {
   }
 
   // ===== Team logo (if user uploaded one and it's an image data URL) =====
-  if (settings.teamLogo && isImageLogo && isImageLogo(settings.teamLogo)) {
+  if (getTeamLogo(currentSeason) && isImageLogo && isImageLogo(getTeamLogo(currentSeason))) {
     try {
-      doc.addImage(settings.teamLogo, 'PNG', marginX, y, 14, 14);
+      doc.addImage(getTeamLogo(currentSeason), 'PNG', marginX, y, 14, 14);
     } catch (e) { /* ignore — emoji-only logos can't be drawn here */ }
   }
 
@@ -7517,8 +7535,8 @@ function drawSeasonPdfHeader(doc, title) {
   var pageW = doc.internal.pageSize.getWidth();
   var y = 14;
   // Team logo if available
-  if (settings.teamLogo && isImageLogo && isImageLogo(settings.teamLogo)) {
-    try { doc.addImage(settings.teamLogo, 'PNG', marginX, y, 14, 14); } catch (e) {}
+  if (getTeamLogo(currentSeason) && isImageLogo && isImageLogo(getTeamLogo(currentSeason))) {
+    try { doc.addImage(getTeamLogo(currentSeason), 'PNG', marginX, y, 14, 14); } catch (e) {}
   }
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(20);
@@ -10049,6 +10067,46 @@ function populateOpponentsDatalist() { /* unused now, kept for compatibility */ 
 
 // Called on input/focus: shows a dropdown of opponent names matching the current text.
 // Pure JS, no <datalist> — works identically on desktop and mobile.
+function getAllTeamNames() {
+  var seen = {}, list = [];
+  function add(nm){ nm=(nm||'').trim(); if(!nm) return; var k=nm.toLowerCase(); if(!seen[k]){ seen[k]=true; list.push(nm); } }
+  if (settings.teamNameBySeason) { for (var s in settings.teamNameBySeason) { if (Object.prototype.hasOwnProperty.call(settings.teamNameBySeason, s)) add(settings.teamNameBySeason[s]); } }
+  add(settings.teamName);
+  list.sort(function(a,b){ return a.localeCompare(b); });
+  return list;
+}
+function onTeamNameInput() {
+  var input = document.getElementById('settings-team-name');
+  var box   = document.getElementById('team-name-suggestions');
+  if (!input || !box) return;
+  var q = (input.value || '').trim().toLowerCase();
+  var all = getAllTeamNames();
+  var matches = [];
+  for (var i = 0; i < all.length; i++) {
+    var nl = all[i].toLowerCase();
+    if (q === '' || nl.indexOf(q) !== -1) { if (nl !== q) matches.push(all[i]); }
+    if (matches.length >= 8) break;
+  }
+  if (matches.length === 0) { box.style.display = 'none'; box.innerHTML = ''; return; }
+  var html = '';
+  for (var j = 0; j < matches.length; j++) {
+    html += '<div class="opp-sugg-row" onmousedown="pickTeamName(' + j + ')" ontouchstart="pickTeamName(' + j + ')">' + escapeHtml(matches[j]) + '</div>';
+  }
+  box.innerHTML = html; box.style.display = 'block';
+  window.__teamNameSuggestions = matches;
+}
+function pickTeamName(idx) {
+  var matches = window.__teamNameSuggestions || [];
+  if (!matches[idx]) return;
+  var input = document.getElementById('settings-team-name');
+  if (input) input.value = matches[idx];
+  hideTeamNameSuggestions();
+  setTeamName(matches[idx]);
+}
+function hideTeamNameSuggestions() {
+  var box = document.getElementById('team-name-suggestions');
+  if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+}
 function onOpponentInput() {
   var input = document.getElementById('p-avversario');
   var box   = document.getElementById('opponent-suggestions');
@@ -13473,7 +13531,7 @@ document.addEventListener("DOMContentLoaded", function() {
           } else {
             // Account diverso: parti pulito (i dati restano comunque salvati in locale finora)
             DB.partite = []; DB.giocatori = []; DB.portieri = [];
-            if (typeof settings !== 'undefined') { settings.teamName = ''; settings.teamNameBySeason = {}; settings.teamLogo = ''; settings.opponentLogos = {}; }
+            if (typeof settings !== 'undefined') { settings.teamName = ''; settings.teamNameBySeason = {}; settings.teamLogo = ''; settings.teamLogoBySeason = {}; settings.opponentLogos = {}; }
             if (typeof window.__origSave === 'function') window.__origSave();
             if (typeof window.__origSaveSettings === 'function') window.__origSaveSettings();
             if (typeof renderAll === 'function') renderAll();
