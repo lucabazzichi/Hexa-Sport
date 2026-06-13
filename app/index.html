@@ -2989,13 +2989,13 @@ body.hexa-admin-only .hexa-guide-overlay { display:none !important; }
         <span class="pm-icon">👤</span>
         <span class="pm-label" data-i18n="menuAccount">Account</span>
       </button>
-      <button class="profile-menu-item" onclick="openSettings()">
-        <span class="pm-icon">⚙️</span>
-        <span class="pm-label" data-i18n="menuSettings">Impostazioni</span>
-      </button>
       <button class="profile-menu-item" onclick="openGuide()">
         <span class="pm-icon">❓</span>
         <span class="pm-label">Come funziona</span>
+      </button>
+      <button class="profile-menu-item" onclick="openSettings()">
+        <span class="pm-icon">⚙️</span>
+        <span class="pm-label" data-i18n="menuSettings">Impostazioni</span>
       </button>
       <button class="profile-menu-item" id="pm-admin-item" onclick="openAdmin()" style="display:none">
         <span class="pm-icon">🛡️</span>
@@ -3293,7 +3293,7 @@ body.hexa-admin-only .hexa-guide-overlay { display:none !important; }
           <div class="settings-item-label">🏷️ <span data-i18n="settingsTeamName">Nome squadra</span></div>
           <div class="settings-item-hint" data-i18n="settingsTeamNameHint">Personalizza il nome che appare nello scoreboard</div>
         </div>
-        <div style="position:relative;"><input type="text" id="settings-team-name" class="settings-text-input" autocomplete="off" data-i18n-ph="settingsTeamNamePh" placeholder="La tua squadra" oninput="onTeamNameInput()" onfocus="onTeamNameInput()" onchange="setTeamName(this.value)" onblur="setTimeout(hideTeamNameSuggestions, 200); setTeamName(this.value);"><div id="team-name-suggestions" class="opponent-suggestions" style="display:none;"></div></div>
+        <input type="text" id="settings-team-name" class="settings-text-input" autocomplete="off" list="team-name-datalist" data-i18n-ph="settingsTeamNamePh" placeholder="La tua squadra" onfocus="refreshTeamNameDatalist()" onchange="setTeamName(this.value)" onblur="setTeamName(this.value)"><datalist id="team-name-datalist"></datalist>
       </div>
 
       <div class="settings-item team-logo-item">
@@ -3809,7 +3809,7 @@ var I18N = {
     settingsCompact: 'Modalità compatta', settingsCompactHint: 'Riduce gli spazi per vedere più informazioni (solo desktop)',
     settingsTemplate: 'Scarica template partita', settingsTemplateHint: 'Foglio cartaceo da portare al palazzetto in caso non si possa usare l'+String.fromCharCode(8217)+'app live', templateDownloadTitle: 'Scarica template partita', templateDownloadHint: 'Scegli il formato', templateFormatPdf: '📄 PDF (stampabile A4)', templateFormatXlsx: '📊 Excel (.xlsx)', templateInfoHeader: 'INFO PARTITA', templateDate: 'Data', templateOpponent: 'Avversario', templateVenue: 'Sede', templateHome: 'Casa', templateAway: 'Trasferta', templateCompetition: 'Competizione', templateResult: 'Risultato finale', templateShots: 'Tiri totali', templateUs: 'Noi', templateThem: 'Loro', templatePpRow: 'Powerplay (PP gol / PP totali)', templatePkRow: 'Penalty Kill (PK gol subiti / PK totali)', templatePkGolFatti: 'Gol fatti in PK', templatePpGolSubiti: 'Gol subiti in PP', templateNotes: 'Note', templatePlayersHeader: 'GIOCATORI', templateGoaliesHeader: 'PORTIERI', templateColName: 'Nome', settingsExport: 'Esporta dati', settingsExportHint: 'Scarica un backup di tutte le tue partite e giocatori',
     settingsImport: 'Importa dati', settingsImportHint: 'Ripristina da un file di backup',
-    exportFailed: 'Esportazione fallita.', importInvalidJson: 'Il file non è un JSON valido.', importInvalidBackup: 'Il file non è un backup valido di Hockey Tracker.', importConfirmTitle: 'Conferma importazione', importBackupDate: 'Data backup', importMatches: 'partite', importPlayers: 'giocatori', importGoalies: 'portieri', importConfirmBody: 'I dati attuali verranno sostituiti. Vuoi continuare?', importSuccess: 'Importazione completata. La pagina verrà ricaricata.', importFailed: 'Importazione fallita.', importReadError: 'Impossibile leggere il file.', clearStep1Title: 'Cancella tutti i dati', clearStep1Body: 'Stai per cancellare definitivamente partite, giocatori e statistiche.\n\nTi consigliamo di scaricare prima un backup. Vuoi farlo ora?', clearBackupFailedContinue: 'Il backup non è riuscito. Vuoi comunque procedere con la cancellazione?', clearKeyword: 'CANCELLA', clearStep2Body: 'Per confermare, scrivi la parola {KEY} (in maiuscolo):', clearKeywordMismatch: 'La parola digitata non corrisponde a {KEY}. Cancellazione annullata.', clearSuccess: 'Dati cancellati. La pagina verrà ricaricata.', clearFailed: 'Cancellazione fallita.', clearStep2Title: 'Conferma cancellazione', clearSkipBackup: 'Salta backup', clearDoBackup: 'Scarica backup', clearConfirmFinal: 'Cancella definitivamente', clearDoneTitle: 'Fatto', ok: 'OK', dialogNotice: 'Avviso', dialogConfirm: 'Conferma', authSubtitleLogin: 'Accedi per gestire le statistiche della tua squadra', authSubtitleRegister: 'Crea un account per iniziare', authEmail: 'Email', authPassword: 'Password', authNome: 'Nome', authCognome: 'Cognome', authErrEmptyNome: 'Inserisci il tuo nome.', authErrEmptyCognome: 'Inserisci il tuo cognome.', authLoginBtn: 'Accedi', authRegisterBtn: 'Registrati', authOr: 'oppure', authGoogleBtn: 'Continua con Google', authNoAccount: 'Non hai un account?', authGoRegister: 'Registrati', authHaveAccount: 'Hai già un account?', authGoLogin: 'Accedi', authForgot: 'Password dimenticata?', authResetEyebrow: 'Recupero password', authResetTitle: 'Hai dimenticato la password?', authResetSub: 'Inserisci la tua email: ti inviamo un link per reimpostarla.', authResetBtn: 'Invia link di reset', authResetSentBtn: 'Email inviata ✓', authBackToLogin: '← Torna all’accesso', verifyBannerText: 'Ti abbiamo inviato un’email di verifica. Controlla la casella (anche lo spam).', verifyResend: 'Reinvia email', cloudMigrateAsk: 'Vuoi caricare nel tuo account i dati presenti su questo dispositivo? Premi "Annulla" se questo non è l’account giusto.', accountTitle: 'Account', accountName: 'Nome', accountEmailLabel: 'Email', accountTeam: 'Squadra', accountTeamSoon: 'Selezione tra più squadre: in arrivo (per i piani Pro ed Enterprise).', accountChangeEmail: 'Cambia email', accountChangePass: 'Cambia password', accountCurrentPass: 'Password attuale', accountNewEmail: 'Nuova email', accountNewEmailConfirm: 'Ripeti nuova email', accountCurrentEmail: 'Email attuale', accountPassWhyEmail: 'Serve solo a confermare che sei tu (per sicurezza). Non è la nuova email.', accountNewPass: 'Nuova password', accountNewPassConfirm: 'Ripeti nuova password', accountUpdateEmailBtn: 'Aggiorna email', accountUpdatePassBtn: 'Aggiorna password', accountGoogleNote: 'Accedi con Google: gestisci email e password dal tuo account Google.', accEmailUpdated: 'Email aggiornata ✓', accPassUpdated: 'Password aggiornata ✓', accEmailVerifySent: 'Ti abbiamo inviato un link di conferma al nuovo indirizzo email. Apri quel messaggio (controlla anche lo spam) e clicca il link: il cambio sarà attivo solo dopo la conferma.', accErrNeedPass: 'Inserisci la password attuale.', accErrNeedEmail: 'Inserisci la nuova email.', accErrEmailMismatch: 'Le due email non coincidono.', accErrPassShort: 'La nuova password deve avere almeno 6 caratteri.', accErrPassMismatch: 'Le due password non coincidono.', accErrWrongPass: 'Password attuale errata.', accErrEmailInUse: 'Questa email è già in uso.', accErrInvalidEmail: 'Email non valida.', accErrRecentLogin: 'Per sicurezza, esci e rientra, poi riprova.', accErrTooMany: 'Troppi tentativi. Riprova più tardi.', accErrGeneric: 'Si è verificato un errore. Riprova.', cloudSaving: 'Salvataggio…', cloudSaved: 'Salvato nel cloud', cloudError: 'Non salvato online', cloudOffline: 'Offline · salvato sul dispositivo', verifyResent: 'Email inviata ✓', verifyRecheck: 'Ho verificato', verifyDone: 'Email verificata. Grazie!', verifyNotYet: 'Non risulta ancora verificata. Clicca il link nell’email (controlla anche lo spam).', authWorking: 'Attendi...', authResetSent: 'Ti abbiamo inviato un’email per reimpostare la password. Controlla la posta (anche lo spam).', authErrInvalidEmail: 'Indirizzo email non valido.', authErrNoUser: 'Nessun account trovato con questa email.', authErrWrongPass: 'Email o password errate.', authErrInUse: 'Esiste già un account con questa email.', authErrWeakPass: 'La password deve avere almeno 6 caratteri.', authErrEmptyEmail: 'Inserisci la tua email.', authErrEmptyPass: 'Inserisci la password.', authErrEmptyEmailReset: 'Scrivi la tua email qui sopra, poi premi di nuovo Password dimenticata.', authErrTooMany: 'Troppi tentativi. Riprova tra poco.', authErrNetwork: 'Problema di connessione. Controlla internet.', authErrGeneric: 'Si è verificato un errore. Riprova.',
+    exportFailed: 'Esportazione fallita.', exportNeedInternet: 'Esportazione non riuscita: per creare PDF ed Excel serve la connessione a internet. Controllala e riprova.', importInvalidJson: 'Il file non è un JSON valido.', importInvalidBackup: 'Il file non è un backup valido di Hockey Tracker.', importConfirmTitle: 'Conferma importazione', importBackupDate: 'Data backup', importMatches: 'partite', importPlayers: 'giocatori', importGoalies: 'portieri', importConfirmBody: 'I dati attuali verranno sostituiti. Vuoi continuare?', importSuccess: 'Importazione completata. La pagina verrà ricaricata.', importFailed: 'Importazione fallita.', importReadError: 'Impossibile leggere il file.', clearStep1Title: 'Cancella tutti i dati', clearStep1Body: 'Stai per cancellare definitivamente partite, giocatori e statistiche.\n\nTi consigliamo di scaricare prima un backup. Vuoi farlo ora?', clearBackupFailedContinue: 'Il backup non è riuscito. Vuoi comunque procedere con la cancellazione?', clearKeyword: 'CANCELLA', clearStep2Body: 'Per confermare, scrivi la parola {KEY} (in maiuscolo):', clearKeywordMismatch: 'La parola digitata non corrisponde a {KEY}. Cancellazione annullata.', clearSuccess: 'Dati cancellati. La pagina verrà ricaricata.', clearFailed: 'Cancellazione fallita.', clearStep2Title: 'Conferma cancellazione', clearSkipBackup: 'Salta backup', clearDoBackup: 'Scarica backup', clearConfirmFinal: 'Cancella definitivamente', clearDoneTitle: 'Fatto', ok: 'OK', dialogNotice: 'Avviso', dialogConfirm: 'Conferma', authSubtitleLogin: 'Accedi per gestire le statistiche della tua squadra', authSubtitleRegister: 'Crea un account per iniziare', authEmail: 'Email', authPassword: 'Password', authNome: 'Nome', authCognome: 'Cognome', authErrEmptyNome: 'Inserisci il tuo nome.', authErrEmptyCognome: 'Inserisci il tuo cognome.', authLoginBtn: 'Accedi', authRegisterBtn: 'Registrati', authOr: 'oppure', authGoogleBtn: 'Continua con Google', authNoAccount: 'Non hai un account?', authGoRegister: 'Registrati', authHaveAccount: 'Hai già un account?', authGoLogin: 'Accedi', authForgot: 'Password dimenticata?', authResetEyebrow: 'Recupero password', authResetTitle: 'Hai dimenticato la password?', authResetSub: 'Inserisci la tua email: ti inviamo un link per reimpostarla.', authResetBtn: 'Invia link di reset', authResetSentBtn: 'Email inviata ✓', authBackToLogin: '← Torna all’accesso', verifyBannerText: 'Ti abbiamo inviato un’email di verifica. Controlla la casella (anche lo spam).', verifyResend: 'Reinvia email', cloudMigrateAsk: 'Vuoi caricare nel tuo account i dati presenti su questo dispositivo? Premi "Annulla" se questo non è l’account giusto.', accountTitle: 'Account', accountName: 'Nome', accountEmailLabel: 'Email', accountTeam: 'Squadra', accountTeamSoon: 'Selezione tra più squadre: in arrivo (per i piani Pro ed Enterprise).', accountChangeEmail: 'Cambia email', accountChangePass: 'Cambia password', accountCurrentPass: 'Password attuale', accountNewEmail: 'Nuova email', accountNewEmailConfirm: 'Ripeti nuova email', accountCurrentEmail: 'Email attuale', accountPassWhyEmail: 'Serve solo a confermare che sei tu (per sicurezza). Non è la nuova email.', accountNewPass: 'Nuova password', accountNewPassConfirm: 'Ripeti nuova password', accountUpdateEmailBtn: 'Aggiorna email', accountUpdatePassBtn: 'Aggiorna password', accountGoogleNote: 'Accedi con Google: gestisci email e password dal tuo account Google.', accEmailUpdated: 'Email aggiornata ✓', accPassUpdated: 'Password aggiornata ✓', accEmailVerifySent: 'Ti abbiamo inviato un link di conferma al nuovo indirizzo email. Apri quel messaggio (controlla anche lo spam) e clicca il link: il cambio sarà attivo solo dopo la conferma.', accErrNeedPass: 'Inserisci la password attuale.', accErrNeedEmail: 'Inserisci la nuova email.', accErrEmailMismatch: 'Le due email non coincidono.', accErrPassShort: 'La nuova password deve avere almeno 6 caratteri.', accErrPassMismatch: 'Le due password non coincidono.', accErrWrongPass: 'Password attuale errata.', accErrEmailInUse: 'Questa email è già in uso.', accErrInvalidEmail: 'Email non valida.', accErrRecentLogin: 'Per sicurezza, esci e rientra, poi riprova.', accErrTooMany: 'Troppi tentativi. Riprova più tardi.', accErrGeneric: 'Si è verificato un errore. Riprova.', cloudSaving: 'Salvataggio…', cloudSaved: 'Salvato nel cloud', cloudError: 'Non salvato online', cloudOffline: 'Offline · salvato sul dispositivo', verifyResent: 'Email inviata ✓', verifyRecheck: 'Ho verificato', verifyDone: 'Email verificata. Grazie!', verifyNotYet: 'Non risulta ancora verificata. Clicca il link nell’email (controlla anche lo spam).', authWorking: 'Attendi...', authResetSent: 'Ti abbiamo inviato un’email per reimpostare la password. Controlla la posta (anche lo spam).', authErrInvalidEmail: 'Indirizzo email non valido.', authErrNoUser: 'Nessun account trovato con questa email.', authErrWrongPass: 'Email o password errate.', authErrInUse: 'Esiste già un account con questa email.', authErrWeakPass: 'La password deve avere almeno 6 caratteri.', authErrEmptyEmail: 'Inserisci la tua email.', authErrEmptyPass: 'Inserisci la password.', authErrEmptyEmailReset: 'Scrivi la tua email qui sopra, poi premi di nuovo Password dimenticata.', authErrTooMany: 'Troppi tentativi. Riprova tra poco.', authErrNetwork: 'Problema di connessione. Controlla internet.', authErrGeneric: 'Si è verificato un errore. Riprova.',
     settingsReset: 'Cancella tutti i dati', settingsResetHint: 'Rimuove definitivamente partite, giocatori e statistiche',
     settingsTeamName: 'Nome squadra', settingsTeamNameHint: 'Personalizza il nome che appare nello scoreboard',
     settingsTeamLogo: 'Logo squadra', settingsTeamLogoHint: 'Carica il logo della tua squadra',
@@ -5160,24 +5160,26 @@ function applyTeamIdentity() {
   // 1. Header logo: replace the SVG puck with the user logo if set
   var logoSlot = document.querySelector('header .logo');
   if (logoSlot) {
-    // Remove any previously-injected team logo
-    var existing = logoSlot.querySelector('.header-team-logo');
-    if (existing) existing.remove();
-    var svg = logoSlot.querySelector('svg');
-    if (getTeamLogo(currentSeason)) {
-      // Hide the default svg and inject the team logo
-      if (svg) svg.style.display = 'none';
-      var injected = document.createElement('span');
-      injected.className = 'header-team-logo';
-      if (isImageLogo(getTeamLogo(currentSeason))) {
-        injected.innerHTML = '<img src="' + escapeAttr(getTeamLogo(currentSeason)) + '" alt="">';
+    var want = getTeamLogo(currentSeason) || '';
+    // Ricostruisci il logo dell'header solo se è cambiato (evita sfarfallio ad ogni ridisegno).
+    if (logoSlot.getAttribute('data-applied-logo') !== want) {
+      logoSlot.setAttribute('data-applied-logo', want);
+      var existing = logoSlot.querySelector('.header-team-logo');
+      if (existing) existing.remove();
+      var svg = logoSlot.querySelector('svg');
+      if (want) {
+        if (svg) svg.style.display = 'none';
+        var injected = document.createElement('span');
+        injected.className = 'header-team-logo';
+        if (isImageLogo(want)) {
+          injected.innerHTML = '<img src="' + escapeAttr(want) + '" alt="">';
+        } else {
+          injected.textContent = want;
+        }
+        logoSlot.insertBefore(injected, logoSlot.firstChild);
       } else {
-        injected.textContent = getTeamLogo(currentSeason);
+        if (svg) svg.style.display = '';
       }
-      logoSlot.insertBefore(injected, logoSlot.firstChild);
-    } else {
-      // Restore default svg
-      if (svg) svg.style.display = '';
     }
   }
   // 2. Header text: always keep "Hockey Stats" (team name is shown elsewhere, e.g. dashboard)
@@ -7063,7 +7065,7 @@ function exportPlayersXLSX() {
       XLSX.writeFile(built.wb, fname);
     } catch (e) { console.error(e); }
     hidePdfToast();
-  }).catch(function(e){ console.error(e); hidePdfToast(); });
+  }).catch(function(e){ console.error(e); hidePdfToast(); appAlert(t('exportNeedInternet')); });
 }
 
 // Goalies export — XLSX with template-style formatting
@@ -7106,7 +7108,7 @@ function exportGoaliesXLSX() {
       XLSX.writeFile(built.wb, fname);
     } catch (e) { console.error(e); }
     hidePdfToast();
-  }).catch(function(e){ console.error(e); hidePdfToast(); });
+  }).catch(function(e){ console.error(e); hidePdfToast(); appAlert(t('exportNeedInternet')); });
 }
 // ============== fine Iter 8 ==============
 
@@ -7127,7 +7129,7 @@ function exportMatchPDF() {
     .then(function(){ doExportPDF(); })
     .catch(function(err){
       console.error(err);
-      appAlert('PDF export failed: ' + err.message);
+      appAlert(t('exportNeedInternet'));
     })
     .finally(function(){
       setTimeout(function(){ var t = document.getElementById('pdf-toast'); if (t) t.remove(); }, 600);
@@ -7163,7 +7165,7 @@ function doExportPDF() {
   if (!p) return;
   // jspdf UMD exposes window.jspdf.jsPDF
   var jsPDFCtor = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
-  if (!jsPDFCtor) { appAlert('jsPDF not loaded'); return; }
+  if (!jsPDFCtor) { appAlert(t('exportNeedInternet')); return; }
   var doc = new jsPDFCtor({ orientation: 'landscape', unit: 'mm', format: 'a4' });
   var pageW = doc.internal.pageSize.getWidth();
   var pageH = doc.internal.pageSize.getHeight();
@@ -7506,7 +7508,7 @@ function exportPlayersPDF() {
   showPdfToast();
   Promise.all([loadScript(CDN_JSPDF), loadScript(CDN_AUTOTABLE)])
     .then(function(){ doExportPlayersPDF(); })
-    .catch(function(err){ console.error(err); appAlert('PDF export failed: ' + err.message); })
+    .catch(function(err){ console.error(err); appAlert(t('exportNeedInternet')); })
     .finally(function(){
       setTimeout(function(){ var t = document.getElementById('pdf-toast'); if (t) t.remove(); }, 600);
     });
@@ -7515,7 +7517,7 @@ function exportGoaliesPDF() {
   showPdfToast();
   Promise.all([loadScript(CDN_JSPDF), loadScript(CDN_AUTOTABLE)])
     .then(function(){ doExportGoaliesPDF(); })
-    .catch(function(err){ console.error(err); appAlert('PDF export failed: ' + err.message); })
+    .catch(function(err){ console.error(err); appAlert(t('exportNeedInternet')); })
     .finally(function(){
       setTimeout(function(){ var t = document.getElementById('pdf-toast'); if (t) t.remove(); }, 600);
     });
@@ -7575,7 +7577,7 @@ function doExportGoaliesPDF() { doExportSeasonPDF(); }
 // Combined season PDF: players table + goalies table (like the match PDF, but season totals)
 function doExportSeasonPDF() {
   var jsPDFCtor = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
-  if (!jsPDFCtor) { appAlert('jsPDF not loaded'); return; }
+  if (!jsPDFCtor) { appAlert(t('exportNeedInternet')); return; }
   var doc = new jsPDFCtor({ orientation: 'landscape', unit: 'mm', format: 'a4' });
   var accent = [232, 160, 32];
   var marginX = 14;
@@ -7995,64 +7997,60 @@ function computeMatchMVP(match) {
   if (convocati.length === 0) return null;
   var statsG = match.statsG || {};
 
-  // Find max minutes among convoked players (denominator for the minutes score)
-  var maxMin = 0;
-  for (var mi = 0; mi < convocati.length; mi++) {
-    var sM = statsG[convocati[mi]] || {};
-    var mins = Number(sM.minuti) || 0;
-    if (mins > maxMin) maxMin = mins;
-  }
-  // Find max "tiri" so we can scale the shot-efficiency criterion
-  var maxTiri = 0;
-  for (var ti = 0; ti < convocati.length; ti++) {
-    var sT = statsG[convocati[ti]] || {};
-    var tt = Number(sT.tiri) || 0;
-    if (tt > maxTiri) maxTiri = tt;
-  }
-  // Find max "persi" so we can scale the ball-care criterion
-  var maxPersi = 0;
-  for (var pi = 0; pi < convocati.length; pi++) {
-    var sP = statsG[convocati[pi]] || {};
-    var pp = Number(sP.persi) || 0;
-    if (pp > maxPersi) maxPersi = pp;
+  // Massimi della partita: servono a mettere tutti sulla stessa scala 0-100.
+  var maxAttack = 0, maxRecuperi = 0, maxMin = 0, maxTiri = 0, maxPersi = 0;
+  for (var k = 0; k < convocati.length; k++) {
+    var sk = statsG[convocati[k]] || {};
+    var aRaw = (Number(sk.gol) || 0) * 2 + (Number(sk.assist) || 0);
+    if (aRaw > maxAttack) maxAttack = aRaw;
+    var rk = Number(sk.recuperi) || 0; if (rk > maxRecuperi) maxRecuperi = rk;
+    var mk = Number(sk.minuti) || 0;   if (mk > maxMin) maxMin = mk;
+    var tk = Number(sk.tiri) || 0;     if (tk > maxTiri) maxTiri = tk;
+    var pk2 = Number(sk.persi) || 0;   if (pk2 > maxPersi) maxPersi = pk2;
   }
 
-  var bestId = null, bestScore = -1;
+  var bestId = null, bestScore = -Infinity;
   for (var i = 0; i < convocati.length; i++) {
     var pid = convocati[i];
     var s = statsG[pid] || {};
     var gol      = Number(s.gol) || 0;
+    var assist   = Number(s.assist) || 0;
     var tiri     = Number(s.tiri) || 0;
     var recuperi = Number(s.recuperi) || 0;
     var persi    = Number(s.persi) || 0;
     var minuti   = Number(s.minuti) || 0;
+    var falli    = Number(s.falli) || 0;
+    var cGiallo  = Number(s.cartGiallo) || 0;
+    var cBlu     = Number(s.cartBlu) || 0;
+    var cRosso   = Number(s.cartRosso) || 0;
 
-    // 1. Efficacia offensiva: gol/tiri × 100 (capped at 100). If no shots, 0.
-    var offEff = tiri > 0 ? Math.min(100, (gol / tiri) * 100) : 0;
+    // 1. ATTACCO (45%): gol e assist insieme, premiando il volume.
+    //    Ogni gol vale 2, ogni assist 1. Scalato sul migliore attaccante della partita.
+    var attackRaw = gol * 2 + assist;
+    var attackScore = maxAttack > 0 ? (attackRaw / maxAttack) * 100 : 0;
 
-    // 2. Efficacia difensiva: recuperi vs persi. If no actions, neutral 50.
-    var defActions = recuperi + persi;
-    var defEff = defActions > 0 ? (recuperi / defActions) * 100 : 50;
+    // 2. DIFESA (25%): palloni recuperati, scalati sul migliore della partita.
+    var defenseScore = maxRecuperi > 0 ? (recuperi / maxRecuperi) * 100 : 0;
 
-    // 3. Efficienza al tiro (pochi tiri per molti gol):
-    //    Score = 100 - (penalty per tiri sprecati).
-    //    Tiri sprecati = tiri - gol. Penalty = min(80, sprecati / maxTiri * 100).
-    //    Se nessuno ha tirato in tutta la squadra → neutro 50.
-    var sprecati = Math.max(0, tiri - gol);
-    var shotEff = maxTiri > 0 ? Math.max(0, 100 - (sprecati / maxTiri) * 80) : 50;
-    // Bonus per chi non ha tirato affatto: punteggio neutro 50 (non punito,
-    // ma neanche premiato perché non ha contribuito offensivamente)
-    if (tiri === 0) shotEff = 50;
-
-    // 4. Cura del pallone: meno persi = punteggio più alto.
-    //    Score = 100 - (persi / maxPersi * 100). Se nessuno ha perso palla → 100.
-    var ballCare = maxPersi > 0 ? Math.max(0, 100 - (persi / maxPersi) * 100) : 100;
-
-    // 5. Minutaggio: minuti/maxMin × 100. Se nessuno ha minuti → tutti a 50.
+    // 3. MINUTI (10%): minuti rispetto al piu' impiegato. Se nessuno ha minuti: 50 neutro.
     var minScore = maxMin > 0 ? (minuti / maxMin) * 100 : 50;
 
-    // Weighted average — all weights equal (20% each)
-    var score = (offEff + defEff + shotEff + ballCare + minScore) / 5;
+    // 4. CURA DEL PALLONE (10%): meno palle perse = punteggio piu' alto.
+    var ballCare = maxPersi > 0 ? Math.max(0, 100 - (persi / maxPersi) * 100) : 100;
+
+    // 5. PRECISIONE AL TIRO (10%): cinismo, tanti gol con pochi tiri.
+    var sprecati = Math.max(0, tiri - gol);
+    var shotPrec = maxTiri > 0 ? Math.max(0, 100 - (sprecati / maxTiri) * 80) : 50;
+    if (tiri === 0) shotPrec = 50;
+
+    var base = attackScore * 0.45 + defenseScore * 0.25 + minScore * 0.10 + ballCare * 0.10 + shotPrec * 0.10;
+
+    // DISCIPLINA: falli e cartellini tolgono punti.
+    //   - ogni fallo: -2 (totale falli limitato a -15, per non azzerare un difensore ruvido)
+    //   - giallo: -6 | blu: -12 | rosso: -25
+    var disciplina = Math.min(15, falli * 2) + cGiallo * 6 + cBlu * 12 + cRosso * 25;
+
+    var score = base - disciplina;
 
     if (score > bestScore) {
       bestScore = score;
@@ -9187,8 +9185,25 @@ function showPage(id) {
   renderAll();
 }
 
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function syncBodyScrollLock() {
+  // Quando un modale è aperto blocchiamo lo scroll di sfondo: così sparisce la barra di scorrimento
+  // (su desktop/Windows) e il modale risulta centrato perfettamente, senza spostamento a sinistra.
+  var anyOpen = !!document.querySelector('.overlay.open');
+  if (anyOpen) {
+    if (!document.body.hasAttribute('data-scroll-locked')) {
+      var sw = window.innerWidth - document.documentElement.clientWidth;
+      document.body.setAttribute('data-scroll-locked', '1');
+      document.body.style.overflow = 'hidden';
+      if (sw > 0) document.body.style.paddingRight = sw + 'px';
+    }
+  } else if (document.body.hasAttribute('data-scroll-locked')) {
+    document.body.removeAttribute('data-scroll-locked');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+  }
+}
+function openModal(id) { var el = document.getElementById(id); if (el) el.classList.add('open'); syncBodyScrollLock(); }
+function closeModal(id) { var el = document.getElementById(id); if (el) el.classList.remove('open'); syncBodyScrollLock(); }
 
 function accProvider() {
   var u = window.fbAuth && window.fbAuth.currentUser;
@@ -10075,37 +10090,13 @@ function getAllTeamNames() {
   list.sort(function(a,b){ return a.localeCompare(b); });
   return list;
 }
-function onTeamNameInput() {
-  var input = document.getElementById('settings-team-name');
-  var box   = document.getElementById('team-name-suggestions');
-  if (!input || !box) return;
-  var q = (input.value || '').trim().toLowerCase();
-  var all = getAllTeamNames();
-  var matches = [];
-  for (var i = 0; i < all.length; i++) {
-    var nl = all[i].toLowerCase();
-    if (q === '' || nl.indexOf(q) !== -1) { if (nl !== q) matches.push(all[i]); }
-    if (matches.length >= 8) break;
-  }
-  if (matches.length === 0) { box.style.display = 'none'; box.innerHTML = ''; return; }
+function refreshTeamNameDatalist() {
+  var dl = document.getElementById('team-name-datalist');
+  if (!dl) return;
+  var names = getAllTeamNames();
   var html = '';
-  for (var j = 0; j < matches.length; j++) {
-    html += '<div class="opp-sugg-row" onmousedown="pickTeamName(' + j + ')" ontouchstart="pickTeamName(' + j + ')">' + escapeHtml(matches[j]) + '</div>';
-  }
-  box.innerHTML = html; box.style.display = 'block';
-  window.__teamNameSuggestions = matches;
-}
-function pickTeamName(idx) {
-  var matches = window.__teamNameSuggestions || [];
-  if (!matches[idx]) return;
-  var input = document.getElementById('settings-team-name');
-  if (input) input.value = matches[idx];
-  hideTeamNameSuggestions();
-  setTeamName(matches[idx]);
-}
-function hideTeamNameSuggestions() {
-  var box = document.getElementById('team-name-suggestions');
-  if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+  for (var i = 0; i < names.length; i++) html += '<option value="' + escapeAttr(names[i]) + '"></option>';
+  dl.innerHTML = html;
 }
 function onOpponentInput() {
   var input = document.getElementById('p-avversario');
@@ -13039,6 +13030,7 @@ function renderPortieri() {
 
 function renderAll() {
   updateSeasonLabels();
+  applyTeamIdentity();
   renderDashboard();
   renderPartite();
   renderGiocatori();
@@ -13050,7 +13042,7 @@ document.addEventListener("DOMContentLoaded", function() {
   var overlays = document.querySelectorAll('.overlay');
   for (var i = 0; i < overlays.length; i++) {
     overlays[i].addEventListener('click', function(e) {
-      if (e.target.classList.contains('overlay')) e.target.classList.remove('open');
+      if (e.target.classList.contains('overlay')) { e.target.classList.remove('open'); if (typeof syncBodyScrollLock === 'function') syncBodyScrollLock(); }
     });
   }
   // iOS Safari fix: il pulsante Modifica/Visualizza (#edit-mode-toggle-btn) su alcuni iPhone
