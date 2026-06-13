@@ -20,7 +20,7 @@
 
   var prodotto = [
     ["index.html#statistiche", "Statistiche", "Radar e schede giocatore", ic.stats],
-    ["index.html#prezzi", "Prezzi", "Free, Pro ed Enterprise", ic.price],
+    ["index.html#prezzi", "Prezzi", "Free, Pro e Società", ic.price],
     ["index.html#societa", "Per le società", "Più squadre, chiavi allenatore", ic.org]
   ];
   var risorse = [

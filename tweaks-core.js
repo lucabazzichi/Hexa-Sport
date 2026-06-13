@@ -31,7 +31,7 @@ window.HSTweaks = (function () {
     themeMode:     { label: "Tema", type: "seg", opts: [["auto", "Auto"], ["light", "Chiaro"], ["dark", "Scuro"]] },
     displayFont:   { label: "Font display", type: "seg", opts: [["Space Grotesk", "Grotesk"], ["Sora", "Sora"], ["Archivo", "Archivo"]] },
     heroLayout:    { label: "Layout hero", type: "seg", opts: [["split", "Split"], ["centered", "Centrato"]] },
-    featuredPlan:  { label: "Piano in evidenza", type: "seg", opts: [["pro", "Pro"], ["enterprise", "Enterprise"]] },
+    featuredPlan:  { label: "Piano in evidenza", type: "seg", opts: [["pro", "Pro"], ["enterprise", "Società"]] },
     billingDefault:{ label: "Prezzi mostrati", type: "seg", opts: [["annual", "Annuale"], ["monthly", "Mensile"]] },
     headlineVariant: { label: "Titolo principale (H1)", type: "stack", opts: [
       ["punch", "Allena sui dati, non a sensazione."],
