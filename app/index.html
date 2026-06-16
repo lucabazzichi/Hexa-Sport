@@ -2900,6 +2900,7 @@ body.hexa-admin-only .hexa-guide-overlay { display:none !important; }
 .hx-seg button{ border:none; background:var(--bg3); color:var(--text2); font-size:12.5px; font-weight:700; padding:7px 12px; cursor:pointer; }
 .hx-seg button.on{ background:var(--accent); color:#000; }
 .hx-range{ flex:1; accent-color:var(--accent); height:24px; }
+#hxstage .crest .hx-crestimg{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; z-index:3; }
 
 </style>
 </head>
@@ -14175,7 +14176,12 @@ function hxData(){
       scorers=arr.map(function(x){return x.n+(x.g>1?(' '+x.g):'');}).join(' \u00b7 ');
     }
   }catch(e){}
-  return {home:home,away:away,hg:hg,ag:ag,comp:p.competizione||'',us:us,scorers:scorers};
+  var season=(typeof currentSeason!=='undefined'?currentSeason:null);
+  var myLogo=(typeof getTeamLogo==='function')?(getTeamLogo(season)||''):'';
+  var oppLogo=(typeof getOpponentLogo==='function')?(getOpponentLogo(them)||''):'';
+  var homeLogo=(p.sede==='trasferta')?oppLogo:myLogo;
+  var awayLogo=(p.sede==='trasferta')?myLogo:oppLogo;
+  return {home:home,away:away,hg:hg,ag:ag,comp:p.competizione||'',us:us,scorers:scorers,homeLogo:homeLogo,awayLogo:awayLogo};
 }
 
 function hxFill(g){
@@ -14194,8 +14200,30 @@ function hxFill(g){
       if(ph){ ph.style.backgroundSize=(hxPhotoFit==='contain')?'cover, contain':'cover, cover'; ph.style.transform='scale('+hxPhotoZoom+')'; ph.style.transformOrigin='50% 38%'; } }
     else { g.style.removeProperty('--hxphoto'); if(hint) hint.style.display=''; } }
   else if(hxColor){ hxSetColor(g,hxColor); }
+  hxFillCrests(g);
 }
 
+function hxCrest(cr, logo, name){
+  if(!cr) return;
+  var ring=cr.querySelector('.ring'), badge=cr.querySelector('.badge'), em=cr.querySelector('.em'), ini=cr.querySelector('.ini');
+  var old=cr.querySelector('.hx-crestimg'); if(old&&old.parentNode) old.parentNode.removeChild(old);
+  var isImg=(typeof logo==='string' && logo.indexOf('data:image/')===0);
+  if(em) em.style.display='none';
+  if(isImg){
+    if(ring) ring.style.display='none'; if(badge) badge.style.display='none'; if(ini) ini.style.display='none';
+    var im=document.createElement('img'); im.className='hx-crestimg'; im.src=logo; im.alt=''; cr.appendChild(im);
+  } else {
+    if(ring) ring.style.display=''; if(badge) badge.style.display='';
+    if(!ini){ var inEl=cr.querySelector('.in'); if(inEl){ ini=document.createElement('span'); ini.className='ini'; inEl.appendChild(ini); } }
+    if(ini){ ini.style.display=''; ini.textContent=(logo&&logo.length<=3)?logo:hxInitials(name); }
+  }
+}
+function hxFillCrests(g){
+  var d=hxData();
+  hxCrest(g.querySelector('.crest.home'), d.homeLogo, d.home);
+  hxCrest(g.querySelector('.crest.away'), d.awayLogo, d.away);
+  var cd=g.querySelector('.cdisc'); if(cd) cd.textContent=hxInitials(d.home);
+}
 function hxApplyTexts(g){
   var s=HX_SLOT[hxCur.style]||{};
   var cl=g.querySelector('.clogo');
@@ -14278,7 +14306,6 @@ function hxBuild(){
     '</div>';
   document.body.appendChild(ov);
   document.getElementById('hxHashRow') || (function(){ var r=document.getElementById('hxRow-hash'); if(r) r.id='hxHashRow'; })();
-  ov.addEventListener('click', function(e){ if(e.target===ov) closeHexaShare(); });
   document.getElementById('hxStyleChips').addEventListener('click',function(e){var c=e.target.closest('.hx-chip'); if(!c)return; hxCur.style=+c.getAttribute('data-st'); var ch=this.children; for(var i=0;i<ch.length;i++) ch[i].classList.remove('on'); c.classList.add('on'); hxRender();});
   document.getElementById('hxFmtChips').addEventListener('click',function(e){var c=e.target.closest('.hx-chip'); if(!c)return; hxCur.fmt=c.getAttribute('data-fmt'); var ch=this.children; for(var i=0;i<ch.length;i++) ch[i].classList.remove('on'); c.classList.add('on'); hxRender();});
   document.getElementById('hxSwatches').addEventListener('click',function(e){var c=e.target.closest('.hx-swt'); if(!c)return; var ch=this.children; for(var i=0;i<ch.length;i++) ch[i].classList.remove('on'); c.classList.add('on'); hxColor=c.getAttribute('data-col'); var g=document.getElementById('hxg'); if(g) hxSetColor(g,hxColor);});
