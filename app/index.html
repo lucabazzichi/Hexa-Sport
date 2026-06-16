@@ -14242,9 +14242,15 @@ function hxApplyTexts(g){
 }
 
 function hxApplyMain(g){
-  var st=hxCur.style; if(st!==1 && st!==3) return;
-  if(hxMain.res){ if(st===3){ var scq=g.querySelector('.scr'); if(scq) scq.textContent=hxMain.res; } else { var sp=g.querySelectorAll('.score span'); var pr=String(hxMain.res).split(/[-\u2013]/); if(sp.length>=2&&pr.length>=2){ sp[0].textContent=pr[0].trim(); sp[1].textContent=pr[1].trim(); } } }
-  if(hxMain.lab){ var lb=g.querySelector(st===1?'.eyebrow':'.foot b'); if(lb) lb.textContent=hxMain.lab; }
+  var st=hxCur.style;
+  if(hxMain.res){
+    var pr=String(hxMain.res).split(/[-\u2013:]/); var a=(pr[0]||'').trim(), b=(pr[1]||'').trim();
+    if(st===3){ var scq=g.querySelector('.scr'); if(scq) scq.textContent=hxMain.res; }
+    else if(st===4){ var bl=g.querySelectorAll('.blk'); if(bl[0]&&a!=='') bl[0].textContent=a; if(bl[1]&&b!=='') bl[1].textContent=b; }
+    else if(st===7){ var gh=g.querySelectorAll('.ghost span'); if(gh[0]&&a!=='') gh[0].textContent=a; if(gh[1]&&b!=='') gh[1].textContent=b; }
+    else { var sp=g.querySelectorAll('.score span'); if(sp[0]&&a!=='') sp[0].textContent=a; if(sp[1]&&b!=='') sp[1].textContent=b; }
+  }
+  if((st===1||st===3) && hxMain.lab){ var lb=g.querySelector(st===1?'.eyebrow':'.foot b'); if(lb) lb.textContent=hxMain.lab; }
   if(st===1 && (hxMain.home||hxMain.away)){ var nm=g.querySelector('.names'); if(nm) nm.innerHTML=hxEsc(hxMain.home)+' <em>vs</em> '+hxEsc(hxMain.away); }
 }
 function hxRender(){
@@ -14256,7 +14262,8 @@ function hxRender(){
   document.getElementById('hxColorGroup').style.display=HX_NOPHOTO[hxCur.style]?'':'none';
   document.getElementById('hxScritte').style.display=({2:1,7:1}[hxCur.style])?'none':'';
   document.getElementById('hxHashRow').style.display=(hxCur.style===4)?'':'none';
-  document.getElementById('hxTesti').style.display=(hxCur.style===1||hxCur.style===3)?'':'none';
+  document.getElementById('hxTesti').style.display='';
+  document.getElementById('hxLabRow').style.display=(hxCur.style===1||hxCur.style===3)?'':'none';
   document.getElementById('hxTeamRows').style.display=(hxCur.style===1)?'':'none';
   document.getElementById('hxPosRow').style.display=(hxCur.style===1)?'':'none';
   document.getElementById('hxPhotoCtl').style.display=(!HX_NOPHOTO[hxCur.style]&&hxPhoto)?'':'none';
@@ -14296,7 +14303,7 @@ function hxBuild(){
         '<div class="hx-sec"><h3>Formato</h3><div class="hx-chips" id="hxFmtChips">'+fmtChips+'</div></div>'+
         '<div id="hxPhotoGroup"><div class="hx-sec"><h3>Foto</h3></div><label class="hx-up">&#128247;&nbsp; Carica foto<input type="file" accept="image/*" id="hxPhotoInput"></label><div id="hxPhotoCtl" style="display:none"><div class="hx-row"><span class="hx-lab">Inquadratura</span><div class="hx-seg" id="hxFitSeg"><button data-fit="cover" class="on">Riempi</button><button data-fit="contain">Intera</button></div></div><div class="hx-row"><span class="hx-lab">Zoom</span><input type="range" min="1" max="2" step="0.05" value="1" id="hxZoom" class="hx-range"></div></div></div>'+
         '<div id="hxColorGroup" style="display:none"><div class="hx-sec"><h3>Colore squadra</h3></div><div class="hx-sw" id="hxSwatches">'+swt+'</div></div>'+
-        '<div id="hxTesti"><div class="hx-sec"><h3>Testi</h3></div><div class="hx-row"><span class="hx-lab">Risultato</span><input class="hx-tin" data-m="res"></div><div class="hx-row"><span class="hx-lab">Etichetta</span><input class="hx-tin" data-m="lab"></div><div id="hxTeamRows"><div class="hx-row"><span class="hx-lab">Casa</span><input class="hx-tin" data-m="home"></div><div class="hx-row"><span class="hx-lab">Ospite</span><input class="hx-tin" data-m="away"></div></div><div class="hx-row" id="hxPosRow"><span class="hx-lab">Posizione</span><div class="hx-seg" id="hxPosSeg"><button data-pos="alto" class="on">In alto</button><button data-pos="basso">In basso</button></div></div></div>'+
+        '<div id="hxTesti"><div class="hx-sec"><h3>Testi</h3></div><div class="hx-row"><span class="hx-lab">Risultato</span><input class="hx-tin" data-m="res"></div><div class="hx-row" id="hxLabRow"><span class="hx-lab">Etichetta</span><input class="hx-tin" data-m="lab"></div><div id="hxTeamRows"><div class="hx-row"><span class="hx-lab">Casa</span><input class="hx-tin" data-m="home"></div><div class="hx-row"><span class="hx-lab">Ospite</span><input class="hx-tin" data-m="away"></div></div><div class="hx-row" id="hxPosRow"><span class="hx-lab">Posizione</span><div class="hx-seg" id="hxPosSeg"><button data-pos="alto" class="on">In alto</button><button data-pos="basso">In basso</button></div></div></div>'+
         '<div id="hxScritte"><div class="hx-sec"><h3>Scritte</h3></div>'+
           row('clogo','Logo camp.',false)+ row('spon','Sponsor',true)+ row('comp','Campionato',true)+ row('gior','Giornata',true)+ row('marc','Marcatori',true)+ row('hash','Hashtag',true)+
         '</div>'+
@@ -14309,7 +14316,7 @@ function hxBuild(){
   document.getElementById('hxStyleChips').addEventListener('click',function(e){var c=e.target.closest('.hx-chip'); if(!c)return; hxCur.style=+c.getAttribute('data-st'); var ch=this.children; for(var i=0;i<ch.length;i++) ch[i].classList.remove('on'); c.classList.add('on'); hxRender();});
   document.getElementById('hxFmtChips').addEventListener('click',function(e){var c=e.target.closest('.hx-chip'); if(!c)return; hxCur.fmt=c.getAttribute('data-fmt'); var ch=this.children; for(var i=0;i<ch.length;i++) ch[i].classList.remove('on'); c.classList.add('on'); hxRender();});
   document.getElementById('hxSwatches').addEventListener('click',function(e){var c=e.target.closest('.hx-swt'); if(!c)return; var ch=this.children; for(var i=0;i<ch.length;i++) ch[i].classList.remove('on'); c.classList.add('on'); hxColor=c.getAttribute('data-col'); var g=document.getElementById('hxg'); if(g) hxSetColor(g,hxColor);});
-  document.getElementById('hxPhotoInput').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0]; if(!f)return; var r=new FileReader(); r.onload=function(){hxPhoto=r.result; hxRender();}; r.readAsDataURL(f);});
+  document.getElementById('hxPhotoInput').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0]; if(!f)return; hxLoadPhoto(f); try{e.target.value='';}catch(_){}});
   document.getElementById('hxClogoInput').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0]; if(!f)return; var r=new FileReader(); r.onload=function(){hxCompLogo=r.result; xt.clogo.on=true; hxSyncControls(); hxRender();}; r.readAsDataURL(f);});
   var scr=document.getElementById('hxScritte');
   scr.addEventListener('click',function(e){var t=e.target.closest('.hx-tog'); if(!t)return; var k=t.getAttribute('data-x'); xt[k].on=!xt[k].on; t.classList.toggle('on',xt[k].on); var inp=document.querySelector('.hx-tin[data-x="'+k+'"]'); if(inp) inp.disabled=!xt[k].on; hxApply();});
@@ -14342,24 +14349,47 @@ function openHexaShare(){
 }
 function closeHexaShare(){var ov=document.getElementById('hx-overlay'); if(ov) ov.classList.remove('open'); hxPhoto=null;}
 
-function hxDownload(){
+function hxIsIOS(){ return /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1); }
+function hxLoadPhoto(file){
+  var r=new FileReader();
+  r.onload=function(){
+    var img=new Image();
+    img.onload=function(){
+      try{
+        var max=1600, w=img.naturalWidth||img.width||0, h=img.naturalHeight||img.height||0;
+        var sc=Math.min(1, max/Math.max(w,h,1)); var cw=Math.max(1,Math.round(w*sc)), ch=Math.max(1,Math.round(h*sc));
+        var cv=document.createElement('canvas'); cv.width=cw; cv.height=ch;
+        cv.getContext('2d').drawImage(img,0,0,cw,ch);
+        hxPhoto=cv.toDataURL('image/jpeg',0.9);
+      }catch(err){ hxPhoto=r.result; }
+      hxRender();
+    };
+    img.onerror=function(){ hxPhoto=r.result; hxRender(); };
+    img.src=r.result;
+  };
+  r.onerror=function(){ alert('Non riesco a leggere questa foto. Prova con un\u2019altra immagine dalla galleria.'); };
+  r.readAsDataURL(file);
+}
+function hxExport(preferShare){
   var node=document.getElementById('hxg'); if(!node) return;
   var targetW=(hxCur.fmt==='ar169')?1200:1080; var scale=Math.max(1, targetW/node.offsetWidth);
   loadScript(CDN_HTML2CANVAS).then(function(){ return (document.fonts&&document.fonts.ready)?document.fonts.ready:null; })
   .then(function(){ return html2canvas(node,{scale:scale,backgroundColor:null,useCORS:true,logging:false}); })
-  .then(function(canvas){ canvas.toBlob(function(blob){ if(!blob)return; var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download='hexa-risultato.png'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(url);},1500); },'image/png'); })
-  .catch(function(err){ alert('Creazione immagine non riuscita. Se sei offline, la prima volta servono i font da internet. Dettaglio: '+err); });
+  .then(function(canvas){ canvas.toBlob(function(blob){ if(!blob){ alert('Creazione immagine non riuscita.'); return; }
+    var file=null; try{ file=new File([blob],'hexa-risultato.png',{type:'image/png'}); }catch(e){}
+    var canShare=!!(file && navigator.share && navigator.canShare && navigator.canShare({files:[file]}));
+    var url=URL.createObjectURL(blob);
+    var done=function(){ setTimeout(function(){URL.revokeObjectURL(url);},2000); };
+    if((preferShare || hxIsIOS()) && canShare){ navigator.share({files:[file]}).then(done).catch(done); return; }
+    var a=document.createElement('a');
+    if(('download' in a) && !hxIsIOS()){ a.href=url; a.download='hexa-risultato.png'; document.body.appendChild(a); a.click(); a.remove(); done(); return; }
+    if(canShare){ navigator.share({files:[file]}).then(done).catch(done); return; }
+    window.open(url,'_blank'); done();
+  },'image/png'); })
+  .catch(function(err){ alert('Operazione non riuscita. Se sei offline, la prima volta servono i font da internet. Dettaglio: '+err); });
 }
-function hxShare(){
-  var node=document.getElementById('hxg'); if(!node) return;
-  var targetW=(hxCur.fmt==='ar169')?1200:1080; var scale=Math.max(1,targetW/node.offsetWidth);
-  loadScript(CDN_HTML2CANVAS).then(function(){ return (document.fonts&&document.fonts.ready)?document.fonts.ready:null; })
-  .then(function(){ return html2canvas(node,{scale:scale,backgroundColor:null,useCORS:true,logging:false}); })
-  .then(function(canvas){ canvas.toBlob(function(blob){ if(!blob)return; var file=new File([blob],'hexa-risultato.png',{type:'image/png'});
-      if(navigator.canShare && navigator.canShare({files:[file]})){ navigator.share({files:[file]}).catch(function(){}); }
-      else { var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download='hexa-risultato.png'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(url);},1500); } },'image/png'); })
-  .catch(function(err){ alert('Condivisione non riuscita: '+err); });
-}
+function hxDownload(){ hxExport(false); }
+function hxShare(){ hxExport(true); }
 </script>
 
 </body>
