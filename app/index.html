@@ -1499,6 +1499,11 @@
   .acc-actions{ display:flex; gap:10px; margin-top:16px; padding-top:16px; border-top:1px solid var(--border); }
   .acc-actions .btn{ flex:1; justify-content:center; }
   @media (max-width:480px){ .acc-actions{ flex-direction:column; } }
+  /* Rifinitura popup Account: spaziatura omogenea (giu 2026) */
+  #modal-acc-email .form-group, #modal-acc-pass .form-group{ margin-bottom:16px; }
+  #modal-acc-email .form-group:last-of-type, #modal-acc-pass .form-group:last-of-type{ margin-bottom:0; }
+  #modal-acc-email .acc-field-hint, #modal-acc-pass .acc-field-hint{ margin-top:8px; }
+  .acc-readonly{ width:100%; box-sizing:border-box; font-size:16px; padding:11px 13px; border-radius:10px; border:1px solid var(--border2); background:var(--bg); color:var(--text); word-break:break-word; }
   .modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: 14px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--bg2); z-index: 1; }
   .modal-header h2 { font-size: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
@@ -3699,7 +3704,7 @@ body.hexa-admin-only .hexa-guide-overlay { display:none !important; }
     <div class="modal-body">
       <div id="acc-msg-email" class="auth-error"></div>
       <div id="acc-ok-email" class="auth-ok" style="display:none;"></div>
-      <div class="acc-row" style="max-width:560px;margin-bottom:14px;"><span class="acc-k" data-i18n="accountCurrentEmail">Email attuale</span><span class="acc-v" id="acc-current-email">—</span></div>
+      <div class="form-group"><label data-i18n="accountCurrentEmail">Email attuale</label><div class="acc-readonly" id="acc-current-email">—</div></div>
       <div class="form-group">
         <label data-i18n="accountCurrentPass">Password attuale</label>
         <input type="password" id="acc-email-pass" autocomplete="current-password">
@@ -3707,7 +3712,7 @@ body.hexa-admin-only .hexa-guide-overlay { display:none !important; }
       </div>
       <div class="form-group"><label data-i18n="accountNewEmail">Nuova email</label><input type="email" id="acc-new-email1" autocomplete="off" autocapitalize="none"></div>
       <div class="form-group"><label data-i18n="accountNewEmailConfirm">Ripeti nuova email</label><input type="email" id="acc-new-email2" autocomplete="off" autocapitalize="none"></div>
-      <button class="btn btn-primary" style="width:100%;margin-top:4px;" onclick="accountUpdateEmail()" data-i18n="accountUpdateEmailBtn">Aggiorna email</button>
+      <button class="btn btn-primary" style="width:100%;margin-top:20px;" onclick="accountUpdateEmail()" data-i18n="accountUpdateEmailBtn">Aggiorna email</button>
     </div>
   </div>
 </div>
@@ -3724,7 +3729,7 @@ body.hexa-admin-only .hexa-guide-overlay { display:none !important; }
       <div class="form-group"><label data-i18n="accountCurrentPass">Password attuale</label><input type="password" id="acc-pass-current" autocomplete="current-password"></div>
       <div class="form-group"><label data-i18n="accountNewPass">Nuova password</label><input type="password" id="acc-new-pass1" autocomplete="new-password"></div>
       <div class="form-group"><label data-i18n="accountNewPassConfirm">Ripeti nuova password</label><input type="password" id="acc-new-pass2" autocomplete="new-password"></div>
-      <button class="btn btn-primary" style="width:100%;margin-top:4px;" onclick="accountUpdatePassword()" data-i18n="accountUpdatePassBtn">Aggiorna password</button>
+      <button class="btn btn-primary" style="width:100%;margin-top:20px;" onclick="accountUpdatePassword()" data-i18n="accountUpdatePassBtn">Aggiorna password</button>
     </div>
   </div>
 </div>
