@@ -887,6 +887,13 @@
     margin-bottom: 14px; padding: 12px 16px;
     background: var(--bg2); border: 1px solid var(--accent); border-radius: var(--radius);
   }
+  /* Restyle barra selezione partite (giu 2026) */
+  .match-bulk-bar{ justify-content: space-between; }
+  .mbb-count{ display:flex; align-items:center; gap:8px; color:var(--text2); font-weight:600; }
+  .mbb-num{ display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; padding:0 8px; border-radius:8px; background:var(--bg); color:var(--accent); font-weight:700; font-size:15px; }
+  .mbb-actions{ display:flex; gap:10px; }
+  .mbb-cancel{ background:transparent; border:1px solid var(--border2); color:var(--text2); }
+  .btn-danger:disabled{ opacity:.4; cursor:not-allowed; }
   .mbb-count { font-weight: 700; color: var(--accent); }
   /* The checkbox column on each match card (only visible when body has .selecting-matches) */
   .match-card .match-select-check { display: none; }
@@ -3122,7 +3129,7 @@ body.hexa-admin-only .hexa-guide-overlay { display:none !important; }
 
   <div class="page" id="page-partite">
     <h1 class="page-mobile-title"><span class="pmt-icon">🏒</span><span data-i18n="navMatches">Partite</span></h1>
-    <div class="action-bar">
+    <div class="action-bar" id="partite-action-bar">
       <button class="btn btn-primary" onclick="openNewPartita()"><span data-i18n="addMatch">+ Aggiungi partita</span></button>
       <!-- Iter 6: Avversari list -->
       <button id="btn-avversari-list" class="btn match-select-btn" onclick="openAvversariList()" style="margin-left:auto;">🆚 <span data-i18n="avvMenuBtn">Avversari</span></button>
@@ -3131,10 +3138,12 @@ body.hexa-admin-only .hexa-guide-overlay { display:none !important; }
     </div>
     <!-- Iter 3: bulk delete action bar — appears when selection mode is active -->
     <div id="match-bulk-bar" class="match-bulk-bar" style="display:none;">
-      <span class="mbb-count"><span id="match-bulk-count">0</span> <span data-i18n="selectedMatches">selezionate</span></span>
-      <button class="btn btn-danger" onclick="bulkDeleteSelectedMatches()"><span data-i18n="deleteSelected">Elimina selezionate</span></button>
-      <button class="btn" onclick="toggleMatchSelectionMode()"><span data-i18n="cancel">Annulla</span></button>
-    </div>
+          <span class="mbb-count"><span class="mbb-num" id="match-bulk-count">0</span> <span data-i18n="selectedMatches">selezionate</span></span>
+          <div class="mbb-actions">
+            <button id="btn-bulk-delete" class="btn btn-danger" onclick="bulkDeleteSelectedMatches()" disabled>🗑 <span data-i18n="deleteSelected">Elimina selezionate</span></button>
+            <button class="btn mbb-cancel" onclick="toggleMatchSelectionMode()"><span data-i18n="cancel">Annulla</span></button>
+          </div>
+        </div>
     <div id="partite-list"></div>
   </div>
 
@@ -12231,6 +12240,8 @@ function toggleMatchSelectionMode() {
   if (btn) btn.classList.toggle('active', matchSelectionMode);
   var bar = document.getElementById('match-bulk-bar');
   if (bar) bar.style.display = matchSelectionMode ? 'flex' : 'none';
+  var ab = document.getElementById('partite-action-bar');
+  if (ab) ab.style.display = matchSelectionMode ? 'none' : '';
   updateMatchBulkCount();
   renderPartite();
 }
@@ -12247,6 +12258,8 @@ function toggleMatchSelection(id) {
 function updateMatchBulkCount() {
   var el = document.getElementById('match-bulk-count');
   if (el) el.textContent = selectedMatchIds.length;
+  var del = document.getElementById('btn-bulk-delete');
+  if (del) del.disabled = (selectedMatchIds.length === 0);
 }
 
 async function bulkDeleteSelectedMatches() {
