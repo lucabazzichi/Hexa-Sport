@@ -3051,7 +3051,7 @@ body.hexa-admin-only .hexa-guide-overlay { display:none !important; }
       <rect x="14.5" y="14.5" width="3" height="8.5" rx="0.6" fill="currentColor"/>
       <rect x="18.5" y="11"   width="3" height="12"  rx="0.6" fill="currentColor"/>
     </svg>
-    <span data-i18n="appTitle">Hockey Stats</span>
+    <span data-i18n="appTitle">Hexa Sport</span>
   </div>
   <nav>
     <button class="active" onclick="showPage('dashboard')" id="nav-dashboard"><span>📊 </span><span data-i18n="navDashboard">Riepilogo</span></button>
@@ -5292,11 +5292,11 @@ function applyTeamIdentity() {
       }
     }
   }
-  // 2. Header text: always keep "Hockey Stats" (team name is shown elsewhere, e.g. dashboard)
+  // 2. Header text: keep the app title from the dictionary (currently "Hexa Sport"); team name is shown elsewhere
   // Use a specific selector to avoid clobbering the injected .header-team-logo span.
   var logoText = document.querySelector('header .logo span[data-i18n="appTitle"]');
   if (logoText) {
-    logoText.textContent = 'Hockey Stats';
+    logoText.textContent = (typeof t === 'function' ? t('appTitle') : 'Hexa Sport');
   }
 }
 
@@ -7601,7 +7601,7 @@ function doExportPDF() {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
-    doc.text((getTeamName(currentSeason) || 'Hockey Stats'), marginX, pageH - 6);
+    doc.text((getTeamName(currentSeason) || 'Hexa Sport'), marginX, pageH - 6);
     doc.text((t('pageOf') || 'Pagina') + ' ' + pp + '/' + pageCount, pageW - marginX, pageH - 6, { align: 'right' });
   }
 
@@ -7674,7 +7674,7 @@ function drawSeasonPdfFooter(doc) {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
-    doc.text((getTeamName(currentSeason) || 'Hockey Stats'), marginX, pageH - 6);
+    doc.text((getTeamName(currentSeason) || 'Hexa Sport'), marginX, pageH - 6);
     doc.text((t('pageOf') || 'Pagina') + ' ' + pp + '/' + pageCount, pageW - marginX, pageH - 6, { align: 'right' });
   }
 }
