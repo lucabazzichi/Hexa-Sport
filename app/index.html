@@ -13589,12 +13589,49 @@ document.addEventListener("DOMContentLoaded", function() {
   };
   // Cancella il documento cloud dell'utente e SPEGNE il salvataggio fino al riavvio,
   // così la cancellazione dei dati non viene riscritta dal sync.
+  // Cancellazione multi-dispositivo: se il cloud porta un 'segnale di cancellazione' più recente
+  // di quello già visto da questo dispositivo, svuota i dati locali e riavvia pulito.
+  function honorCloudWipe(cd) {
+    try {
+      if (!cd || !cd.wiped) return false;
+      var seen = Number(localStorage.getItem('hockey_wipe_seen') || 0);
+      var w = Number(cd.wipedAt || 0);
+      if (w > seen) {
+        try {
+          localStorage.removeItem('hockey_db_v3');
+          localStorage.removeItem('hockey_settings');
+          localStorage.removeItem('hockey_current_season');
+          localStorage.removeItem('hockey_live_state');
+          localStorage.setItem('hockey_wipe_seen', String(w));
+        } catch (e) {}
+        location.reload();
+        return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+  function recheckCloudWipe() {
+    try {
+      if (!fbDB || !cloudUid) return;
+      cloudDocRef(cloudUid).get().then(function(doc) {
+        if (doc && doc.exists) { honorCloudWipe(doc.data() || {}); }
+      }).catch(function(){});
+    } catch (e) {}
+  }
+  try {
+    document.addEventListener('visibilitychange', function(){ if (!document.hidden) recheckCloudWipe(); });
+    window.addEventListener('online', recheckCloudWipe);
+  } catch (e) {}
   window.cloudWipeAndStop = function() {
     try { if (cloudTimer) { clearTimeout(cloudTimer); cloudTimer = null; } } catch (e) {}
     var uid = cloudUid;
     cloudUid = null;
     cloudReady = false;
-    if (fbDB && uid) { return cloudDocRef(uid).delete(); }
+    if (fbDB && uid) {
+      var __wipedAt = Date.now();
+      try { localStorage.setItem('hockey_wipe_seen', String(__wipedAt)); } catch (e) {}
+      return cloudDocRef(uid).set({ wiped: true, wipedAt: __wipedAt });
+    }
     return Promise.resolve();
   };
   window.cloudSave = function() {
@@ -13617,6 +13654,12 @@ document.addEventListener("DOMContentLoaded", function() {
     cloudUid = user.uid;
     cloudDocRef(user.uid).get().then(function(doc) {
       if (doc && doc.exists) {
+        var __cd = doc.data() || {};
+        if (__cd.wiped) {
+          // Un altro dispositivo ha cancellato tutto: svuota anche questo
+          if (honorCloudWipe(__cd)) return;
+          cloudReady = true; return;
+        }
         // Il cloud ha già dati → sono la verità
         applyCloudState(doc.data());
         cloudReady = true;
